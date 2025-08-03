@@ -1,0 +1,13 @@
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/bin/Debug/net8.0/MyFamilyTreeNet.Data.deps.json
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/bin/Debug/net8.0/MyFamilyTreeNet.Data.dll
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/bin/Debug/net8.0/MyFamilyTreeNet.Data.pdb
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.csproj.AssemblyReference.cache
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.GeneratedMSBuildEditorConfig.editorconfig
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.AssemblyInfoInputs.cache
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.AssemblyInfo.cs
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.csproj.CoreCompileInputs.cache
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.sourcelink.json
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.dll
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/refint/MyFamilyTreeNet.Data.dll
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/MyFamilyTreeNet.Data.pdb
+/Users/marsteyor/Desktop/final_exam/MyFamilyTreeNet/MyFamilyTreeNet.Data/obj/Debug/net8.0/ref/MyFamilyTreeNet.Data.dll
