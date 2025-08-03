@@ -1,0 +1,46 @@
+# Keep current content but add:
+
+# Documentation temp files
+docs/*.tmp
+*.docx~
+*.xlsx~
+
+# Backup files
+*.backup
+*.bak
+*.orig
+
+# Archive files (development artifacts)
+*.zip
+*.rar
+*.7z
+*.tar.gz
+
+# Database dumps and seeds (development)
+*.dump
+*.seed
+database/backups/
+
+# Deployment artifacts
+deploy/
+deployment/*.log
+
+# Angular specific
+.angular/cache/
+angular.json.backup
+
+# E2E testing
+e2e/reports/
+e2e/screenshots/
+e2e/videos/
+
+# Build optimization
+.webpack/
+.nyc_output/
+
+# Environment template
+src/environments/environment.local.ts
+src/environments/environment.staging.ts
+
+# Service worker cache
+ngsw-cache/

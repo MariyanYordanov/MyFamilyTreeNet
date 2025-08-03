@@ -1,0 +1,27 @@
+bin/
+obj/
+# Runtime and temporary files
+*.tmp
+*.temp
+wwwroot/uploads/
+wwwroot/temp/
+
+# Application-specific
+appsettings.*.json
+!appsettings.json
+!appsettings.Development.json.example
+
+
+# JWT Secrets
+secrets.json
+user-secrets/
+
+# Docker development
+docker-compose.override.yml
+.dockerignore.dev
+
+# Testing artifacts  
+TestResults/
+*.trx
+*.coverage
+*.coveragexml
