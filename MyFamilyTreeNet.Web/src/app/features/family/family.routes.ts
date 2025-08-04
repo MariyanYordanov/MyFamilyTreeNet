@@ -8,6 +8,6 @@ export const familyRoutes: Routes = [
   },
   {
     path: 'catalog',
-    loadComponent: () => import('./components/family-catalog.component').then(c => c.FamilyCatalogComponent)
+    loadComponent: () => import('./components/family-catalog/family-catalog').then(c => c.FamilyCatalogComponent)
   }
 ];
