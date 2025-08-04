@@ -1,5 +1,5 @@
 <div class="container my-4">
-  <!-- Hero Section -->
+
   <div class="text-center mb-5">
     <h1 class="display-4 text-primary mb-3">
       <i class="fas fa-users me-3"></i>
@@ -7,7 +7,6 @@
     </h1>
     <p class="lead text-muted mb-4">Разгледайте семейните истории и открийте връзки</p>
     
-    <!-- Search -->
     <div class="d-flex justify-content-center">
       <div class="input-group" style="max-width: 400px;">
         <span class="input-group-text">
@@ -23,7 +22,6 @@
     </div>
   </div>
 
-  <!-- Loading State -->
   <div *ngIf="isLoading" class="text-center py-5">
     <div class="spinner-border text-primary mb-3" role="status">
       <span class="visually-hidden">Зареждане...</span>
@@ -31,7 +29,6 @@
     <p class="text-muted">Зареждане на семейства...</p>
   </div>
 
-  <!-- Error State -->
   <div *ngIf="error" class="alert alert-danger text-center" role="alert">
     <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
     <h4>Възникна грешка</h4>
@@ -42,7 +39,6 @@
     </button>
   </div>
 
-  <!-- Family Grid -->
   <div *ngIf="!isLoading && !error" class="row g-4">
     <div *ngFor="let family of filteredFamilies$ | async; trackBy: trackByFamilyId" 
          class="col-12 col-md-6 col-lg-4">
@@ -62,7 +58,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <small class="text-muted">
               <i class="fas fa-users me-1"></i>
-              {{ family.memberCount || 0 }} членове
+              {{ family.members || 0 }} членове
             </small>
             <a [routerLink]="['/families', family.id]" class="btn btn-primary btn-sm">
               Детайли
@@ -73,7 +69,6 @@
     </div>
   </div>
 
-  <!-- Empty State -->
   <div *ngIf="!isLoading && !error && families.length === 0" class="text-center py-5">
     <i class="fas fa-users fa-4x text-muted mb-3"></i>
     <h4 class="text-muted">Няма семейства</h4>

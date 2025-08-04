@@ -115,6 +115,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("MyFamilyTreeNetPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

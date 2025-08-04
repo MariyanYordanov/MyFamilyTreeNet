@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { Subject, Observable, takeUntil, debounceTime, switchMap, startWith, catchError, of } from 'rxjs';
+import { Subject, Observable, takeUntil, debounceTime, startWith, catchError, of, combineLatest, map, BehaviorSubject } from 'rxjs';
 
 import { FamilyService } from '../../../../core/services/family.service';
 import { Family } from '../../../../core/models/family.interface';
@@ -21,6 +21,7 @@ import { Family } from '../../../../core/models/family.interface';
 export class FamilyCatalogComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   private searchSubject = new Subject<string>();
+  private familiesSubject = new BehaviorSubject<Family[]>([]);
 
   families: Family[] = [];
   filteredFamilies$!: Observable<Family[]>;
@@ -31,8 +32,8 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
   constructor(private familyService: FamilyService) {}
 
   ngOnInit(): void {
-    this.loadFamilies();
     this.setupSearch();
+    this.loadFamilies();
   }
 
   ngOnDestroy(): void {
@@ -48,29 +49,39 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (families) => {
-          this.families = families;
+          console.log('Loaded families:', families);
+          this.families = families || [];
+          this.familiesSubject.next(this.families);
           this.isLoading = false;
         },
         error: (error) => {
           this.error = 'Възникна грешка при зареждането на семействата.';
           this.isLoading = false;
+          this.familiesSubject.next([]);
           console.error('Error loading families:', error);
         }
       });
   }
 
   setupSearch(): void {
-    this.filteredFamilies$ = this.searchSubject.pipe(
-      startWith(''),
-      debounceTime(300),
-      switchMap(searchTerm => {
-        const filtered = this.families.filter(family =>
+    this.filteredFamilies$ = combineLatest([
+      this.familiesSubject.asObservable(),
+      this.searchSubject.pipe(startWith(''), debounceTime(300))
+    ]).pipe(
+      map(([families, searchTerm]) => {
+        console.log('Filtering families:', families.length, 'searchTerm:', searchTerm);
+        if (!families || families.length === 0) {
+          return [];
+        }
+        if (!searchTerm) {
+          return families;
+        }
+        return families.filter(family =>
           family.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           (family.description && family.description.toLowerCase().includes(searchTerm.toLowerCase()))
         );
-        return of(filtered);
       }),
-      catchError(() => of(this.families))
+      catchError(() => of([]))
     );
   }
 
@@ -79,7 +90,7 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
     this.searchSubject.next(this.searchTerm);
   }
 
-  trackByFamilyId(index: number, family: Family): number {
+  trackByFamilyId(_index: number, family: Family): number {
     return family.id;
   }
 }
