@@ -1,0 +1,75 @@
+<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+      <div class="container">
+
+        <a class="navbar-brand" routerLink="/">
+          <i class="fas fa-tree me-2"></i>
+          <strong>World Family</strong>
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+
+          <ul class="navbar-nav me-auto" *ngIf="currentUser$ | async">
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/families" routerLinkActive="active">
+                <i class="fas fa-users me-1"></i>
+                Семейства
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" routerLink="/members" routerLinkActive="active">
+                <i class="fas fa-user-friends me-1"></i>
+                Роднини
+              </a>
+            </li>
+          </ul>
+
+          <div class="navbar-nav ms-auto">
+            <ng-container *ngIf="currentUser$ | async as user; else loginButtons">
+              <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" 
+                   data-bs-toggle="dropdown" aria-expanded="false">
+                  <i class="fas fa-user-circle me-2"></i>
+                  <span class="d-none d-md-inline">{{ user.firstName }} {{ user.lastName }}</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li>
+                    <a class="dropdown-item" routerLink="/profile">
+                      <i class="fas fa-user me-2"></i>
+                      Профил
+                    </a>
+                  </li>
+                  <li *ngIf="isAdmin">
+                    <a class="dropdown-item" routerLink="/admin">
+                      <i class="fas fa-cog me-2"></i>
+                      Администрация
+                    </a>
+                  </li>
+                  <li><hr class="dropdown-divider"></li>
+                  <li>
+                    <a class="dropdown-item" (click)="logout()" style="cursor: pointer;">
+                      <i class="fas fa-sign-out-alt me-2"></i>
+                      Излез
+                    </a>
+                  </li>
+                </ul>
+              </div>
+            </ng-container>
+            
+            <ng-template #loginButtons>
+              <div class="d-flex gap-2">
+                <a class="btn btn-outline-primary" routerLink="/auth/login">
+                  Влез
+                </a>
+                <a class="btn btn-primary" routerLink="/auth/register">
+                  Регистрация
+                </a>
+              </div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </nav>
