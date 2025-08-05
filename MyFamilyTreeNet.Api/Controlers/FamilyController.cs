@@ -1,100 +1,45 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using MyFamilyTreeNet.Data;
+using MyFamilyTreeNet.Api.Contracts;
+using MyFamilyTreeNet.Api.DTOs;
+using MyFamilyTreeNet.Data.Models;
 
-namespace MyFamilyTreeNet.Api.Controlers
+namespace MyFamilyTreeNet.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous]
+    [Route("api/[controller]")]
+    [IgnoreAntiforgeryToken]
+    [Authorize]
     public class FamilyController : ControllerBase
     {
-        private readonly AppDbContext _context;
+        private readonly IFamilyService _familyService;
+        private readonly IMapper _mapper;
 
-        public FamilyController(AppDbContext context)
+        public FamilyController(IFamilyService familyService, IMapper mapper)
         {
-            _context = context;
+            _familyService = familyService;
+            _mapper = mapper;
         }
 
         [HttpGet]
+        [AllowAnonymous]
         public async Task<IActionResult> GetAllFamilies()
         {
-            try
+            var families = await _familyService.GetAllFamiliesAsync();
+            var familyDtos = families.Select(f => new FamilyDto
             {
-                var families = await _context.Families
-                .Select(f => new
-                {
-                    f.Id,
-                    f.Name,
-                    f.Description,
-                    f.IsPublic,
-                    f.CreatedAt,
-                    f.CreatedByUserId,
-                    members = f.FamilyMembers.Count()
-                })
-                .OrderByDescending(f => f.CreatedAt)
-                .ToListAsync();
-
-                return Ok(new
-                {
-                    families,
-                    total = families.Count
-                });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Database error",
-                    error = ex.Message
-                });
-            }
+                Id = f.Id,
+                Name = f.Name,
+                Description = f.Description,
+                CreatedAt = f.CreatedAt,
+                CreatedByUserId = f.CreatedByUserId,
+                MemberCount = f.FamilyMembers?.Count ?? 0,
+                PhotoCount = f.Photos?.Count ?? 0,
+                StoryCount = f.Stories?.Count ?? 0
+            });
+            return Ok(familyDtos);
         }
-        
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetFamily(int id)
-        {
-            try
-            {
-                var family = await _context.Families
-                    .Include(f => f.FamilyMembers)
-                    .Where(f => f.Id == id)
-                    .Select(f => new
-                    {
-                        f.Id,
-                        f.Name,
-                        f.Description,
-                        f.IsPublic,
-                        f.CreatedAt,
-                        Members = f.FamilyMembers.Select(m => new
-                        {
-                            m.Id,
-                            m.FirstName,
-                            m.MiddleName,
-                            m.LastName,
-                            m.DateOfBirth,
-                            m.DateOfDeath,
-                            m.Gender
-                        }).ToList()
-                    })
-                    .FirstOrDefaultAsync();
 
-                if (family == null)
-                {
-                    return NotFound(new { message = $"Family with ID {id} not found" });
-                }
-
-                return Ok(family);
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new
-                {
-                    message = "Failed to retrieve family",
-                    error = ex.Message
-                });
-            }
-        }
     }
 }

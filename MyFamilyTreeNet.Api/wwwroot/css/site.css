@@ -1,0 +1,188 @@
+/* World Family MVC Site Styles */
+
+:root {
+  --primary-color: #023b6d;
+  --secondary-color: #009bd9;
+  --accent-color: #f8f9fa;
+  --text-dark: #2c3e50;
+  --text-light: #6c757d;
+  --border-color: #e9ecef;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+}
+
+/* Global Styles */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  line-height: 1.6;
+  color: var(--text-dark);
+}
+
+/* Navigation */
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+}
+
+/* Cards */
+.family-card {
+  transition: all 0.3s ease;
+  border: none;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.family-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+/* Buttons */
+.btn {
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: var(--secondary-color);
+}
+
+/* Forms */
+.form-control {
+  border-radius: 6px;
+  border: 1px solid var(--border-color);
+  padding: 0.75rem 1rem;
+}
+
+.form-control:focus {
+  border-color: var(--secondary-color);
+  box-shadow: 0 0 0 0.2rem rgba(0, 155, 217, 0.25);
+}
+
+/* Hero Section */
+.hero-section {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+  color: white;
+  padding: 80px 0;
+}
+
+/* Loading Spinner */
+.spinner-border-custom {
+  color: var(--primary-color);
+}
+
+/* Activity Timeline */
+.activity-item {
+  border-left: 3px solid var(--border-color);
+  padding-left: 1rem;
+  position: relative;
+}
+
+.activity-item:before {
+  content: '';
+  position: absolute;
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 10px;
+  height: 10px;
+  background-color: var(--primary-color);
+  border-radius: 50%;
+}
+
+.activity-icon {
+  width: 35px;
+  height: 35px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.9rem;
+}
+
+/* Error Pages */
+.error-illustration {
+  font-size: 8rem;
+  color: var(--text-light);
+  margin-bottom: 2rem;
+}
+
+.error-code {
+  font-size: 3rem;
+  font-weight: bold;
+  color: var(--primary-color);
+}
+
+/* Family Tree */
+.tree-container {
+  background: #f8f9fa;
+  border: 2px dashed var(--border-color);
+  border-radius: 10px;
+  min-height: 400px;
+  position: relative;
+  overflow: auto;
+}
+
+.tree-member {
+  background: white;
+  border: 2px solid var(--primary-color);
+  border-radius: 8px;
+  padding: 0.5rem;
+  margin: 0.5rem;
+  position: absolute;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  min-width: 120px;
+  text-align: center;
+}
+
+.tree-member:hover {
+  transform: scale(1.05);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.tree-member.male {
+  border-color: #007bff;
+  background: #e3f2fd;
+}
+
+.tree-member.female {
+  border-color: #e91e63;
+  background: #fce4ec;
+}
+
+/* Zoom Controls */
+.zoom-controls {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 100;
+}
+
+.zoom-controls .btn {
+  margin: 2px;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.875rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 60px 0;
+  }
+  
+  .error-illustration {
+    font-size: 4rem;
+  }
+  
+  .error-code {
+    font-size: 2rem;
+  }
+}
