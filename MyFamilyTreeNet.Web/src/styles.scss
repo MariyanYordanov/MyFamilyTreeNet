@@ -1,8 +1,7 @@
-/* You can add global styles to this file, and also import other style files */
-/* Bootstrap 5 Import */
+
 @import 'bootstrap/dist/css/bootstrap.min.css';
 
-/* Custom CSS Variables - Based on Me & Family Template */
+
 :root {
   --primary-color: #023b6d;
   --secondary-color: #009bd9;
@@ -15,7 +14,6 @@
   --danger-color: #dc3545;
 }
 
-/* Global Styles */
 * {
   margin: 0;
   padding: 0;
@@ -29,12 +27,10 @@ body {
   background-color: #ffffff;
 }
 
-/* Remove the ugly purple gradient */
 .container-fluid {
   background: none !important;
 }
 
-/* Header Styles */
 .navbar {
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }

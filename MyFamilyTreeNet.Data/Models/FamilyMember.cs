@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Data.Models
 {
@@ -6,40 +7,40 @@ namespace MyFamilyTreeNet.Data.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequireField)]
         public int FamilyId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
-        public string FirstName { get; set; } = "";
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
+        public string FirstName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string MiddleName { get; set; } = "";
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
+        public string MiddleName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string LastName { get; set; } = "";
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
+        public string LastName { get; set; } = string.Empty;
 
         public DateTime? DateOfBirth { get; set; }
 
         public DateTime? DateOfDeath { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(PlacesLenght)]
         public string? PlaceOfBirth { get; set; }
 
-        [MaxLength(100)]
+        [MaxLength(PlacesLenght)]
         public string? PlaceOfDeath { get; set; }
 
         public Gender Gender { get; set; } = Gender.Unknown;
 
-        [MaxLength(2000)]
+        [MaxLength(BioLenght)]
         public string? Biography { get; set; }
 
         public string? ProfileImageUrl { get; set; }
 
         [Required]
-        public string AddedByUserId { get; set; } = "";
+        public string AddedByUserId { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
       

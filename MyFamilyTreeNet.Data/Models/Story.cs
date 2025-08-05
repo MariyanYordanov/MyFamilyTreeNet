@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Data.Models
 {
@@ -9,8 +10,8 @@ namespace MyFamilyTreeNet.Data.Models
         [Required]
         public int FamilyId { get; set; }
 
-        [Required]
-        [MaxLength(200)]
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(TitleLenght)]
         public string Title { get; set; } = string.Empty;
 
         [Required]

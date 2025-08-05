@@ -6,18 +6,18 @@ namespace MyFamilyTreeNet.Data.Models
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequireField)]
         public int PrimaryMemberId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequireField)]
         public int RelatedMemberId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequireField)]
         public RelationshipType RelationshipType { get; set; }
 
         public string? Notes { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = RequireField)]
         public string CreatedByUserId { get; set; } = string.Empty; 
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

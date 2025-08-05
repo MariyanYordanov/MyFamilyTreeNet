@@ -27,6 +27,7 @@ export class HeaderComponent implements OnInit {
 
   ngOnInit(): void {
     this.currentUser$.subscribe(user => {
+      // if(this.currentUser$)
       // TODO: Check if user has admin role
       this.isAdmin = false;
     });

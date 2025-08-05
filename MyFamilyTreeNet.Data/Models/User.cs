@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Identity;
 using System.ComponentModel.DataAnnotations;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Data.Models
 {
@@ -12,22 +13,23 @@ namespace MyFamilyTreeNet.Data.Models
         }
 
         [Required]
-        [MaxLength(50)]
-        public string FirstName { get; set; } = "";
+        [MaxLength(NameLenght)]
+        [Required(ErrorMessage = RequireField)]
+        public string FirstName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string MiddleName { get; set; } = "";
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
+        public string MiddleName { get; set; } = string.Empty;
 
-        [Required]
-        [MaxLength(50)]
-        public string LastName { get; set; } = "";
+        [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
+        public string LastName { get; set; } = string.Empty;
 
         public string? ProfilePictureUrl { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLenght)]
         public string? Bio { get; set; }
 
         public DateTime CreatedAt { get; set; }

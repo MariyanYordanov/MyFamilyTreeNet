@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using static MyFamilyTreeNet.Data.Constats;
 
 namespace MyFamilyTreeNet.Data.Models
 {
@@ -7,10 +8,10 @@ namespace MyFamilyTreeNet.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(100)]
+        [MaxLength(NameLenght)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(1000)]
+        [MaxLength(DescriptionLenght)]
         public string? Description { get; set; }
 
         public bool IsPublic { get; set; } = true;
