@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-public class LoginViewModel
+
+namespace MyFamilyTreeNet.Api.ViewModels
+{
+    public class LoginViewModel
 {
     [Required(ErrorMessage = "Email адресът е задължителен")]
     [EmailAddress(ErrorMessage = "Невалиден email адрес")]
@@ -9,4 +12,5 @@ public class LoginViewModel
     public required string Password { get; set; }
 
     public bool RememberMe { get; set; }
+}
 }

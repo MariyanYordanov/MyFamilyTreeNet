@@ -1,5 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-public class RegisterViewModel
+
+namespace MyFamilyTreeNet.Api.ViewModels
+{
+    public class RegisterViewModel
     {
         [Required(ErrorMessage = "Email адресът е задължителен")]
         [EmailAddress(ErrorMessage = "Невалиден email адрес")]
@@ -27,4 +30,4 @@ public class RegisterViewModel
         [MinLength(2, ErrorMessage = "Фамилията трябва да е поне 2 символа")]
         public required string LastName { get; set; }
     }
-    
+}

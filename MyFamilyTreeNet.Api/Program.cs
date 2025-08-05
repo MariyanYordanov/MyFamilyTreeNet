@@ -8,7 +8,7 @@ using MyFamilyTreeNet.Data.Models;
 using MyFamilyTreeNet.Api.Contracts;
 using MyFamilyTreeNet.Api.Services;
 using MyFamilyTreeNet.Api.Middleware;
-using MyFamilyTreeNet.Api.Security;
+// using MyFamilyTreeNet.Api.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -170,12 +170,14 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // Register application services
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
-builder.Services.AddScoped<IRelationshipService, RelationshipService>();
-builder.Services.AddScoped<IPhotoService, PhotoService>();
-builder.Services.AddScoped<IStoryService, StoryService>();
+// TODO: Uncomment when services are implemented
+// builder.Services.AddScoped<IRelationshipService, RelationshipService>();
+// builder.Services.AddScoped<IPhotoService, PhotoService>();
+// builder.Services.AddScoped<IStoryService, StoryService>();
 
 // Register security services
-builder.Services.AddScoped<ISecurityService, MyFamilyTreeNet.Api.Security.SecurityService>();
+// TODO: Uncomment when security service is implemented
+// builder.Services.AddScoped<ISecurityService, MyFamilyTreeNet.Api.Security.SecurityService>();
 
 var app = builder.Build();
 
