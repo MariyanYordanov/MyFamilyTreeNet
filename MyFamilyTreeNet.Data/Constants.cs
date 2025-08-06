@@ -1,13 +1,16 @@
-public static class Constants
+namespace MyFamilyTreeNet.Data
 {
-    public static string RequireField = "Field is require";
-    public static int NameLenght = 50;
+    public static class Constants
+    {
+        public const string RequireField = "Field is require";
+        public const int NameLenght = 50;
 
-    public static int BioLenght = 1000;
+        public const int BioLenght = 1000;
 
-    public static int TitleLenght = 200;
+        public const int TitleLenght = 200;
 
-    public static int DescriptionLenght = 2000;
+        public const int DescriptionLenght = 2000;
 
-    public static int PlacesLenght = 100;
+        public const int PlacesLenght = 100;
+    }
 }

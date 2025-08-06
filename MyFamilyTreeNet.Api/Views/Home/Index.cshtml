@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Home";
+}
+
+<div class="text-center">
+    <h1 class="display-4">Welcome to MyFamilyTreeNet</h1>
+    <p>A platform for preserving and sharing family histories.</p>
+    
+    <div class="row mt-5">
+        <div class="col-md-4">
+            <h3>Create Your Family Tree</h3>
+            <p>Build and maintain your family tree with our easy-to-use tools.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Share Stories</h3>
+            <p>Document and share family stories for future generations.</p>
+        </div>
+        <div class="col-md-4">
+            <h3>Connect with Family</h3>
+            <p>Discover relatives and connect with family members.</p>
+        </div>
+    </div>
+    
+    <div class="mt-5">
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Get Started</a>
+        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Sign In</a>
+    </div>
+</div>

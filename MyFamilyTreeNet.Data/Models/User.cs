@@ -12,9 +12,8 @@ namespace MyFamilyTreeNet.Data.Models
             CreatedAt = DateTime.UtcNow;
         }
 
-        [Required]
-        [MaxLength(NameLenght)]
         [Required(ErrorMessage = RequireField)]
+        [MaxLength(NameLenght)]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = RequireField)]

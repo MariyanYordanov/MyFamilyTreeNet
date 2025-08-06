@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using static MyFamilyTreeNet.Data.Constats;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Data.Models
 {
