@@ -6,23 +6,44 @@
     <h1 class="display-4">Добре дошли в MyFamilyTreeNet</h1>
     <p>Платформа за съхраняване и споделяне на семейни истории.</p>
     
-    <div class="row mt-5">
+    <div class="row mt-5 g-4">
         <div class="col-md-4">
-            <h3>Създайте семейното си дърво</h3>
-            <p>Изградете и поддържайте семейното си дърво с нашите лесни за използване инструменти.</p>
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-tree fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">Създайте семейното си дърво</h4>
+                    <p class="card-text text-muted">Изградете и поддържайте семейното си дърво с нашите лесни за използване инструменти.</p>
+                </div>
+            </div>
         </div>
         <div class="col-md-4">
-            <h3>Споделяйте истории</h3>
-            <p>Документирайте и споделяйте семейни истории за бъдещите поколения.</p>
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-book-open fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">Споделяйте истории</h4>
+                    <p class="card-text text-muted">Документирайте и споделяйте семейни истории за бъдещите поколения.</p>
+                </div>
+            </div>
         </div>
         <div class="col-md-4">
-            <h3>Свържете се със семейството</h3>
-            <p>Открийте роднини и се свържете с членовете на семейството.</p>
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <div class="mb-3">
+                        <i class="fas fa-users fa-3x text-primary"></i>
+                    </div>
+                    <h4 class="card-title">Свържете се със семейството</h4>
+                    <p class="card-text text-muted">Открийте роднини и се свържете с членовете на семейството.</p>
+                </div>
+            </div>
         </div>
     </div>
     
     <div class="mt-5">
-        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg">Започнете</a>
+        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg me-3">Регистрация</a>
         <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Вход</a>
     </div>
 </div>

@@ -32,6 +32,7 @@ function passwordMatchValidator(control: AbstractControl) {
 export class RegisterComponent {
   registerForm: FormGroup;
   isLoading = false;
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -75,5 +76,9 @@ export class RegisterComponent {
           }
         });
     }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

@@ -38,9 +38,12 @@ namespace MyFamilyTreeNet.Api.Controllers
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterDto model)
         {
-            _logger.LogInformation("Register attempt for email: {Email}", model?.Email);
+            if (model == null)
+                return BadRequest("Model cannot be null");
+                
+            _logger.LogInformation("Register attempt for email: {Email}", model.Email);
             _logger.LogInformation("Register model: FirstName={FirstName}, MiddleName={MiddleName}, LastName={LastName}", 
-                model?.FirstName, model?.MiddleName, model?.LastName);
+                model.FirstName, model.MiddleName, model.LastName);
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
@@ -84,7 +87,10 @@ namespace MyFamilyTreeNet.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginDto model)
         {
-            _logger.LogInformation("Login attempt for email: {Email}", model?.Email);
+            if (model == null)
+                return BadRequest("Model cannot be null");
+                
+            _logger.LogInformation("Login attempt for email: {Email}", model.Email);
             
             if (!ModelState.IsValid)
             {
@@ -101,6 +107,9 @@ namespace MyFamilyTreeNet.Api.Controllers
             if (result.Succeeded)
             {
                 var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user == null)
+                    return BadRequest("User not found");
+                    
                 var token = await GenerateJwtToken(user);
                 
                 var userDto = _mapper.Map<UserDto>(user);
@@ -125,10 +134,10 @@ namespace MyFamilyTreeNet.Api.Controllers
         {
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email),
-                new Claim(ClaimTypes.NameIdentifier, user.Id),
-                new Claim(ClaimTypes.Name, user.UserName)
+                new(JwtRegisteredClaimNames.Sub, user.Id),
+                new(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Name, user.UserName ?? string.Empty)
             };
 
             var roles = await _userManager.GetRolesAsync(user);
@@ -137,7 +146,8 @@ namespace MyFamilyTreeNet.Api.Controllers
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:SecretKey"]));
+            var secretKey = _configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException("JWT Secret Key not configured");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(

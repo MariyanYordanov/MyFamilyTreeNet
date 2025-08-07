@@ -23,6 +23,7 @@ export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isLoading = false;
   returnUrl = '/families';
+  showPassword = false;
 
   constructor(
     private fb: FormBuilder,
@@ -66,5 +67,9 @@ export class LoginComponent implements OnInit {
           }
         });
     }
+  }
+
+  togglePasswordVisibility(): void {
+    this.showPassword = !this.showPassword;
   }
 }

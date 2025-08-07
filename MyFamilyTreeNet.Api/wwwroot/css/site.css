@@ -38,6 +38,14 @@ body {
   box-shadow: 0 8px 25px rgba(0,0,0,0.15);
 }
 
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+}
+
 /* Buttons */
 .btn {
   border-radius: 6px;
