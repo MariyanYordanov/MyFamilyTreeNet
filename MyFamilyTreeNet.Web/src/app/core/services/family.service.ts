@@ -19,8 +19,7 @@ export class FamilyService {
     constructor(private http: HttpClient) {}
 
     getFamilies(): Observable<Family[]> {
-        return this.http.get<{families: Family[], total: number}>(this.apiUrl)
-            .pipe(map(response => response.families || [])); 
+        return this.http.get<Family[]>(this.apiUrl);
     }
 
     getFamilyById(id: number): Observable<Family> {

@@ -58,7 +58,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <small class="text-muted">
               <i class="fas fa-users me-1"></i>
-              {{ family.members || 0 }} членове
+              {{ family.memberCount || 0 }} {{ family.memberCount === 1 ? 'член' : 'членове' }}
             </small>
             <a [routerLink]="['/families', family.id]" class="btn btn-primary btn-sm">
               Детайли

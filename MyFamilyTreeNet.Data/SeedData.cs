@@ -89,8 +89,8 @@ public static class SeedData
             
             var doeFamily = new Family
             {
-                Name = "The Doe Family",
-                Description = "Welcome to the Doe family tree! We're a loving family spanning three generations.",
+                Name = "Семейство Доу",
+                Description = "Добре дошли в родословното дърво на семейство Доу! Ние сме любящо семейство, обхващащо три поколения.",
                 CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsPublic = true
@@ -98,8 +98,8 @@ public static class SeedData
 
             var smithFamily = new Family
             {
-                Name = "The Smith Family",
-                Description = "The Smith family legacy - preserving our heritage and memories.",
+                Name = "Семейство Смит",
+                Description = "Наследството на семейство Смит - съхраняване на нашето наследство и спомени.",
                 CreatedByUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsPublic = true
@@ -107,8 +107,8 @@ public static class SeedData
 
             var royalFamily = new Family
             {
-                Name = "The Royal Family Tree",
-                Description = "A complex family demonstrating all possible relationship types including cousin marriages, step-relationships, and multiple generations.",
+                Name = "Кралското родословно дърво",
+                Description = "Сложно семейство с 9 членове, демонстриращо всички възможни видове връзки, включително бракове между братовчеди, мащехи/заварени деца и множество поколения.",
                 CreatedByUserId = adminId,
                 CreatedAt = DateTime.UtcNow,
                 IsPublic = true
@@ -132,23 +132,23 @@ public static class SeedData
 
             var royalMembers = new List<FamilyMember>
             {
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "King", MiddleName = "Edward", LastName = "Royal I", DateOfBirth = new DateTime(1900, 1, 1), DateOfDeath = new DateTime(1980, 1, 1), Gender = Gender.Male, Biography = "Founder of the Royal dynasty. Established the family kingdom.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Queen", MiddleName = "Elizabeth", LastName = "Royal I", DateOfBirth = new DateTime(1905, 3, 15), DateOfDeath = new DateTime(1985, 3, 15), Gender = Gender.Female, Biography = "Beloved matriarch. Known for her wisdom and diplomatic skills.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Крал", MiddleName = "Едуард", LastName = "Роял I", DateOfBirth = new DateTime(1900, 1, 1), DateOfDeath = new DateTime(1980, 1, 1), Gender = Gender.Male, Biography = "Основател на династията Роял. Създал семейното кралство.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Кралица", MiddleName = "Елизабет", LastName = "Роял I", DateOfBirth = new DateTime(1905, 3, 15), DateOfDeath = new DateTime(1985, 3, 15), Gender = Gender.Female, Biography = "Обичана матриарх. Известна със своята мъдрост и дипломатически умения.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
                 
 
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Prince", MiddleName = "Charles", LastName = "Royal", DateOfBirth = new DateTime(1925, 4, 21), DateOfDeath = new DateTime(2005, 4, 21), Gender = Gender.Male, Biography = "Eldest son of King Edward I. Military hero and statesman.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Princess", MiddleName = "Diana", LastName = "Noble-Royal", DateOfBirth = new DateTime(1930, 7, 12), DateOfDeath = new DateTime(2010, 7, 12), Gender = Gender.Female, Biography = "Married Prince Charles, creating alliance.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Принц", MiddleName = "Чарлз", LastName = "Роял", DateOfBirth = new DateTime(1925, 4, 21), DateOfDeath = new DateTime(2005, 4, 21), Gender = Gender.Male, Biography = "Най-големият син на крал Едуард I. Военен герой и държавник.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Принцеса", MiddleName = "Даяна", LastName = "Нобъл-Роял", DateOfBirth = new DateTime(1930, 7, 12), DateOfDeath = new DateTime(2010, 7, 12), Gender = Gender.Female, Biography = "Омъжена за принц Чарлз, създавайки съюз.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
                 
 
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "King", MiddleName = "William", LastName = "Royal II", DateOfBirth = new DateTime(1950, 8, 15), Gender = Gender.Male, Biography = "Current reigning monarch. Son of Prince Charles and Princess Diana.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Queen", MiddleName = "Isabella", LastName = "Cambridge-Royal", DateOfBirth = new DateTime(1955, 12, 25), Gender = Gender.Female, Biography = "Queen consort. From the Cambridge noble family.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Крал", MiddleName = "Уилям", LastName = "Роял II", DateOfBirth = new DateTime(1950, 8, 15), Gender = Gender.Male, Biography = "Настоящ управляващ монарх. Син на принц Чарлз и принцеса Даяна.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Кралица", MiddleName = "Изабела", LastName = "Кеймбридж-Роял", DateOfBirth = new DateTime(1955, 12, 25), Gender = Gender.Female, Biography = "Кралица консорт. От благородническото семейство Кеймбридж.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
                 
              
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Crown Prince", MiddleName = "Alexander", LastName = "Royal", DateOfBirth = new DateTime(1975, 2, 14), Gender = Gender.Male, Biography = "Heir to the throne. Son of King William II and Queen Isabella.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Crown Princess", MiddleName = "Sophia", LastName = "Habsburg-Royal", DateOfBirth = new DateTime(1978, 8, 25), Gender = Gender.Female, Biography = "Wife of Crown Prince Alexander. From Austrian Habsburg family.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Престолонаследник", MiddleName = "Александър", LastName = "Роял", DateOfBirth = new DateTime(1975, 2, 14), Gender = Gender.Male, Biography = "Наследник на трона. Син на крал Уилям II и кралица Изабела.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Престолонаследничка", MiddleName = "София", LastName = "Хабсбург-Роял", DateOfBirth = new DateTime(1978, 8, 25), Gender = Gender.Female, Biography = "Съпруга на престолонаследник Александър. От австрийското семейство Хабсбург.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
                 
               
-                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Prince", MiddleName = "Edward", LastName = "Royal III", DateOfBirth = new DateTime(2000, 3, 21), Gender = Gender.Male, Biography = "Future king. Son of Crown Prince Alexander and Crown Princess Sophia.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow }
+                new FamilyMember { FamilyId = royalFamily.Id, FirstName = "Принц", MiddleName = "Едуард", LastName = "Роял III", DateOfBirth = new DateTime(2000, 3, 21), Gender = Gender.Male, Biography = "Бъдещ крал. Син на престолонаследник Александър и престолонаследничка София.", AddedByUserId = adminId, CreatedAt = DateTime.UtcNow }
             };
 
             familyMembers.AddRange(royalMembers);
@@ -193,24 +193,24 @@ public static class SeedData
                 {
                     FamilyId = doeFamily.Id,
                     AuthorUserId = demoUsers.FirstOrDefault()?.Id ?? adminId,
-                    Title = "Our Wedding Day",
-                    Content = "It was a beautiful summer day when Jane and I tied the knot. Friends and family gathered to celebrate our love...",
+                    Title = "Нашият сватбен ден",
+                    Content = "Беше прекрасен летен ден, когато с Джейн си казахме „Да“. Приятели и семейство се събраха, за да празнуват нашата любов...",
                     CreatedAt = DateTime.UtcNow.AddDays(-365)
                 },
                 new Story
                 {
                     FamilyId = smithFamily.Id,
                     AuthorUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId,
-                    Title = "50 Years Together",
-                    Content = "Mary and I celebrated our golden anniversary surrounded by our children and grandchildren. What a journey it has been...",
+                    Title = "50 години заедно",
+                    Content = "С Мери отпразнувахме златната си сватба, заобиколени от нашите деца и внуци. Какво пътешествие беше това...",
                     CreatedAt = DateTime.UtcNow.AddDays(-7)
                 },
                 new Story
                 {
                     FamilyId = royalFamily.Id,
                     AuthorUserId = adminId,
-                    Title = "The Foundation of Our Dynasty",
-                    Content = "King Edward Royal I established our family's reign in 1900. Born during turbulent times, he united the kingdom through wisdom and strength.",
+                    Title = "Основаването на нашата династия",
+                    Content = "Крал Едуард Роял I установи управлението на нашето семейство през 1900 г. Роден в бурни времена, той обедини кралството чрез мъдрост и сила.",
                     CreatedAt = DateTime.UtcNow.AddDays(-100)
                 }
             };
@@ -224,8 +224,8 @@ public static class SeedData
                 {
                     FamilyId = doeFamily.Id,
                     UploadedByUserId = demoUsers.Skip(1).FirstOrDefault()?.Id ?? adminId,
-                    Title = "Family Christmas 2023",
-                    Description = "Our annual family gathering around the Christmas tree",
+                    Title = "Семейна Коледа 2023",
+                    Description = "Нашето годишно семейно събиране около коледната елха",
                     ImageUrl = "/uploads/christmas2023.jpg",
                     UploadedAt = DateTime.UtcNow.AddDays(-40),
                     DateTaken = new DateTime(2023, 12, 25)
@@ -234,8 +234,8 @@ public static class SeedData
                 {
                     FamilyId = smithFamily.Id,
                     UploadedByUserId = demoUsers.Skip(5).FirstOrDefault()?.Id ?? adminId,
-                    Title = "Golden Anniversary",
-                    Description = "50 wonderful years together",
+                    Title = "Златна сватба",
+                    Description = "50 чудесни години заедно",
                     ImageUrl = "/uploads/anniversary50.jpg",
                     UploadedAt = DateTime.UtcNow.AddDays(-10),
                     DateTaken = DateTime.UtcNow.AddDays(-10)
@@ -244,12 +244,12 @@ public static class SeedData
                 {
                     FamilyId = royalFamily.Id,
                     UploadedByUserId = adminId,
-                    Title = "King Edward I Coronation",
-                    Description = "The founding moment of our dynasty - King Edward Royal I's coronation in 1925",
+                    Title = "Коронясване на крал Едуард I",
+                    Description = "Основополагащият момент на нашата династия - коронясването на крал Едуард Роял I през 1925 г.",
                     ImageUrl = "/uploads/royal/coronation_edward_i.jpg",
                     UploadedAt = DateTime.UtcNow.AddDays(-120),
                     DateTaken = new DateTime(1925, 6, 15),
-                    Location = "Royal Cathedral, Capital City"
+                    Location = "Кралска катедрала, Столица"
                 }
             };
 
@@ -257,21 +257,21 @@ public static class SeedData
             await context.SaveChangesAsync();
 
          
-            Console.WriteLine("SeedData initialization completed successfully!");
-            Console.WriteLine($"Total Families: {await context.Families.CountAsync()}");
-            Console.WriteLine($"Total Family Members: {await context.FamilyMembers.CountAsync()}");
-            Console.WriteLine($"Total Relationships: {await context.Relationships.CountAsync()}");
-            Console.WriteLine($"Total Stories: {await context.Stories.CountAsync()}");
-            Console.WriteLine($"Total Photos: {await context.Photos.CountAsync()}");
-            Console.WriteLine($"Total Users: {await context.Users.CountAsync()}");
+            Console.WriteLine("Инициализацията на началните данни завърши успешно!");
+            Console.WriteLine($"Общо семейства: {await context.Families.CountAsync()}");
+            Console.WriteLine($"Общо членове на семействата: {await context.FamilyMembers.CountAsync()}");
+            Console.WriteLine($"Общо връзки: {await context.Relationships.CountAsync()}");
+            Console.WriteLine($"Общо истории: {await context.Stories.CountAsync()}");
+            Console.WriteLine($"Общо снимки: {await context.Photos.CountAsync()}");
+            Console.WriteLine($"Общо потребители: {await context.Users.CountAsync()}");
         }
         else
         {
 
-            Console.WriteLine("Database already contains seed data - skipping initialization");
-            Console.WriteLine($"Current Families: {await context.Families.CountAsync()}");
-            Console.WriteLine($"Current Family Members: {await context.FamilyMembers.CountAsync()}");
-            Console.WriteLine($"Current Users: {await context.Users.CountAsync()}");
+            Console.WriteLine("Базата данни вече съдържа начални данни - пропускане на инициализацията");
+            Console.WriteLine($"Текущи семейства: {await context.Families.CountAsync()}");
+            Console.WriteLine($"Текущи членове на семействата: {await context.FamilyMembers.CountAsync()}");
+            Console.WriteLine($"Текущи потребители: {await context.Users.CountAsync()}");
         }
     }
 }

@@ -2,10 +2,12 @@ export interface Family {
     id: number;
     name: string;
     description: string;
-    isPublic: boolean;
+    isPublic?: boolean;
     createdAt: Date;
     createdByUserId: string;
-    members: number;
+    memberCount: number;
+    photoCount?: number;
+    storyCount?: number;
 }
 
 export interface FamilyMember {
