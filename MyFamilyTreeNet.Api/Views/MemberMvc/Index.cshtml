@@ -1,0 +1,310 @@
+@model IEnumerable<MyFamilyTreeNet.Data.Models.FamilyMember>
+@{
+    ViewData["Title"] = "Членове на семейството";
+    var families = ViewBag.Families as SelectList;
+    var search = ViewBag.Search as string;
+    var familyId = ViewBag.FamilyId as int?;
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var pageSize = ViewBag.PageSize as int? ?? 20;
+    var totalCount = ViewBag.TotalCount as int? ?? 0;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-users me-2"></i>Членове на семейството</h2>
+            <p class="text-muted mb-0">Управление на членовете на семейството</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
+            </a>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-user-plus me-1"></i>Добави член
+            </a>
+        </div>
+    </div>
+
+    <!-- Statistics -->
+    @if (Model.Any())
+    {
+        <div class="row g-3 mb-4">
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x text-primary mb-2"></i>
+                        <h4 class="mb-0">@totalCount</h4>
+                        <small class="text-muted">Общо членове</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-heart fa-2x text-success mb-2"></i>
+                        <h4 class="mb-0">@Model.Count(m => m.DateOfDeath == null)</h4>
+                        <small class="text-muted">Живи</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-cross fa-2x text-secondary mb-2"></i>
+                        <h4 class="mb-0">@Model.Count(m => m.DateOfDeath != null)</h4>
+                        <small class="text-muted">Починали</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-calendar-alt fa-2x text-info mb-2"></i>
+                        <h4 class="mb-0">
+                            @{
+                                var membersWithAge = Model.Where(m => m.DateOfBirth != null).ToList();
+                                var averageAge = membersWithAge.Any() ? 
+                                    (int)membersWithAge.Average(m => {
+                                        var endDate = m.DateOfDeath ?? DateTime.Now;
+                                        var age = endDate.Year - m.DateOfBirth.Value.Year;
+                                        if (endDate < m.DateOfBirth.Value.AddYears(age)) age--;
+                                        return Math.Max(0, age);
+                                    }) : 0;
+                            }
+                            @averageAge
+                        </h4>
+                        <small class="text-muted">Средна възраст</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
+    <!-- Filters -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form asp-action="Index" method="get" class="row g-3">
+                <div class="col-md-4">
+                    <label class="form-label">Търсене</label>
+                    <div class="input-group">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                        <input type="text" class="form-control" name="search" value="@search" placeholder="Търсене по име, фамилия или биография...">
+                    </div>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">Семейство</label>
+                    @Html.DropDownList("familyId", families, "Всички семейства", new { @class = "form-select" })
+                </div>
+
+                <div class="col-md-2">
+                    <label class="form-label">Елементи на страница</label>
+                    <select name="pageSize" class="form-select">
+                        <option value="10" selected="@(pageSize == 10)">10</option>
+                        <option value="20" selected="@(pageSize == 20)">20</option>
+                        <option value="50" selected="@(pageSize == 50)">50</option>
+                        <option value="100" selected="@(pageSize == 100)">100</option>
+                    </select>
+                </div>
+
+                <div class="col-md-3">
+                    <label class="form-label">&nbsp;</label>
+                    <div class="d-grid gap-2 d-md-flex">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search me-1"></i>Търси
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Изчисти
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Members List -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var member in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-start justify-content-between mb-3">
+                                <div>
+                                    <h5 class="card-title mb-1">@member.FirstName @member.MiddleName @member.LastName</h5>
+                                    <p class="text-muted small mb-0">@member.Family.Name</p>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><a class="dropdown-item" asp-action="Details" asp-route-id="@member.Id">
+                                            <i class="fas fa-eye me-2"></i>Преглед
+                                        </a></li>
+                                        <li><a class="dropdown-item" asp-action="Edit" asp-route-id="@member.Id">
+                                            <i class="fas fa-edit me-2"></i>Редактиране
+                                        </a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" asp-action="Delete" asp-route-id="@member.Id">
+                                            <i class="fas fa-trash me-2"></i>Изтриване
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+
+                            <div class="row g-2 mb-3">
+                                @if (member.DateOfBirth != null)
+                                {
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            <i class="fas fa-birthday-cake me-1"></i>
+                                            Роден: @member.DateOfBirth.Value.ToString("dd.MM.yyyy")
+                                        </small>
+                                    </div>
+                                }
+                                
+                                @if (member.DateOfDeath != null)
+                                {
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            <i class="fas fa-cross me-1"></i>
+                                            Починал: @member.DateOfDeath.Value.ToString("dd.MM.yyyy")
+                                        </small>
+                                    </div>
+                                }
+
+                                @if (member.DateOfBirth != null)
+                                {
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            @{
+                                                var endDate = member.DateOfDeath ?? DateTime.Now;
+                                                var age = endDate.Year - member.DateOfBirth.Value.Year;
+                                                if (endDate < member.DateOfBirth.Value.AddYears(age)) age--;
+                                                age = Math.Max(0, age);
+                                            }
+                                            @if (member.DateOfDeath != null)
+                                            {
+                                                @($"{age} г. (починал)")
+                                            }
+                                            else
+                                            {
+                                                @($"{age} г.")
+                                            }
+                                        </small>
+                                    </div>
+                                }
+
+                                @if (!string.IsNullOrWhiteSpace(member.PlaceOfBirth))
+                                {
+                                    <div class="col-12">
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>
+                                            @member.PlaceOfBirth
+                                        </small>
+                                    </div>
+                                }
+                            </div>
+
+                            @if (!string.IsNullOrWhiteSpace(member.Biography))
+                            {
+                                <p class="card-text small text-muted">
+                                    @(member.Biography.Length > 100 ? member.Biography.Substring(0, 100) + "..." : member.Biography)
+                                </p>
+                            }
+
+                            <div class="d-flex gap-2">
+                                <a asp-action="Details" asp-route-id="@member.Id" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye me-1"></i>Преглед
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@member.Id" class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Редактиране
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1)
+        {
+            <nav class="mt-5">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <p class="mb-0 text-muted">
+                            Показани @((currentPage - 1) * pageSize + 1) - 
+                            @(Math.Min(currentPage * pageSize, totalCount)) 
+                            от @totalCount резултата
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <ul class="pagination justify-content-end mb-0">
+                            <li class="page-item @(currentPage <= 1 ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(currentPage - 1)"
+                                   asp-route-search="@search"
+                                   asp-route-familyId="@familyId"
+                                   asp-route-pageSize="@pageSize">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            
+                            @for (int i = Math.Max(1, currentPage - 2); i <= Math.Min(totalPages, currentPage + 2); i++)
+                            {
+                                <li class="page-item @(i == currentPage ? "active" : "")">
+                                    <a class="page-link" asp-action="Index" 
+                                       asp-route-page="@i"
+                                       asp-route-search="@search"
+                                       asp-route-familyId="@familyId"
+                                       asp-route-pageSize="@pageSize">
+                                        @i
+                                    </a>
+                                </li>
+                            }
+                            
+                            <li class="page-item @(currentPage >= totalPages ? "disabled" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-page="@(currentPage + 1)"
+                                   asp-route-search="@search"
+                                   asp-route-familyId="@familyId"
+                                   asp-route-pageSize="@pageSize">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        }
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-4"></i>
+            <h4>Няма намерени членове</h4>
+            @if (!string.IsNullOrWhiteSpace(search) || familyId.HasValue)
+            {
+                <p class="text-muted mb-4">Опитайте да промените филтрите или да изчистите търсенето.</p>
+                <a asp-action="Index" class="btn btn-outline-primary">
+                    <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
+                </a>
+            }
+            else
+            {
+                <p class="text-muted mb-4">Започнете като добавите първия член на семейството.</p>
+                <a asp-action="Create" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-1"></i>Добави първия член
+                </a>
+            }
+        </div>
+    }
+</div>

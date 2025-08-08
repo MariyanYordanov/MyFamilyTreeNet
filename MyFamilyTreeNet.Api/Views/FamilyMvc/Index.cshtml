@@ -1,0 +1,77 @@
+@model IEnumerable<MyFamilyTreeNet.Data.Models.Family>
+@{
+    ViewData["Title"] = "Моите семейства";
+}
+
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2><i class="fas fa-users me-2"></i>Моите семейства</h2>
+            <p class="text-muted mb-0">Управление на семейните дървета</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-1"></i>Създай семейство
+        </a>
+    </div>
+
+    <!-- Family Cards -->
+    @if (Model.Any())
+    {
+        <div class="row g-4">
+            @foreach (var family in Model)
+            {
+                <div class="col-lg-4 col-md-6">
+                    <div class="card h-100 shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-tree me-2"></i>@family.Name
+                            </h5>
+                            @if (!string.IsNullOrEmpty(family.Description))
+                            {
+                                <p class="card-text text-muted">@family.Description</p>
+                            }
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <span class="badge bg-primary">
+                                        <i class="fas fa-users me-1"></i>@family.FamilyMembers.Count членове
+                                    </span>
+                                    <span class="badge bg-info">
+                                        <i class="fas fa-camera me-1"></i>@family.Photos.Count снимки
+                                    </span>
+                                    <span class="badge bg-success">
+                                        <i class="fas fa-book me-1"></i>@family.Stories.Count истории
+                                    </span>
+                                </div>
+                            </div>
+                            <p class="small text-muted mb-3">
+                                <i class="fas fa-calendar me-1"></i>
+                                Създадено на @family.CreatedAt.ToString("dd.MM.yyyy")
+                            </p>
+                            <div class="d-flex gap-2">
+                                <a asp-action="Details" asp-route-id="@family.Id" class="btn btn-outline-primary btn-sm flex-fill">
+                                    <i class="fas fa-eye me-1"></i>Преглед
+                                </a>
+                                <a asp-action="Edit" asp-route-id="@family.Id" class="btn btn-outline-secondary btn-sm flex-fill">
+                                    <i class="fas fa-edit me-1"></i>Редактиране
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <!-- Empty State -->
+        <div class="text-center py-5">
+            <i class="fas fa-tree fa-4x text-muted mb-4"></i>
+            <h4>Нямате създадени семейства</h4>
+            <p class="text-muted mb-4">Започнете като създадете вашето първо семейно дърво.</p>
+            <a asp-action="Create" class="btn btn-primary">
+                <i class="fas fa-plus me-1"></i>Създай първото семейство
+            </a>
+        </div>
+    }
+</div>

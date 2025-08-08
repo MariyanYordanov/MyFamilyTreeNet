@@ -1,0 +1,216 @@
+@model MyFamilyTreeNet.Data.Models.FamilyMember
+@{
+    ViewData["Title"] = "Добавяне на нов член";
+    var families = ViewBag.Families as SelectList;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-user-plus me-2"></i>Добавяне на нов член
+                    </h2>
+                    <p class="text-muted mb-0">Въведете информация за новия член на семейството</p>
+                </div>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-1"></i>Отказ
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Основна информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                        <!-- Family Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label asp-for="FamilyId" class="form-label">
+                                    Семейство <span class="text-danger">*</span>
+                                </label>
+                                @Html.DropDownListFor(m => m.FamilyId, families, "Изберете семейство", new { @class = "form-select" })
+                                <span asp-validation-for="FamilyId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Name Fields -->
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label asp-for="FirstName" class="form-label">
+                                    Име <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="FirstName" class="form-control" placeholder="Иван" />
+                                <span asp-validation-for="FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="MiddleName" class="form-label">
+                                    Презиме <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="MiddleName" class="form-control" placeholder="Петров" />
+                                <span asp-validation-for="MiddleName" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label asp-for="LastName" class="form-label">
+                                    Фамилия <span class="text-danger">*</span>
+                                </label>
+                                <input asp-for="LastName" class="form-control" placeholder="Иванов" />
+                                <span asp-validation-for="LastName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Gender -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="Gender" class="form-label">Пол</label>
+                                <select asp-for="Gender" class="form-select">
+                                    <option value="0">Не е указано</option>
+                                    <option value="1">Мъж</option>
+                                    <option value="2">Жена</option>
+                                    <option value="3">Друго</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Birth and Death Dates -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="DateOfBirth" class="form-label">
+                                    <i class="fas fa-birthday-cake me-1"></i>Дата на раждане
+                                </label>
+                                <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="DateOfDeath" class="form-label">
+                                    <i class="fas fa-cross me-1"></i>Дата на смърт
+                                </label>
+                                <input asp-for="DateOfDeath" type="date" class="form-control" />
+                                <span asp-validation-for="DateOfDeath" class="text-danger"></span>
+                                <div class="form-text">Оставете празно ако лицето е живо</div>
+                            </div>
+                        </div>
+
+                        <!-- Places -->
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <label asp-for="PlaceOfBirth" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Място на раждане
+                                </label>
+                                <input asp-for="PlaceOfBirth" class="form-control" placeholder="София, България" />
+                                <span asp-validation-for="PlaceOfBirth" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="PlaceOfDeath" class="form-label">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Място на смърт
+                                </label>
+                                <input asp-for="PlaceOfDeath" class="form-control" placeholder="София, България" />
+                                <span asp-validation-for="PlaceOfDeath" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Biography -->
+                        <div class="mb-4">
+                            <label asp-for="Biography" class="form-label">
+                                <i class="fas fa-book me-1"></i>Биография
+                            </label>
+                            <textarea asp-for="Biography" class="form-control" rows="4" 
+                                      placeholder="Разкажете за живота и постиженията на този човек..."></textarea>
+                            <span asp-validation-for="Biography" class="text-danger"></span>
+                            <div class="form-text">
+                                <span id="biography-counter">0</span>/1000 символа
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Създай член
+                            </button>
+                            
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-1"></i>Нулиране
+                            </button>
+                            
+                            <a asp-action="Index" class="btn btn-outline-danger">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Полезни съвети</h6>
+                        <ul class="mb-0 small">
+                            <li>Полетата с <span class="text-danger">*</span> са задължителни</li>
+                            <li>Датите трябва да бъдат в правилна хронологична последователност</li>
+                            <li>Биографията може да включва информация за образование, кариера, семейство и интереси</li>
+                            <li>След създаване можете да добавите семейни връзки от страницата на члена</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Biography character counter
+            const biographyTextarea = document.querySelector('textarea[name="Biography"]');
+            const counter = document.getElementById('biography-counter');
+            
+            if (biographyTextarea && counter) {
+                function updateCounter() {
+                    const length = biographyTextarea.value.length;
+                    counter.textContent = length;
+                    
+                    if (length > 1000) {
+                        counter.classList.add('text-danger');
+                    } else {
+                        counter.classList.remove('text-danger');
+                    }
+                }
+                
+                biographyTextarea.addEventListener('input', updateCounter);
+                updateCounter(); // Initial count
+            }
+
+            // Date validation
+            const birthDateInput = document.querySelector('input[name="DateOfBirth"]');
+            const deathDateInput = document.querySelector('input[name="DateOfDeath"]');
+            
+            function validateDates() {
+                if (birthDateInput.value && deathDateInput.value) {
+                    const birthDate = new Date(birthDateInput.value);
+                    const deathDate = new Date(deathDateInput.value);
+                    
+                    if (birthDate > deathDate) {
+                        deathDateInput.setCustomValidity('Датата на смърт не може да бъде преди датата на раждане.');
+                    } else {
+                        deathDateInput.setCustomValidity('');
+                    }
+                }
+            }
+            
+            if (birthDateInput && deathDateInput) {
+                birthDateInput.addEventListener('change', validateDates);
+                deathDateInput.addEventListener('change', validateDates);
+            }
+        });
+    </script>
+}

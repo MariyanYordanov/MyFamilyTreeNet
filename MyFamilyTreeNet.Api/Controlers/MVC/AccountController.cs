@@ -5,7 +5,7 @@ using MyFamilyTreeNet.Data.Models;
 using MyFamilyTreeNet.Api.DTOs;
 using MyFamilyTreeNet.Api.ViewModels;
 
-namespace MyFamilyTreeNet.Api.Controllers.MVC
+namespace MyFamilyTreeNet.Api.Controlers.MVC
 {
     public class AccountController : Controller
     {

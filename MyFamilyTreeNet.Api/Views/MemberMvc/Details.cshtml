@@ -1,0 +1,342 @@
+@model MyFamilyTreeNet.Data.Models.FamilyMember
+@{
+    ViewData["Title"] = $"Профил на {Model.FirstName} {Model.LastName}";
+    var relationships = ViewBag.Relationships as List<MyFamilyTreeNet.Data.Models.Relationship>;
+    var statistics = ViewBag.Statistics;
+}
+
+<div class="container py-4">
+    <div class="row">
+        <!-- Profile Card -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm sticky-top" style="top: 20px;">
+                <div class="card-body text-center">
+                    <div class="mb-4">
+                        <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white" 
+                             style="width: 120px; height: 120px; font-size: 2.5rem; font-weight: bold; background-color: @(Model.DateOfDeath == null ? "#28a745" : "#6c757d")">
+                            @Model.FirstName.Substring(0, 1)@Model.LastName.Substring(0, 1)
+                        </div>
+                    </div>
+                    
+                    <h2 class="h4 mb-1">
+                        @Model.FirstName @Model.MiddleName @Model.LastName
+                    </h2>
+                    
+                    <p class="text-muted mb-3">@Model.Family.Name</p>
+                    
+                    @if (Model.DateOfBirth != null || Model.DateOfDeath != null)
+                    {
+                        <p class="mb-2">
+                            <i class="fas fa-calendar-alt text-muted me-2"></i>
+                            @if (Model.DateOfBirth != null && Model.DateOfDeath != null)
+                            {
+                                @($"{Model.DateOfBirth.Value.Year} - {Model.DateOfDeath.Value.Year}")
+                            }
+                            else if (Model.DateOfBirth != null)
+                            {
+                                @($"р. {Model.DateOfBirth.Value.Year}")
+                            }
+                        </p>
+                    }
+                    
+                    @if (statistics.Age != null)
+                    {
+                        <p class="mb-3">
+                            <i class="fas fa-birthday-cake text-muted me-2"></i>
+                            @if (Model.DateOfDeath != null)
+                            {
+                                @($"{statistics.Age} години (починал)")
+                            }
+                            else
+                            {
+                                @($"{statistics.Age} години")
+                            }
+                        </p>
+                    }
+                    
+                    <div class="d-flex gap-2 justify-content-center flex-wrap">
+                        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-edit me-1"></i>Редактиране
+                        </a>
+                        <a asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@Model.FamilyId" class="btn btn-outline-secondary btn-sm">
+                            <i class="fas fa-users me-1"></i>Семейство
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                            <i class="fas fa-trash me-1"></i>Изтриване
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <div class="row g-4">
+                <!-- Biography -->
+                @if (!string.IsNullOrWhiteSpace(Model.Biography))
+                {
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-book-open me-2"></i>Биография
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-0" style="white-space: pre-wrap;">@Model.Biography</p>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Personal Information -->
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Лична информация
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                @if (Model.Gender != MyFamilyTreeNet.Data.Models.Gender.Unknown)
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Пол:</strong>
+                                        <span class="ms-2">
+                                            @switch (Model.Gender)
+                                            {
+                                                case MyFamilyTreeNet.Data.Models.Gender.Male:
+                                                    @("Мъж")
+                                                    break;
+                                                case MyFamilyTreeNet.Data.Models.Gender.Female:
+                                                    @("Жена")
+                                                    break;
+                                                default:
+                                                    @("Друго")
+                                                    break;
+                                            }
+                                        </span>
+                                    </div>
+                                }
+                                
+                                @if (Model.DateOfBirth != null)
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Дата на раждане:</strong>
+                                        <span class="ms-2">@Model.DateOfBirth.Value.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("bg-BG"))</span>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrWhiteSpace(Model.PlaceOfBirth))
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Място на раждане:</strong>
+                                        <span class="ms-2">@Model.PlaceOfBirth</span>
+                                    </div>
+                                }
+                                
+                                @if (Model.DateOfDeath != null)
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Дата на смърт:</strong>
+                                        <span class="ms-2">@Model.DateOfDeath.Value.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("bg-BG"))</span>
+                                    </div>
+                                }
+                                
+                                @if (!string.IsNullOrWhiteSpace(Model.PlaceOfDeath))
+                                {
+                                    <div class="col-md-6">
+                                        <strong>Място на смърт:</strong>
+                                        <span class="ms-2">@Model.PlaceOfDeath</span>
+                                    </div>
+                                }
+
+                                <div class="col-md-6">
+                                    <strong>Добавен на:</strong>
+                                    <span class="ms-2">@Model.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("bg-BG"))</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Family Relationships -->
+                @if (relationships != null && relationships.Any())
+                {
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-network-wired me-2"></i>Семейни връзки
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    @foreach (var relationship in relationships)
+                                    {
+                                        <div class="col-md-6">
+                                            <div class="d-flex align-items-center p-3 border rounded">
+                                                <div class="flex-grow-1">
+                                                    <h6 class="mb-1">
+                                                        @if (relationship.PrimaryMemberId == Model.Id)
+                                                        {
+                                                            <a asp-action="Details" asp-route-id="@relationship.RelatedMemberId" class="text-decoration-none">
+                                                                @relationship.RelatedMember.FirstName @relationship.RelatedMember.LastName
+                                                            </a>
+                                                        }
+                                                        else
+                                                        {
+                                                            <a asp-action="Details" asp-route-id="@relationship.PrimaryMemberId" class="text-decoration-none">
+                                                                @relationship.PrimaryMember.FirstName @relationship.PrimaryMember.LastName
+                                                            </a>
+                                                        }
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        @switch (relationship.RelationshipType)
+                                                        {
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Parent:
+                                                                @("Родител")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Child:
+                                                                @("Дете")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Spouse:
+                                                                @("Съпруг/а")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Sibling:
+                                                                @("Брат/Сестра")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Grandparent:
+                                                                @("Дядо/Баба")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Grandchild:
+                                                                @("Внук/Внучка")
+                                                                break;
+                                                            default:
+                                                                @("Друго")
+                                                                break;
+                                                        }
+                                                    </small>
+                                                    @if (!string.IsNullOrWhiteSpace(relationship.Notes))
+                                                    {
+                                                        <br>
+                                                        <small class="text-muted fst-italic">@relationship.Notes</small>
+                                                    }
+                                                </div>
+                                                @if (relationship.PrimaryMemberId == Model.Id)
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@relationship.RelatedMemberId" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                }
+                                                else
+                                                {
+                                                    <a asp-action="Details" asp-route-id="@relationship.PrimaryMemberId" class="btn btn-outline-primary btn-sm">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="col-12">
+                        <div class="card shadow-sm">
+                            <div class="card-body text-center py-4">
+                                <i class="fas fa-network-wired fa-3x text-muted mb-3"></i>
+                                <h5>Няма добавени семейни връзки</h5>
+                                <p class="text-muted mb-3">Добавете връзки с други членове на семейството за да се покажат тук.</p>
+                                <button class="btn btn-primary" disabled>
+                                    <i class="fas fa-plus me-1"></i>Добави връзка
+                                </button>
+                                <small class="d-block text-muted mt-2">Функционалността ще бъде добавена скоро</small>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                <!-- Statistics -->
+                <div class="col-12">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-chart-line me-2"></i>Статистики
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center g-3">
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded">
+                                        <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                                        <h6>Възраст</h6>
+                                        <p class="mb-0 text-muted">
+                                            @if (statistics.Age != null)
+                                            {
+                                                @($"{statistics.Age} години")
+                                            }
+                                            else
+                                            {
+                                                @("Неизвестна")
+                                            }
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded">
+                                        <i class="fas fa-network-wired fa-2x text-success mb-2"></i>
+                                        <h6>Връзки</h6>
+                                        <p class="mb-0 text-muted">
+                                            @statistics.RelationshipCount връзки
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-3 border rounded">
+                                        <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                                        <h6>В системата</h6>
+                                        <p class="mb-0 text-muted">
+                                            @Model.CreatedAt.ToString("dd.MM.yyyy")
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Danger Zone -->
+                <div class="col-12">
+                    <div class="card border-warning">
+                        <div class="card-body">
+                            <h6 class="text-warning mb-2">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Внимание
+                            </h6>
+                            <p class="mb-2 small">
+                                Изтриването на този член ще премахне всичката му информация и семейни връзки.
+                                Това действие не може да бъде отменено.
+                            </p>
+                            <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-trash me-1"></i>Изтрий този член
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            $('.alert').fadeOut();
+        }, 5000);
+    </script>
+}
