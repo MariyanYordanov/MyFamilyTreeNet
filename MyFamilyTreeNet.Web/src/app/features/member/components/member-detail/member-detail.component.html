@@ -1,0 +1,255 @@
+<div class="container py-4">
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Зареждане...</span>
+      </div>
+      <p class="mt-3 text-muted">Зареждане на профила...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2"></i>{{ error() }}
+    </div>
+  }
+
+  @if (!loading() && member()) {
+    <div class="row">
+      <div class="col-lg-4">
+        <div class="card shadow-sm sticky-top" style="top: 20px;">
+          <div class="card-body text-center">
+            <div class="mb-4">
+              <div class="rounded-circle d-inline-flex align-items-center justify-content-center bg-primary text-white" 
+                   style="width: 120px; height: 120px; font-size: 2.5rem; font-weight: bold;">
+                {{ member()!.firstName | nameFormat:member()!.middleName:member()!.lastName:'initials' }}
+              </div>
+            </div>
+            
+            <h2 class="h4 mb-1">
+              {{ member()!.firstName | nameFormat:member()!.middleName:member()!.lastName:'full' }}
+            </h2>
+            
+            <p class="text-muted mb-3">{{ member()!.familyName }}</p>
+            
+            @if (member()!.dateOfBirth || member()!.dateOfDeath) {
+              <p class="mb-2">
+                <i class="fas fa-calendar-alt text-muted me-2"></i>
+                {{ getLifeSpan() }}
+              </p>
+            }
+            
+            @if (member()!.age !== undefined) {
+              <p class="mb-3">
+                <i class="fas fa-birthday-cake text-muted me-2"></i>
+                {{ getAgeText() }}
+              </p>
+            }
+            
+            <div class="d-flex gap-2 justify-content-center flex-wrap">
+              <a [routerLink]="['/members', member()!.id, 'edit']" class="btn btn-outline-primary btn-sm">
+                <i class="fas fa-edit me-1"></i>Редактиране
+              </a>
+              <a [routerLink]="['/families', member()!.familyId]" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-users me-1"></i>Семейство
+              </a>
+              <button class="btn btn-outline-danger btn-sm" (click)="onDeleteMember()">
+                <i class="fas fa-trash me-1"></i>Изтриване
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-8">
+        <div class="row g-4">
+          @if (member()!.biography) {
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-header">
+                  <h5 class="mb-0">
+                    <i class="fas fa-book-open me-2"></i>Биография
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <p class="mb-0" style="white-space: pre-wrap;">{{ member()!.biography }}</p>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-info-circle me-2"></i>Лична информация
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="row g-3">
+                  @if (member()!.gender) {
+                    <div class="col-md-6">
+                      <strong>Пол:</strong>
+                      <span class="ms-2">{{ member()!.gender === 'Male' ? 'Мъж' : 'Жена' }}</span>
+                    </div>
+                  }
+                  
+                  @if (member()!.dateOfBirth) {
+                    <div class="col-md-6">
+                      <strong>Дата на раждане:</strong>
+                      <span class="ms-2">{{ member()!.dateOfBirth | dateFormat:'long' }}</span>
+                    </div>
+                  }
+                  
+                  @if (member()!.placeOfBirth) {
+                    <div class="col-md-6">
+                      <strong>Място на раждане:</strong>
+                      <span class="ms-2">{{ member()!.placeOfBirth }}</span>
+                    </div>
+                  }
+                  
+                  @if (member()!.dateOfDeath) {
+                    <div class="col-md-6">
+                      <strong>Дата на смърт:</strong>
+                      <span class="ms-2">{{ member()!.dateOfDeath | dateFormat:'long' }}</span>
+                    </div>
+                  }
+                  
+                  @if (member()!.placeOfDeath) {
+                    <div class="col-md-6">
+                      <strong>Място на смърт:</strong>
+                      <span class="ms-2">{{ member()!.placeOfDeath }}</span>
+                    </div>
+                  }
+
+                  <div class="col-md-6">
+                    <strong>Добавен на:</strong>
+                    <span class="ms-2">{{ member()!.createdAt | dateFormat:'long' }}</span>
+                  </div>
+
+                  @if (member()!.updatedAt !== member()!.createdAt) {
+                    <div class="col-md-6">
+                      <strong>Последна промяна:</strong>
+                      <span class="ms-2">{{ member()!.updatedAt | dateFormat:'long' }}</span>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+          @if (relationships() && relationships()!.relationships.length > 0) {
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-header">
+                  <h5 class="mb-0">
+                    <i class="fas fa-network-wired me-2"></i>Семейни връзки
+                  </h5>
+                </div>
+                <div class="card-body">
+                  <div class="row g-3">
+                    @for (relationship of relationships()!.relationships; track relationship.id) {
+                      <div class="col-md-6">
+                        <div class="d-flex align-items-center p-3 border rounded">
+                          <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                              {{ relationship.primaryMemberId === member()!.id ? relationship.relatedMemberName : relationship.primaryMemberName }}
+                            </h6>
+                            <small class="text-muted">
+                              {{ getRelationshipTypeText(relationship.relationshipType) }}
+                            </small>
+                            @if (relationship.notes) {
+                              <br>
+                              <small class="text-muted fst-italic">{{ relationship.notes }}</small>
+                            }
+                          </div>
+                          <a [routerLink]="['/members', relationship.primaryMemberId === member()!.id ? relationship.relatedMemberId : relationship.primaryMemberId]" 
+                             class="btn btn-outline-primary btn-sm">
+                            <i class="fas fa-eye"></i>
+                          </a>
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+
+          @if (!relationships() || relationships()!.relationships.length === 0) {
+            <div class="col-12">
+              <div class="card shadow-sm">
+                <div class="card-body text-center py-4">
+                  <i class="fas fa-network-wired fa-3x text-muted mb-3"></i>
+                  <h5>Няма добавени семейни връзки</h5>
+                  <p class="text-muted mb-3">Добавете връзки с други членове на семейството за да се покажат тук.</p>
+                  <button class="btn btn-primary">
+                    <i class="fas fa-plus me-1"></i>Добави връзка
+                  </button>
+                </div>
+              </div>
+            </div>
+          }
+
+          <div class="col-12">
+            <div class="card shadow-sm">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-chart-line me-2"></i>Статистики
+                </h5>
+              </div>
+              <div class="card-body">
+                <div class="row text-center g-3">
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded">
+                      <i class="fas fa-calendar-check fa-2x text-primary mb-2"></i>
+                      <h6>Възраст</h6>
+                      <p class="mb-0 text-muted">
+                        {{ member()!.age !== undefined ? member()!.age + ' години' : 'Неизвестна' }}
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded">
+                      <i class="fas fa-network-wired fa-2x text-success mb-2"></i>
+                      <h6>Връзки</h6>
+                      <p class="mb-0 text-muted">
+                        {{ relationships()?.relationships?.length || 0 }} връзки
+                      </p>
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <div class="p-3 border rounded">
+                      <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                      <h6>В системата</h6>
+                      <p class="mb-0 text-muted">
+                        {{ member()!.createdAt | dateFormat:'short' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12">
+            <div class="card border-warning">
+              <div class="card-body">
+                <h6 class="text-warning mb-2">
+                  <i class="fas fa-exclamation-triangle me-2"></i>Внимание
+                </h6>
+                <p class="mb-2 small">
+                  Изтриването на този член ще премахне всичката му информация и семейни връзки.
+                  Това действие не може да бъде отменено.
+                </p>
+                <button class="btn btn-outline-danger btn-sm" (click)="onDeleteMember()">
+                  <i class="fas fa-trash me-1"></i>Изтрий този член
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

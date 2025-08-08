@@ -1,0 +1,191 @@
+<div class="container-fluid py-4">
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Зареждане...</span>
+      </div>
+      <p class="mt-3 text-muted">Зареждане на семейството...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2"></i>{{ error() }}
+    </div>
+  }
+
+  @if (!loading() && family()) {
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h1 class="mb-0">
+              <i class="fas fa-users me-2"></i>{{ family()!.name }}
+            </h1>
+            <p class="text-muted mb-0">{{ family()!.description || 'Семейно дърво' }}</p>
+          </div>
+          <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary" (click)="refreshTree()" [disabled]="loading()">
+              <i class="fas fa-sync-alt me-1"></i>Обнови
+            </button>
+            <button class="btn btn-outline-primary" (click)="exportTree()">
+              <i class="fas fa-download me-1"></i>Експорт
+            </button>
+            <a [routerLink]="['/families', familyId, 'edit']" class="btn btn-primary">
+              <i class="fas fa-edit me-1"></i>Редактиране
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+            <h3 class="mb-0">{{ statistics().totalMembers }}</h3>
+            <small class="text-muted">Общо членове</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-heart fa-2x text-success mb-2"></i>
+            <h3 class="mb-0">{{ statistics().aliveMembers }}</h3>
+            <small class="text-muted">Живи</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-cross fa-2x text-secondary mb-2"></i>
+            <h3 class="mb-0">{{ statistics().deceasedMembers }}</h3>
+            <small class="text-muted">Починали</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-layer-group fa-2x text-info mb-2"></i>
+            <h3 class="mb-0">{{ statistics().generations }}</h3>
+            <small class="text-muted">Поколения</small>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="card shadow-sm">
+          <div class="card-header bg-white">
+            <div class="d-flex justify-content-between align-items-center">
+              <h5 class="mb-0">
+                <i class="fas fa-sitemap me-2"></i>Семейно дърво
+              </h5>
+              <div class="d-flex gap-2">
+                <small class="text-muted me-3">
+                  <i class="fas fa-circle text-success me-1"></i>Живи
+                  <i class="fas fa-circle text-secondary ms-2 me-1"></i>Починали
+                </small>
+                <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('family-tree-container').scrollIntoView({behavior: 'smooth', block: 'center'})">
+                  <i class="fas fa-expand-arrows-alt me-1"></i>Центриране
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="card-body p-0" style="height: 600px; overflow: hidden; position: relative;">
+            <div id="family-tree-container" class="w-100 h-100" style="border: 1px solid #eee;"></div>
+            
+            @if (members().length === 0) {
+              <div class="position-absolute top-50 start-50 translate-middle text-center">
+                <i class="fas fa-users fa-4x text-muted mb-3"></i>
+                <h4>Няма добавени членове</h4>
+                <p class="text-muted">Започнете като добавите първия член на семейството.</p>
+                <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-primary">
+                  <i class="fas fa-user-plus me-1"></i>Добави член
+                </a>
+              </div>
+            }
+          </div>
+          
+          @if (members().length > 0) {
+            <div class="card-footer bg-light">
+              <div class="row align-items-center">
+                <div class="col-md-6">
+                  <small class="text-muted">
+                    Кликнете върху член за да видите неговия профил. Използвайте мишката за навигация в дървото.
+                  </small>
+                </div>
+                <div class="col-md-6 text-end">
+                  <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-sm btn-primary">
+                    <i class="fas fa-user-plus me-1"></i>Добави член
+                  </a>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    @if (members().length > 0) {
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h5 class="mb-0">
+                <i class="fas fa-list me-2"></i>Всички членове
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row g-3">
+                @for (member of members(); track member.id) {
+                  <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card border-0 bg-light h-100">
+                      <div class="card-body p-3">
+                        <div class="d-flex align-items-center">
+                          <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
+                               [style.background-color]="member.dateOfDeath ? '#6c757d' : '#28a745'"
+                               style="width: 40px; height: 40px; color: white; font-weight: bold;">
+                            {{ member.firstName | nameFormat:member.middleName:member.lastName:'initials' }}
+                          </div>
+                          <div class="flex-grow-1">
+                            <h6 class="mb-1">
+                              <a [routerLink]="['/members', member.id]" class="text-decoration-none">
+                                {{ member.firstName | nameFormat:member.middleName:member.lastName:'short' }}
+                              </a>
+                            </h6>
+                            @if (member.age !== undefined) {
+                              <small class="text-muted">
+                                {{ member.dateOfBirth | age:member.dateOfDeath:'text' }}
+                              </small>
+                            }
+                            @if (member.dateOfBirth) {
+                              <br>
+                              <small class="text-muted">
+                                {{ member.dateOfBirth | dateFormat:'year' }}
+                                @if (member.dateOfDeath) {
+                                  - {{ member.dateOfDeath | dateFormat:'year' }}
+                                }
+                              </small>
+                            }
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<script src="https://d3js.org/d3.v7.min.js"></script>

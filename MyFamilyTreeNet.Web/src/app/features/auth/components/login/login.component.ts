@@ -15,8 +15,8 @@ import { of } from 'rxjs';
     ReactiveFormsModule,
     RouterLink
   ],
-  templateUrl: './login.html',
-  styleUrl: './login.scss'
+  templateUrl: './login.component.html',
+  styleUrl: './login.component.scss'
 })
 
 export class LoginComponent implements OnInit {

@@ -1,0 +1,338 @@
+<div class="container-fluid py-4">
+  <!-- Header -->
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+      <h2><i class="fas fa-users me-2"></i>Членове на семейството</h2>
+      <p class="text-muted mb-0">Управление на членовете на семейството</p>
+    </div>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary" (click)="clearFilters()" [disabled]="loading()">
+        <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
+      </button>
+      <a routerLink="/members/create" class="btn btn-primary">
+        <i class="fas fa-user-plus me-1"></i>Добави член
+      </a>
+    </div>
+  </div>
+
+  <!-- Statistics Cards -->
+  @if (hasMembers()) {
+    <div class="row g-3 mb-4">
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-users fa-2x text-primary mb-2"></i>
+            <h4 class="mb-0">{{ members().length }}</h4>
+            <small class="text-muted">Общо членове</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-heart fa-2x text-success mb-2"></i>
+            <h4 class="mb-0">{{ aliveCount() }}</h4>
+            <small class="text-muted">Живи</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-cross fa-2x text-secondary mb-2"></i>
+            <h4 class="mb-0">{{ deceasedCount() }}</h4>
+            <small class="text-muted">Починали</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-3">
+        <div class="card border-0 shadow-sm h-100">
+          <div class="card-body text-center">
+            <i class="fas fa-calendar-alt fa-2x text-info mb-2"></i>
+            <h4 class="mb-0">{{ averageAge() }}</h4>
+            <small class="text-muted">Средна възраст</small>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Filters and Search -->
+  <div class="card mb-4">
+    <div class="card-body">
+      <div class="row g-3">
+        <!-- Search -->
+        <div class="col-md-4">
+          <label class="form-label">Търсене</label>
+          <div class="input-group">
+            <span class="input-group-text"><i class="fas fa-search"></i></span>
+            <input 
+              type="text" 
+              class="form-control" 
+              placeholder="Търсене по име, фамилия или биография..."
+              [value]="searchTerm()"
+              (input)="onSearchChange($any($event.target).value)"
+              [disabled]="loading()">
+          </div>
+        </div>
+
+        <!-- Family Filter -->
+        <div class="col-md-3">
+          <label class="form-label">Семейство</label>
+          <select 
+            class="form-select" 
+            [value]="selectedFamilyId() || ''"
+            (change)="onFamilyFilterChange($any($event.target).value)"
+            [disabled]="loading()">
+            <option value="">Всички семейства</option>
+            @for (family of families(); track family.id) {
+              <option [value]="family.id">{{ family.name }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Sort -->
+        <div class="col-md-3">
+          <label class="form-label">Сортиране</label>
+          <div class="btn-group w-100" role="group">
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="sortBy() === 'name'"
+              (click)="onSortChange('name')"
+              [disabled]="loading()">
+              Име
+              @if (sortBy() === 'name') {
+                <i class="fas ms-1" [class.fa-sort-up]="sortDirection() === 'asc'" [class.fa-sort-down]="sortDirection() === 'desc'"></i>
+              }
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="sortBy() === 'age'"
+              (click)="onSortChange('age')"
+              [disabled]="loading()">
+              Възраст
+              @if (sortBy() === 'age') {
+                <i class="fas ms-1" [class.fa-sort-up]="sortDirection() === 'asc'" [class.fa-sort-down]="sortDirection() === 'desc'"></i>
+              }
+            </button>
+            <button 
+              type="button" 
+              class="btn btn-outline-secondary"
+              [class.active]="sortBy() === 'birthDate'"
+              (click)="onSortChange('birthDate')"
+              [disabled]="loading()">
+              Дата
+              @if (sortBy() === 'birthDate') {
+                <i class="fas ms-1" [class.fa-sort-up]="sortDirection() === 'asc'" [class.fa-sort-down]="sortDirection() === 'desc'"></i>
+              }
+            </button>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="col-md-2">
+          <label class="form-label">Филтри</label>
+          <div class="form-check">
+            <input 
+              class="form-check-input" 
+              type="checkbox" 
+              id="aliveOnly"
+              [checked]="showAliveOnly()"
+              (change)="onAliveFilterChange($any($event.target).checked)"
+              [disabled]="loading()">
+            <label class="form-check-label" for="aliveOnly">
+              Само живи
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Error Message -->
+  @if (error()) {
+    <div class="alert alert-danger">
+      <i class="fas fa-exclamation-triangle me-2"></i>{{ error() }}
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Зареждане...</span>
+      </div>
+      <p class="mt-3 text-muted">Зареждане на членове...</p>
+    </div>
+  }
+
+  <!-- Members List -->
+  @if (!loading() && hasMembers()) {
+    <div class="row g-4">
+      @for (member of members(); track member.id) {
+        <div class="col-lg-4 col-md-6">
+          <div class="card h-100 border-0 shadow-sm">
+            <div class="card-body">
+              <div class="d-flex align-items-start justify-content-between mb-3">
+                <div>
+                  <h5 class="card-title mb-1">{{ getFullName(member) }}</h5>
+                  <p class="text-muted small mb-0">{{ member.familyName }}</p>
+                </div>
+                <div class="dropdown">
+                  <button class="btn btn-sm btn-outline-secondary dropdown-toggle" data-bs-toggle="dropdown">
+                    <i class="fas fa-ellipsis-v"></i>
+                  </button>
+                  <ul class="dropdown-menu dropdown-menu-end">
+                    <li><a class="dropdown-item" [routerLink]="['/members', member.id]">
+                      <i class="fas fa-eye me-2"></i>Преглед
+                    </a></li>
+                    <li><a class="dropdown-item" [routerLink]="['/members', member.id, 'edit']">
+                      <i class="fas fa-edit me-2"></i>Редактиране
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    <li><button class="dropdown-item text-danger" (click)="onDeleteMember(member)">
+                      <i class="fas fa-trash me-2"></i>Изтриване
+                    </button></li>
+                  </ul>
+                </div>
+              </div>
+
+              <div class="row g-2 mb-3">
+                @if (member.dateOfBirth) {
+                  <div class="col-12">
+                    <small class="text-muted">
+                      <i class="fas fa-birthday-cake me-1"></i>
+                      Роден: {{ formatDate(member.dateOfBirth) }}
+                    </small>
+                  </div>
+                }
+                
+                @if (member.dateOfDeath) {
+                  <div class="col-12">
+                    <small class="text-muted">
+                      <i class="fas fa-cross me-1"></i>
+                      Починал: {{ formatDate(member.dateOfDeath) }}
+                    </small>
+                  </div>
+                }
+
+                @if (member.age !== undefined) {
+                  <div class="col-12">
+                    <small class="text-muted">
+                      <i class="fas fa-calendar-alt me-1"></i>
+                      {{ getAgeDisplay(member) }}
+                    </small>
+                  </div>
+                }
+
+                @if (member.placeOfBirth) {
+                  <div class="col-12">
+                    <small class="text-muted">
+                      <i class="fas fa-map-marker-alt me-1"></i>
+                      {{ member.placeOfBirth }}
+                    </small>
+                  </div>
+                }
+              </div>
+
+              @if (member.biography) {
+                <p class="card-text small text-muted">
+                  {{ member.biography.length > 100 ? member.biography.substring(0, 100) + '...' : member.biography }}
+                </p>
+              }
+
+              <div class="d-flex gap-2">
+                <a [routerLink]="['/members', member.id]" class="btn btn-outline-primary btn-sm flex-fill">
+                  <i class="fas fa-eye me-1"></i>Преглед
+                </a>
+                <a [routerLink]="['/members', member.id, 'edit']" class="btn btn-outline-secondary btn-sm flex-fill">
+                  <i class="fas fa-edit me-1"></i>Редактиране
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages() > 1) {
+      <nav class="mt-5">
+        <div class="row align-items-center">
+          <div class="col-md-6">
+            <p class="mb-0 text-muted">
+              Показани {{ (currentPage() - 1) * pageSize() + 1 }} - 
+              {{ Math.min(currentPage() * pageSize(), totalCount()) }} 
+              от {{ totalCount() }} резултата
+            </p>
+          </div>
+          <div class="col-md-6">
+            <ul class="pagination justify-content-end mb-0">
+              <li class="page-item" [class.disabled]="!canGoPrevious()">
+                <button class="page-link" (click)="previousPage()" [disabled]="!canGoPrevious()">
+                  <i class="fas fa-chevron-left"></i>
+                </button>
+              </li>
+              
+              @for (page of [].constructor(Math.min(5, totalPages())); track $index; let i = $index) {
+                @let pageNum = Math.max(1, currentPage() - 2) + i;
+                @if (pageNum <= totalPages()) {
+                  <li class="page-item" [class.active]="pageNum === currentPage()">
+                    <button class="page-link" (click)="goToPage(pageNum)">{{ pageNum }}</button>
+                  </li>
+                }
+              }
+              
+              <li class="page-item" [class.disabled]="!canGoNext()">
+                <button class="page-link" (click)="nextPage()" [disabled]="!canGoNext()">
+                  <i class="fas fa-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </nav>
+    }
+
+    <!-- Page Size Selector -->
+    <div class="row mt-3">
+      <div class="col-md-6">
+        <div class="d-flex align-items-center gap-2">
+          <label class="form-label mb-0">Елементи на страница:</label>
+          <select 
+            class="form-select form-select-sm" 
+            style="width: auto;"
+            [value]="pageSize()"
+            (change)="onPageSizeChange(parseInt($any($event.target).value))"
+            [disabled]="loading()">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+          </select>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Empty State -->
+  @if (!loading() && !hasMembers()) {
+    <div class="text-center py-5">
+      <i class="fas fa-users fa-4x text-muted mb-4"></i>
+      <h4>Няма намерени членове</h4>
+      @if (searchTerm() || selectedFamilyId() || showAliveOnly()) {
+        <p class="text-muted mb-4">Опитайте да промените филтрите или да изчистите търсенето.</p>
+        <button class="btn btn-outline-primary" (click)="clearFilters()">
+          <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
+        </button>
+      } @else {
+        <p class="text-muted mb-4">Започнете като добавите първия член на семейството.</p>
+        <a routerLink="/members/create" class="btn btn-primary">
+          <i class="fas fa-user-plus me-1"></i>Добави първия член
+        </a>
+      }
+    </div>
+  }
+</div>

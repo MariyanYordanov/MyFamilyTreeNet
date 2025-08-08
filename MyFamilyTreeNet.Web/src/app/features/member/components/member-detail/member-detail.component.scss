@@ -1,0 +1,76 @@
+.sticky-top {
+  position: sticky;
+  top: 20px;
+}
+
+.card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.rounded-circle {
+  transition: transform 0.3s ease;
+}
+
+.rounded-circle:hover {
+  transform: scale(1.05);
+}
+
+.btn {
+  transition: all 0.2s ease;
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+.border.rounded {
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.border.rounded:hover {
+  border-color: #007bff;
+  background-color: rgba(0, 123, 255, 0.05);
+}
+
+@media (max-width: 768px) {
+  .sticky-top {
+    position: static;
+  }
+  
+  .d-flex.gap-2 {
+    flex-direction: column;
+    gap: 0.5rem !important;
+  }
+  
+  .btn {
+    width: 100%;
+  }
+  
+  .rounded-circle {
+    width: 80px !important;
+    height: 80px !important;
+    font-size: 2rem !important;
+  }
+}
+
+.text-muted.fst-italic {
+  font-size: 0.85rem;
+}
+
+.card-header h5 {
+  color: #495057;
+}
+
+.border-warning {
+  border-color: #ffc107 !important;
+}
+
+.text-warning {
+  color: #856404 !important;
+}

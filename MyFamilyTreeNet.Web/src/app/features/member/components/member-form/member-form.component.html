@@ -1,0 +1,302 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2>
+            <i class="fas fa-user me-2"></i>
+            {{ isEditMode() ? 'Редактиране на член' : 'Добавяне на нов член' }}
+          </h2>
+          <p class="text-muted mb-0">
+            {{ isEditMode() ? 'Редактирайте информацията за члена' : 'Въведете информация за новия член' }}
+          </p>
+        </div>
+        <button class="btn btn-outline-secondary" (click)="onCancel()" [disabled]="isLoading()">
+          <i class="fas fa-times me-1"></i>Отказ
+        </button>
+      </div>
+
+      <!-- Alert Messages -->
+      @if (error()) {
+        <div class="alert alert-danger alert-dismissible fade show">
+          <i class="fas fa-exclamation-triangle me-2"></i>{{ error() }}
+          <button type="button" class="btn-close" (click)="error.set(null)"></button>
+        </div>
+      }
+
+      @if (success()) {
+        <div class="alert alert-success alert-dismissible fade show">
+          <i class="fas fa-check-circle me-2"></i>{{ success() }}
+          <button type="button" class="btn-close" (click)="success.set(null)"></button>
+        </div>
+      }
+
+      <!-- Loading -->
+      @if (isLoading() && isEditMode()) {
+        <div class="text-center py-5">
+          <div class="spinner-border text-primary" role="status">
+            <span class="visually-hidden">Зареждане...</span>
+          </div>
+          <p class="mt-3 text-muted">Зареждане на информация за члена...</p>
+        </div>
+      }
+
+      <!-- Form -->
+      @if (!isLoading() || !isEditMode()) {
+        <div class="card shadow-sm">
+          <div class="card-header">
+            <h5 class="mb-0">
+              <i class="fas fa-info-circle me-2"></i>Основна информация
+            </h5>
+          </div>
+          <div class="card-body">
+            <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
+              <!-- Family Selection -->
+              <div class="row mb-3">
+                <div class="col-md-12">
+                  <label for="familyId" class="form-label">
+                    Семейство <span class="text-danger">*</span>
+                  </label>
+                  <select 
+                    id="familyId" 
+                    class="form-select"
+                    formControlName="familyId"
+                    [class.is-invalid]="isFieldInvalid('familyId')"
+                    [disabled]="isEditMode()">
+                    <option value="">Изберете семейство</option>
+                    @for (family of families(); track family.id) {
+                      <option [value]="family.id">{{ family.name }}</option>
+                    }
+                  </select>
+                  @if (isFieldInvalid('familyId')) {
+                    <div class="invalid-feedback">{{ getFieldError('familyId') }}</div>
+                  }
+                  @if (isEditMode()) {
+                    <div class="form-text">Семейството не може да бъде променено при редактиране</div>
+                  }
+                </div>
+              </div>
+
+              <!-- Name Fields -->
+              <div class="row mb-3">
+                <div class="col-md-4">
+                  <label for="firstName" class="form-label">
+                    Име <span class="text-danger">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="firstName"
+                    class="form-control" 
+                    formControlName="firstName"
+                    [class.is-invalid]="isFieldInvalid('firstName')"
+                    placeholder="Иван">
+                  @if (isFieldInvalid('firstName')) {
+                    <div class="invalid-feedback">{{ getFieldError('firstName') }}</div>
+                  }
+                </div>
+                <div class="col-md-4">
+                  <label for="middleName" class="form-label">Презиме</label>
+                  <input 
+                    type="text" 
+                    id="middleName"
+                    class="form-control" 
+                    formControlName="middleName"
+                    [class.is-invalid]="isFieldInvalid('middleName')"
+                    placeholder="Петров">
+                  @if (isFieldInvalid('middleName')) {
+                    <div class="invalid-feedback">{{ getFieldError('middleName') }}</div>
+                  }
+                </div>
+                <div class="col-md-4">
+                  <label for="lastName" class="form-label">
+                    Фамилия <span class="text-danger">*</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    id="lastName"
+                    class="form-control" 
+                    formControlName="lastName"
+                    [class.is-invalid]="isFieldInvalid('lastName')"
+                    placeholder="Иванов">
+                  @if (isFieldInvalid('lastName')) {
+                    <div class="invalid-feedback">{{ getFieldError('lastName') }}</div>
+                  }
+                </div>
+              </div>
+
+              <!-- Gender -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="gender" class="form-label">Пол</label>
+                  <select 
+                    id="gender" 
+                    class="form-select"
+                    formControlName="gender">
+                    <option value="">Не е указано</option>
+                    <option value="Male">Мъж</option>
+                    <option value="Female">Жена</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Birth and Death Dates -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="dateOfBirth" class="form-label">
+                    <i class="fas fa-birthday-cake me-1"></i>Дата на раждане
+                  </label>
+                  <input 
+                    type="date" 
+                    id="dateOfBirth"
+                    class="form-control" 
+                    formControlName="dateOfBirth"
+                    (change)="onBirthDateChange()">
+                </div>
+                <div class="col-md-6">
+                  <label for="dateOfDeath" class="form-label">
+                    <i class="fas fa-cross me-1"></i>Дата на смърт
+                  </label>
+                  <input 
+                    type="date" 
+                    id="dateOfDeath"
+                    class="form-control" 
+                    formControlName="dateOfDeath"
+                    [class.is-invalid]="memberForm.get('dateOfDeath')?.hasError('invalidDate')"
+                    (change)="onDeathDateChange()">
+                  @if (memberForm.get('dateOfDeath')?.hasError('invalidDate')) {
+                    <div class="invalid-feedback">Датата на смърт не може да бъде преди датата на раждане</div>
+                  }
+                  <div class="form-text">Оставете празно ако лицето е живо</div>
+                </div>
+              </div>
+
+              <!-- Places -->
+              <div class="row mb-3">
+                <div class="col-md-6">
+                  <label for="placeOfBirth" class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Място на раждане
+                  </label>
+                  <input 
+                    type="text" 
+                    id="placeOfBirth"
+                    class="form-control" 
+                    formControlName="placeOfBirth"
+                    [class.is-invalid]="isFieldInvalid('placeOfBirth')"
+                    placeholder="София, България">
+                  @if (isFieldInvalid('placeOfBirth')) {
+                    <div class="invalid-feedback">{{ getFieldError('placeOfBirth') }}</div>
+                  }
+                </div>
+                <div class="col-md-6">
+                  <label for="placeOfDeath" class="form-label">
+                    <i class="fas fa-map-marker-alt me-1"></i>Място на смърт
+                  </label>
+                  <input 
+                    type="text" 
+                    id="placeOfDeath"
+                    class="form-control" 
+                    formControlName="placeOfDeath"
+                    [class.is-invalid]="isFieldInvalid('placeOfDeath')"
+                    placeholder="София, България">
+                  @if (isFieldInvalid('placeOfDeath')) {
+                    <div class="invalid-feedback">{{ getFieldError('placeOfDeath') }}</div>
+                  }
+                </div>
+              </div>
+
+              <!-- Biography -->
+              <div class="mb-4">
+                <label for="biography" class="form-label">
+                  <i class="fas fa-book me-1"></i>Биография
+                </label>
+                <textarea 
+                  id="biography"
+                  class="form-control" 
+                  rows="4"
+                  formControlName="biography"
+                  [class.is-invalid]="isFieldInvalid('biography')"
+                  placeholder="Разкажете за живота и постиженията на този човек..."></textarea>
+                @if (isFieldInvalid('biography')) {
+                  <div class="invalid-feedback">{{ getFieldError('biography') }}</div>
+                }
+                <div class="form-text">
+                  {{ memberForm.get('biography')?.value?.length || 0 }}/1000 символа
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="d-flex gap-2 flex-wrap">
+                <button 
+                  type="submit" 
+                  class="btn btn-primary"
+                  [disabled]="memberForm.invalid || isLoading()">
+                  @if (isLoading()) {
+                    <span class="spinner-border spinner-border-sm me-2"></span>
+                  } @else {
+                    <i class="fas fa-save me-1"></i>
+                  }
+                  {{ isEditMode() ? 'Обнови член' : 'Създай член' }}
+                </button>
+                
+                <button 
+                  type="button" 
+                  class="btn btn-outline-secondary"
+                  (click)="onReset()"
+                  [disabled]="isLoading()">
+                  <i class="fas fa-undo me-1"></i>Нулиране
+                </button>
+                
+                <button 
+                  type="button" 
+                  class="btn btn-outline-danger"
+                  (click)="onCancel()"
+                  [disabled]="isLoading()">
+                  <i class="fas fa-times me-1"></i>Отказ
+                </button>
+              </div>
+
+              <!-- Form Status -->
+              @if (memberForm.invalid && (memberForm.dirty || memberForm.touched)) {
+                <div class="mt-3 p-3 bg-light rounded">
+                  <h6 class="text-danger mb-2">
+                    <i class="fas fa-exclamation-circle me-1"></i>Моля, поправете следните грешки:
+                  </h6>
+                  <ul class="list-unstyled mb-0 text-sm">
+                    @if (memberForm.get('firstName')?.invalid && memberForm.get('firstName')?.touched) {
+                      <li class="text-danger">• {{ getFieldError('firstName') }}</li>
+                    }
+                    @if (memberForm.get('lastName')?.invalid && memberForm.get('lastName')?.touched) {
+                      <li class="text-danger">• {{ getFieldError('lastName') }}</li>
+                    }
+                    @if (memberForm.get('familyId')?.invalid && memberForm.get('familyId')?.touched) {
+                      <li class="text-danger">• {{ getFieldError('familyId') }}</li>
+                    }
+                    @if (memberForm.get('dateOfDeath')?.hasError('invalidDate')) {
+                      <li class="text-danger">• Датата на смърт не може да бъде преди датата на раждане</li>
+                    }
+                  </ul>
+                </div>
+              }
+            </form>
+          </div>
+        </div>
+      }
+
+      <!-- Help Text -->
+      <div class="mt-4">
+        <div class="card bg-light">
+          <div class="card-body">
+            <h6><i class="fas fa-lightbulb me-2"></i>Полезни съвети</h6>
+            <ul class="mb-0 small">
+              <li>Полетата с <span class="text-danger">*</span> са задължителни</li>
+              <li>Датите трябва да бъдат в правилна хронологична последователност</li>
+              <li>Биографията може да включва информация за образование, кариера, семейство и интереси</li>
+              <li>След създаване можете да добавите семейни връзки от страницата на члена</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -25,8 +25,8 @@ function passwordMatchValidator(control: AbstractControl) {
     ReactiveFormsModule,
     RouterLink
   ],
-  templateUrl: './register.html',
-  styleUrls: ['./register.scss']
+  templateUrl: './register.component.html',
+  styleUrls: ['./register.component.scss']
 })
 
 export class RegisterComponent {

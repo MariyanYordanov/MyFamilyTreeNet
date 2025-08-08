@@ -9,5 +9,9 @@ export const familyRoutes: Routes = [
   {
     path: 'catalog',
     loadComponent: () => import('./components/family-catalog/family-catalog').then(c => c.FamilyCatalogComponent)
+  },
+  {
+    path: ':id',
+    loadComponent: () => import('./components/family-detail/family-detail.component').then(c => c.FamilyDetailComponent)
   }
 ];
