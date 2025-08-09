@@ -68,7 +68,7 @@
                                 var averageAge = membersWithAge.Any() ? 
                                     (int)membersWithAge.Average(m => {
                                         var endDate = m.DateOfDeath ?? DateTime.Now;
-                                        var age = endDate.Year - m.DateOfBirth.Value.Year;
+                                        var age = endDate.Year - m.DateOfBirth!.Value.Year;
                                         if (endDate < m.DateOfBirth.Value.AddYears(age)) age--;
                                         return Math.Max(0, age);
                                     }) : 0;

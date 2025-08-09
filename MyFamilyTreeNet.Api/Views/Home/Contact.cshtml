@@ -1,0 +1,150 @@
+@{
+    ViewData["Title"] = "Контакти - My Family Tree Net";
+}
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 text-primary mb-3">
+                <i class="fas fa-envelope me-3"></i>Свържете се с нас
+            </h1>
+            <p class="lead text-muted">
+                Имаме удоволствието да отговорим на вашите въпроси
+            </p>
+        </div>
+
+        <div class="row">
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">
+                            <i class="fas fa-info-circle me-2"></i>Информация за контакт
+                        </h4>
+                        
+                        <div class="contact-item mb-3">
+                            <i class="fas fa-map-marker-alt text-primary me-3"></i>
+                            <strong>Адрес:</strong><br>
+                            <span class="ms-4">ул. "Технологична" 15, София 1000, България</span>
+                        </div>
+                        
+                        <div class="contact-item mb-3">
+                            <i class="fas fa-phone text-primary me-3"></i>
+                            <strong>Телефон:</strong><br>
+                            <span class="ms-4">+359 888 123 456</span>
+                        </div>
+                        
+                        <div class="contact-item mb-3">
+                            <i class="fas fa-envelope text-primary me-3"></i>
+                            <strong>Email:</strong><br>
+                            <span class="ms-4">info@myfamilytreenet.bg</span>
+                        </div>
+                        
+                        <div class="contact-item mb-3">
+                            <i class="fas fa-clock text-primary me-3"></i>
+                            <strong>Работно време:</strong><br>
+                            <span class="ms-4">Понеделник - Петък: 9:00 - 18:00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title text-primary mb-4">
+                            <i class="fas fa-paper-plane me-2"></i>Изпратете съобщение
+                        </h4>
+                        
+                        <form id="contactForm">
+                            <div class="mb-3">
+                                <label for="name" class="form-label">Име</label>
+                                <input type="text" class="form-control" id="name" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="subject" class="form-label">Тема</label>
+                                <select class="form-select" id="subject">
+                                    <option value="">Изберете тема</option>
+                                    <option value="general">Общи въпроси</option>
+                                    <option value="technical">Техническа поддръжка</option>
+                                    <option value="feature">Предложение за функция</option>
+                                    <option value="other">Друго</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="message" class="form-label">Съобщение</label>
+                                <textarea class="form-control" id="message" rows="4" required 
+                                          placeholder="Моля, опишете вашия въпрос или предложение..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-primary w-100">
+                                <i class="fas fa-paper-plane me-2"></i>Изпрати съобщение
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h3 class="text-primary mb-4">
+                <i class="fas fa-question-circle me-2"></i>Често задавани въпроси
+            </h3>
+            
+            <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq1">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse1">
+                            Безплатна ли е платформата?
+                        </button>
+                    </h2>
+                    <div id="collapse1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Да, My Family Tree Net e безплатно прилжение.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq2">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse2">
+                            Как да създам семейно дърво?
+                        </button>
+                    </h2>
+                    <div id="collapse2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            След регистрация, използвайте бутона "Създай семейство" и следвайте стъпките в помощника.
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion-item">
+                    <h2 class="accordion-header" id="faq3">
+                        <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse3">
+                            Сигурни ли са моите данни?
+                        </button>
+                    </h2>
+                    <div id="collapse3" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                        <div class="accordion-body">
+                            Абсолютно! Използваме най-съвременните мерки за сигурност и шифроване на данните.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById('contactForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('Благодарим за съобщението! Ще се свържем с вас скоро.');
+        });
+    </script>
+}

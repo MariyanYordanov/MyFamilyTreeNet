@@ -1,0 +1,157 @@
+@{
+    ViewData["Title"] = "Моят профил - My Family Tree Net";
+}
+
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="text-primary">
+                <i class="fas fa-tachometer-alt me-2"></i>Моят профил
+            </h1>
+            <div>
+                <span class="badge bg-success">
+                    <i class="fas fa-user me-1"></i>Активен потребител
+                </span>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <a asp-area="" asp-controller="FamilyMvc" asp-action="Create" class="card text-decoration-none h-100">
+                    <div class="card-body text-center text-primary">
+                        <i class="fas fa-plus-circle fa-3x mb-2"></i>
+                        <h6 class="card-title">Създай семейство</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a asp-area="" asp-controller="FamilyMvc" asp-action="Index" class="card text-decoration-none h-100">
+                    <div class="card-body text-center text-primary">
+                        <i class="fas fa-users fa-3x mb-2"></i>
+                        <h6 class="card-title">Всички семейства</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="#" class="card text-decoration-none h-100">
+                    <div class="card-body text-center text-primary">
+                        <i class="fas fa-camera fa-3x mb-2"></i>
+                        <h6 class="card-title">Качи снимки</h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="#" class="card text-decoration-none h-100">
+                    <div class="card-body text-center text-primary">
+                        <i class="fas fa-book fa-3x mb-2"></i>
+                        <h6 class="card-title">Моите истории</h6>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-3 mb-3">
+                <div class="card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <h2 class="display-6">@ViewBag.FamilyCount</h2>
+                        <p class="mb-0">Моите семейства</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-success text-white">
+                    <div class="card-body text-center">
+                        <h2 class="display-6">@ViewBag.MemberCount</h2>
+                        <p class="mb-0">Семейни членове</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-info text-white">
+                    <div class="card-body text-center">
+                        <h2 class="display-6">@ViewBag.PhotoCount</h2>
+                        <p class="mb-0">Качени снимки</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 mb-3">
+                <div class="card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <h2 class="display-6">@ViewBag.StoryCount</h2>
+                        <p class="mb-0">Написани истории</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clock me-2"></i>Последна активност
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @if (ViewBag.RecentActivities != null && ((List<dynamic>)ViewBag.RecentActivities).Count > 0)
+                        {
+                            @foreach (var activity in (List<dynamic>)ViewBag.RecentActivities)
+                            {
+                                <div class="activity-item d-flex align-items-center mb-3">
+                                    <div class="activity-icon @activity.BgClass text-white rounded-circle p-2 me-3">
+                                        <i class="@activity.Icon"></i>
+                                    </div>
+                                    <div>
+                                        <strong>@activity.Action "@activity.Name"</strong><br>
+                                        <small class="text-muted">
+                                            @{
+                                                var timeDiff = DateTime.Now - activity.CreatedAt;
+                                                var timeAgo = timeDiff.TotalDays >= 1 
+                                                    ? $"преди {(int)timeDiff.TotalDays} {((int)timeDiff.TotalDays == 1 ? "ден" : "дни")}"
+                                                    : timeDiff.TotalHours >= 1 
+                                                        ? $"преди {(int)timeDiff.TotalHours} {((int)timeDiff.TotalHours == 1 ? "час" : "часа")}"
+                                                        : "преди малко";
+                                            }
+                                            @timeAgo
+                                        </small>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <div class="text-center text-muted py-4">
+                                <i class="fas fa-clock fa-3x mb-3 opacity-50"></i>
+                                <p>Все още няма активност</p>
+                                <p>Започнете със създаване на семейство или добавяне на членове</p>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+>
+            <div class="col-md-4 mb-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user me-2"></i>Профилна информация
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <i class="fas fa-user-circle fa-5x text-muted"></i>
+                        </div>
+                        <p><strong>Име:</strong> @ViewBag.UserName</p>
+                        <p><strong>Email:</strong> @ViewBag.UserEmail</p>
+                        <p><strong>Роля:</strong> @(User.IsInRole("Admin") ? "Администратор" : "Потребител")</p>
+                        <p><strong>Регистрация:</strong> @ViewBag.RegistrationDate</p>
+                        <a href="#" class="btn btn-outline-primary w-100">
+                            <i class="fas fa-edit me-2"></i>Редактирай профил
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

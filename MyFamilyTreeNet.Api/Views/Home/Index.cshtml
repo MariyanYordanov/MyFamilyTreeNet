@@ -1,49 +1,162 @@
 @{
-    ViewData["Title"] = "Начало";
+    ViewData["Title"] = "Начало - My Family Tree Net";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Добре дошли в MyFamilyTreeNet</h1>
-    <p>Платформа за съхраняване и споделяне на семейни истории.</p>
-    
-    <div class="row mt-5 g-4">
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-tree fa-3x text-primary"></i>
-                    </div>
-                    <h4 class="card-title">Създайте семейното си дърво</h4>
-                    <p class="card-text text-muted">Изградете и поддържайте семейното си дърво с нашите лесни за използване инструменти.</p>
-                </div>
-            </div>
+<div class="hero-section bg-primary text-white py-5 mb-5 rounded">
+    <div class="container text-center">
+        <h1 class="display-4 fw-bold mb-3">
+            <i class="fas fa-tree me-3"></i>
+            Добре дошли в My Family Tree Net
+        </h1>
+        <p class="lead mb-4">
+            Създайте, споделете и открийте вашата семейна история с най-модерната социална мрежа за семейства
+        </p>
+        <div class="d-flex gap-3 justify-content-center flex-wrap">
+            @if (User.Identity?.IsAuthenticated == true)
+            {
+                <a asp-area="" asp-controller="FamilyMvc" asp-action="Create" class="btn btn-light btn-lg">
+                    <i class="fas fa-plus me-2"></i>Създай семейство
+                </a>
+                <a asp-area="" asp-controller="Home" asp-action="Dashboard" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-tachometer-alt me-2"></i>Моят профил
+                </a>
+            }
+            else
+            {
+                <a href="/login" class="btn btn-light btn-lg">
+                    <i class="fas fa-sign-in-alt me-2"></i>Влез
+                </a>
+                <a href="/register" class="btn btn-outline-light btn-lg">
+                    <i class="fas fa-user-plus me-2"></i>Регистрирай се
+                </a>
+            }
         </div>
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-book-open fa-3x text-primary"></i>
-                    </div>
-                    <h4 class="card-title">Споделяйте истории</h4>
-                    <p class="card-text text-muted">Документирайте и споделяйте семейни истории за бъдещите поколения.</p>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card h-100 shadow-sm border-0">
-                <div class="card-body text-center p-4">
-                    <div class="mb-3">
-                        <i class="fas fa-users fa-3x text-primary"></i>
-                    </div>
-                    <h4 class="card-title">Свържете се със семейството</h4>
-                    <p class="card-text text-muted">Открийте роднини и се свържете с членовете на семейството.</p>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <div class="mt-5">
-        <a asp-controller="Account" asp-action="Register" class="btn btn-primary btn-lg me-3">Регистрация</a>
-        <a asp-controller="Account" asp-action="Login" class="btn btn-outline-primary btn-lg">Вход</a>
     </div>
 </div>
+
+<div class="row mb-5">
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-sitemap fa-3x text-primary"></i>
+                </div>
+                <h4 class="card-title">Родословни дървета</h4>
+                <p class="card-text">
+                    Създайте интерактивни родословни дървета и проследете историята на вашето семейство
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-images fa-3x text-primary"></i>
+                </div>
+                <h4 class="card-title">Семейни галерии</h4>
+                <p class="card-text">
+                    Качвайте и споделяйте семейни снимки, създавайте галерии с важни моменти
+                </p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body text-center">
+                <div class="feature-icon mb-3">
+                    <i class="fas fa-book fa-3x text-primary"></i>
+                </div>
+                <h4 class="card-title">Семейни истории</h4>
+                <p class="card-text">
+                    Документирайте и споделяйте истории, традиции и спомени за бъдещите поколения
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row text-center mb-5">
+    <div class="col-md-4">
+        <div class="p-4">
+            <h2 class="display-5 text-primary fw-bold">@ViewBag.TotalFamilies</h2>
+            <p class="lead">Регистрирани семейства</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-4">
+            <h2 class="display-5 text-primary fw-bold">@ViewBag.TotalMembers</h2>
+            <p class="lead">Семейни членове</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="p-4">
+            <h2 class="display-5 text-primary fw-bold">@ViewBag.TotalStories</h2>
+            <p class="lead">Споделени истории</p>
+        </div>
+    </div>
+</div>
+
+@if (ViewBag.FeaturedFamilies != null && ((List<MyFamilyTreeNet.Data.Models.Family>)ViewBag.FeaturedFamilies).Any())
+{
+    <div class="mb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h3">
+                <i class="fas fa-star me-2 text-warning"></i>
+                Представени семейства
+            </h2>
+            <a asp-area="" asp-controller="FamilyMvc" asp-action="Index" class="btn btn-outline-primary">
+                Виж всички <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+        
+        <div class="row g-4">
+            @foreach (var family in (List<MyFamilyTreeNet.Data.Models.Family>)ViewBag.FeaturedFamilies)
+            {
+                <div class="col-md-6 col-lg-4">
+                    <div class="card h-100 shadow-sm family-card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-home me-2 text-primary"></i>
+                                @family.Name
+                            </h5>
+                            <p class="card-text text-muted small mb-2">
+                                <i class="fas fa-calendar me-1"></i>
+                                Създадено @family.CreatedAt.ToString("dd.MM.yyyy")
+                            </p>
+                            <p class="card-text">
+                                @if (!string.IsNullOrEmpty(family.Description))
+                                {
+                                    @(family.Description.Length > 100 ? family.Description.Substring(0, 100) + "..." : family.Description)
+                                }
+                                else
+                                {
+                                    <em>Няма описание</em>
+                                }
+                            </p>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <a asp-area="" asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@family.Id" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-eye me-1"></i>Разгледай
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@if (User.Identity?.IsAuthenticated != true)
+{
+    <div class="bg-light p-5 rounded text-center">
+        <h3 class="mb-3">Готови ли сте да започнете?</h3>
+        <p class="lead mb-4">
+            Присъединете се към семейства, които вече използват My Family Tree Net
+        </p>
+        <a href="/register" class="btn btn-primary btn-lg">
+            <i class="fas fa-user-plus me-2"></i>Започнете безплатно
+        </a>
+    </div>
+}

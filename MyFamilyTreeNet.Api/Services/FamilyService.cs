@@ -62,4 +62,10 @@ public class FamilyService : IFamilyService
         await _context.SaveChangesAsync();
         return true;
     }
+
+    public async Task<bool> UserOwnsFamilyAsync(int familyId, string userId)
+    {
+        var family = await _context.Families.FindAsync(familyId);
+        return family != null && family.CreatedByUserId == userId;
+    }
 }

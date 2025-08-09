@@ -7,7 +7,7 @@ using System.Security.Claims;
 
 namespace MyFamilyTreeNet.Api.Controlers.MVC
 {
-    // [Authorize] - Temporarily disabled for testing
+    [Authorize]
     public class FamilyMvcController : Controller
     {
         private readonly AppDbContext _context;
@@ -266,14 +266,14 @@ namespace MyFamilyTreeNet.Api.Controlers.MVC
                 .Where(m => m.DateOfBirth.HasValue)
                 .Select(m => CalculateAge(m.DateOfBirth, m.DateOfDeath))
                 .Where(age => age.HasValue)
-                .Select(age => age.Value)
+                .Select(age => age!.Value)
                 .ToList();
 
             var averageAge = ages.Any() ? (int)Math.Round(ages.Average()) : 0;
 
             var generations = members
                 .Where(m => m.DateOfBirth.HasValue)
-                .Select(m => (DateTime.Now.Year - m.DateOfBirth.Value.Year) / 25)
+                .Select(m => (DateTime.Now.Year - m.DateOfBirth!.Value.Year) / 25)
                 .DefaultIfEmpty(0)
                 .Max() + 1;
 

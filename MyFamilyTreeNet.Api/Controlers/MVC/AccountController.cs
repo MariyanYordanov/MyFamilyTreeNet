@@ -79,7 +79,8 @@ namespace MyFamilyTreeNet.Api.Controlers.MVC
                 Email = model.Email,
                 FirstName = model.FirstName,
                 MiddleName = model.MiddleName,
-                LastName = model.LastName
+                LastName = model.LastName,
+                DateOfBirth = model.DateOfBirth
             };
 
             var result = await _userManager.CreateAsync(user, model.Password);

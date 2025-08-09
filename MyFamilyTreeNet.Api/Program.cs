@@ -83,10 +83,10 @@ var secretKey = jwtSettings["SecretKey"];
 
 builder.Services.AddAuthentication(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultAuthenticateScheme = "JWT_OR_COOKIE";
+    options.DefaultChallengeScheme = "JWT_OR_COOKIE";
 })
-.AddJwtBearer(options =>
+.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -97,6 +97,29 @@ builder.Services.AddAuthentication(options =>
         ValidIssuer = jwtSettings["Issuer"],
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? "ThisIsAVerySecretKeyForWorldFamilyAppMinimum32Characters"))
+    };
+})
+.AddCookie("Cookies", options =>
+{
+    options.LoginPath = "/login";
+    options.LogoutPath = "/logout";
+    options.AccessDeniedPath = "/Account/AccessDenied";
+    options.ExpireTimeSpan = TimeSpan.FromHours(24);
+    options.SlidingExpiration = true;
+})
+.AddPolicyScheme("JWT_OR_COOKIE", "JWT_OR_COOKIE", options =>
+{
+    options.ForwardDefaultSelector = context =>
+    {
+        string? authorization = context.Request.Headers["Authorization"];
+        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
+            return JwtBearerDefaults.AuthenticationScheme;
+
+        // Check if this is an API request
+        if (context.Request.Path.StartsWithSegments("/api"))
+            return JwtBearerDefaults.AuthenticationScheme;
+
+        return "Cookies";
     };
 });
 

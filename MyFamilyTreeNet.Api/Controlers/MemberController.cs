@@ -11,6 +11,7 @@ namespace MyFamilyTreeNet.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [IgnoreAntiforgeryToken]
     [Authorize]
     public class MemberController : ControllerBase
     {
@@ -43,6 +44,7 @@ namespace MyFamilyTreeNet.Api.Controllers
             try
             {
                 var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("Member API - GetMembers called by user: {UserId}", currentUserId);
                 var query = _context.FamilyMembers
                     .Include(m => m.Family)
                     .Where(m => m.Family.CreatedByUserId == currentUserId);
@@ -121,6 +123,7 @@ namespace MyFamilyTreeNet.Api.Controllers
                 }
 
                 var currentUserId = GetCurrentUserId();
+                _logger.LogInformation("Member API - CreateMember called by user: {UserId} for family: {FamilyId}", currentUserId, createMemberDto.FamilyId);
                 
                 // Verify family ownership
                 var family = await _context.Families

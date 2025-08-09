@@ -29,5 +29,9 @@ namespace MyFamilyTreeNet.Api.ViewModels
         [Required(ErrorMessage = "Фамилията е задължителна")]
         [MinLength(2, ErrorMessage = "Фамилията трябва да е поне 2 символа")]
         public required string LastName { get; set; }
+
+        [Required(ErrorMessage = "Рождената дата е задължителна")]
+        [DataType(DataType.Date)]
+        public DateTime DateOfBirth { get; set; }
     }
 }
