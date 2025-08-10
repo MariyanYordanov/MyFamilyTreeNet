@@ -1,0 +1,192 @@
+@{
+    ViewData["Title"] = "Възникна техническа грешка";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="error-page">
+                <!-- 500 Icon -->
+                <div class="error-icon mb-4">
+                    <i class="fas fa-tools fa-5x text-danger opacity-75"></i>
+                    <div class="position-relative">
+                        <h1 class="display-1 fw-bold text-muted">500</h1>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div class="mb-4">
+                    <h2 class="h3 text-danger mb-3">
+                        <i class="fas fa-cog me-2"></i>
+                        Възникна техническа грешка
+                    </h2>
+                    <p class="lead text-muted mb-4">
+                        Съжаляваме за неудобството. Нашият екип работи по отстраняването на проблема.
+                    </p>
+                </div>
+
+                <!-- Error Details (if in development) -->
+                @if (Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") == "Development")
+                {
+                    <div class="alert alert-warning text-start mb-4">
+                        <h6 class="alert-heading">
+                            <i class="fas fa-code me-2"></i>
+                            Информация за разработчици
+                        </h6>
+                        <p class="mb-2">
+                            <strong>Време:</strong> @DateTime.Now.ToString("dd.MM.yyyy HH:mm:ss")
+                        </p>
+                        <p class="mb-2">
+                            <strong>URL:</strong> <code>@Context.Request.Path</code>
+                        </p>
+                        <p class="mb-0">
+                            <strong>Метод:</strong> <span class="badge bg-primary">@Context.Request.Method</span>
+                        </p>
+                    </div>
+                }
+
+                <!-- Status Information -->
+                <div class="card border-danger mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-danger">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Какво се случи?
+                        </h5>
+                        <div class="row text-start">
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-primary">Възможни причини:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-circle text-danger me-2" style="font-size: 0.5rem;"></i>
+                                        Временна претоварка на сървъра
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-circle text-danger me-2" style="font-size: 0.5rem;"></i>
+                                        Проблем с базата данни
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-circle text-danger me-2" style="font-size: 0.5rem;"></i>
+                                        Техническа поддръжка
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <h6 class="text-success">Какво правим:</h6>
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Автоматично уведомяване на екипа
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Анализ на грешката
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Възстановяване на услугата
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="mb-4">
+                    <h6 class="text-primary mb-3">Опитайте следното:</h6>
+                    <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                        <button type="button" class="btn btn-primary btn-lg" onclick="location.reload()">
+                            <i class="fas fa-redo me-2"></i>
+                            Презаредете страницата
+                        </button>
+                        <a asp-controller="Home" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                            <i class="fas fa-home me-2"></i>
+                            Начална страница
+                        </a>
+                        <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                            <i class="fas fa-arrow-left me-2"></i>
+                            Върни се назад
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Status Indicator -->
+                <div class="row mb-4">
+                    <div class="col-md-12">
+                        <div class="card bg-light border-0">
+                            <div class="card-body">
+                                <h6 class="card-title">
+                                    <i class="fas fa-heartbeat me-2 text-success"></i>
+                                    Статус на системата
+                                </h6>
+                                <div class="row text-center">
+                                    <div class="col-md-3 mb-2">
+                                        <div class="service-status">
+                                            <i class="fas fa-circle text-success"></i>
+                                            <small class="d-block">Уеб сайт</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <div class="service-status">
+                                            <i class="fas fa-circle text-warning"></i>
+                                            <small class="d-block">API</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <div class="service-status">
+                                            <i class="fas fa-circle text-success"></i>
+                                            <small class="d-block">База данни</small>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-3 mb-2">
+                                        <div class="service-status">
+                                            <i class="fas fa-circle text-success"></i>
+                                            <small class="d-block">Файлове</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Support Information -->
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-clock fa-2x text-info mb-3"></i>
+                                <h6>Очаквано време за възстановяване</h6>
+                                <p class="text-muted">обикновено 5-15 минути</p>
+                                <small class="text-muted">Последна актуализация: @DateTime.Now.ToString("HH:mm")</small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-0 bg-light">
+                            <div class="card-body text-center">
+                                <i class="fas fa-envelope fa-2x text-success mb-3"></i>
+                                <h6>Нужна е допълнителна помощ?</h6>
+                                <p class="text-muted">Свържете се с нашия екип</p>
+                                <a href="mailto:support@worldfamily.com" class="btn btn-sm btn-outline-success">
+                                    support@worldfamily.com
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/error-pages.css" />
+}
+
+@section Scripts {
+    <script src="~/js/error-pages.js"></script>
+}

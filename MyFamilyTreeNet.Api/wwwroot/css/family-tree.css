@@ -1,0 +1,54 @@
+/* Family Tree Styles */
+.tree-container {
+    width: 100%;
+    height: 600px;
+    border: 1px solid #ddd;
+    position: relative;
+    background: radial-gradient(circle, #f8f9fa 1px, transparent 1px);
+    background-size: 20px 20px;
+    overflow: hidden;
+    cursor: grab;
+}
+
+.tree-container.grabbing {
+    cursor: grabbing;
+}
+
+.tree-svg {
+    width: 100%;
+    height: 100%;
+}
+
+/* Tree nodes and links */
+.node {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.node:hover {
+    transform: scale(1.1);
+    filter: brightness(1.1);
+}
+
+.node rect {
+    fill: #fff;
+    stroke: #007bff;
+    stroke-width: 2px;
+}
+
+.node text {
+    font-size: 12px;
+    text-anchor: middle;
+}
+
+.link {
+    fill: none;
+    stroke: #666;
+    stroke-width: 1.5px;
+    transition: stroke 0.3s ease;
+}
+
+.link:hover {
+    stroke: #007bff;
+    stroke-width: 2px;
+}

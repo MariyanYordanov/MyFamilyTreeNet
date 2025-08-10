@@ -89,26 +89,5 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Handle all toggle password buttons
-            document.querySelectorAll('.toggle-password').forEach(function(button) {
-                button.addEventListener('click', function() {
-                    const inputGroup = this.closest('.input-group');
-                    const passwordInput = inputGroup.querySelector('.password-field');
-                    const icon = this.querySelector('i');
-                    
-                    if (passwordInput.type === 'password') {
-                        passwordInput.type = 'text';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                    } else {
-                        passwordInput.type = 'password';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    }
-                });
-            });
-        });
-    </script>
+    <script src="~/js/form-helpers.js"></script>
 }

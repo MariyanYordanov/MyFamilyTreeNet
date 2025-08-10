@@ -169,49 +169,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Biography character counter
-            const biographyTextarea = document.querySelector('textarea[name="Biography"]');
-            const counter = document.getElementById('biography-counter');
-            
-            if (biographyTextarea && counter) {
-                function updateCounter() {
-                    const length = biographyTextarea.value.length;
-                    counter.textContent = length;
-                    
-                    if (length > 1000) {
-                        counter.classList.add('text-danger');
-                    } else {
-                        counter.classList.remove('text-danger');
-                    }
-                }
-                
-                biographyTextarea.addEventListener('input', updateCounter);
-                updateCounter(); // Initial count
-            }
-
-            // Date validation
-            const birthDateInput = document.querySelector('input[name="DateOfBirth"]');
-            const deathDateInput = document.querySelector('input[name="DateOfDeath"]');
-            
-            function validateDates() {
-                if (birthDateInput.value && deathDateInput.value) {
-                    const birthDate = new Date(birthDateInput.value);
-                    const deathDate = new Date(deathDateInput.value);
-                    
-                    if (birthDate > deathDate) {
-                        deathDateInput.setCustomValidity('Датата на смърт не може да бъде преди датата на раждане.');
-                    } else {
-                        deathDateInput.setCustomValidity('');
-                    }
-                }
-            }
-            
-            if (birthDateInput && deathDateInput) {
-                birthDateInput.addEventListener('change', validateDates);
-                deathDateInput.addEventListener('change', validateDates);
-            }
-        });
-    </script>
+    <script src="~/js/form-helpers.js"></script>
 }

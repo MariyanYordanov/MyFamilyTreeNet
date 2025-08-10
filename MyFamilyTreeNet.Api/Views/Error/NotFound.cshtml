@@ -1,0 +1,132 @@
+@{
+    ViewData["Title"] = "Страницата не е намерена";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 text-center">
+            <div class="error-page">
+                <div class="error-icon mb-4">
+                    <i class="fas fa-search fa-5x text-primary opacity-75"></i>
+                    <div class="position-relative">
+                        <h1 class="display-1 fw-bold text-muted">404</h1>
+                        <div class="position-absolute top-50 start-50 translate-middle">
+                            <i class="fas fa-question-circle fa-3x text-warning"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-4">
+                    <h2 class="h3 text-primary mb-3">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Страницата не е намерена
+                    </h2>
+                    <p class="lead text-muted mb-4">
+                        Съжаляваме, но страницата която търсите не съществува или е била премахната.
+                    </p>
+                </div>
+
+                <div class="card border-primary mb-4">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            Какво можете да направите?
+                        </h5>
+                        <div class="row text-start">
+                            <div class="col-md-6 mb-3">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Проверете URL адреса за грешки
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Използвайте навигационното меню
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Върнете се към началната страница
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Използвайте функцията за търсене
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Прегледайте каталога със семейства
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Свържете се с нас за помощ
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="d-flex flex-column flex-md-row gap-3 justify-content-center">
+                    <a asp-controller="Home" asp-action="Index" class="btn btn-primary btn-lg">
+                        <i class="fas fa-home me-2"></i>
+                        Начална страница
+                    </a>
+                    <a asp-controller="FamilyMvc" asp-action="Index" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-users me-2"></i>
+                        Каталог със семейства
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary btn-lg" onclick="history.back()">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Върни се назад
+                    </button>
+                </div>
+
+                <div class="mt-5">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-question-circle fa-2x text-info mb-3"></i>
+                                    <h6>Имате въпроси?</h6>
+                                    <p class="text-muted small">Посетете нашата страница с често задавани въпроси</p>
+                                    <a href="#" class="btn btn-sm btn-outline-info">FAQ</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-envelope fa-2x text-success mb-3"></i>
+                                    <h6>Нужна е помощ?</h6>
+                                    <p class="text-muted small">Свържете се с нашия екип за поддръжка</p>
+                                    <a href="#" class="btn btn-sm btn-outline-success">Контакт</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-bug fa-2x text-warning mb-3"></i>
+                                    <h6>Намерихте проблем?</h6>
+                                    <p class="text-muted small">Съобщете ни за технически грешки</p>
+                                    <a href="#" class="btn btn-sm btn-outline-warning">Съобщи</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <link rel="stylesheet" href="~/css/error-pages.css" />
+}
+
+@section Scripts {
+    <script src="~/js/error-pages.js"></script>
+}

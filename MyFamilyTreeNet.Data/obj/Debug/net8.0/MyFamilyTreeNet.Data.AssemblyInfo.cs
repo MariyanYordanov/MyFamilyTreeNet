@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("MyFamilyTreeNet.Data")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ad0af6adb5de92d4e62a30345983cb9527e3d0f5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3ba625c1a64ba721831afe6caa6ae6696dcad3ed")]
 [assembly: System.Reflection.AssemblyProductAttribute("MyFamilyTreeNet.Data")]
 [assembly: System.Reflection.AssemblyTitleAttribute("MyFamilyTreeNet.Data")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
