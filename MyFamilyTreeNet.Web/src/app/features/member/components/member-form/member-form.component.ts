@@ -4,9 +4,9 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MemberService } from '../../services/member.service';
-import { FamilyService } from '../../../../core/services/family.service';
+import { FamilyService } from '../../../family/services/family.service';
 import { Member, CreateMemberRequest, UpdateMemberRequest } from '../../models/member.model';
-import { Family } from '../../../../core/models/family.interface';
+import { Family } from '../../../family/models/family.model';
 
 @Component({
   selector: 'app-member-form',
@@ -68,11 +68,11 @@ export class MemberFormComponent implements OnInit, OnDestroy {
     this.familyService.getFamilies()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (families) => {
-          this.families.set(families);
+        next: (response) => {
+          this.families.set(response.families);
           
-          if (families.length === 1) {
-            this.memberForm.patchValue({ familyId: families[0].id });
+          if (response.families.length === 1) {
+            this.memberForm.patchValue({ familyId: response.families[0].id });
           }
         },
         error: (error) => {

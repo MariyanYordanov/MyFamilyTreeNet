@@ -4,9 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Subject, takeUntil, debounceTime, distinctUntilChanged, switchMap, startWith, combineLatest, map } from 'rxjs';
 import { MemberService } from '../../services/member.service';
-import { FamilyService } from '../../../../core/services/family.service';
+import { FamilyService } from '../../../family/services/family.service';
 import { Member, MemberSearchParams } from '../../models/member.model';
-import { Family } from '../../../../core/models/family.interface';
+import { Family } from '../../../family/models/family.model';
 
 @Component({
   selector: 'app-member-list',
@@ -68,7 +68,7 @@ export class MemberListComponent implements OnInit, OnDestroy {
     this.familyService.getFamilies()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (families) => this.families.set(families),
+        next: (response) => this.families.set(response.families),
         error: (error) => {
           console.error('Error loading families:', error);
           this.error.set('Грешка при зареждане на семействата');

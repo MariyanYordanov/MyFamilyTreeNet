@@ -4,8 +4,8 @@ import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { Subject, Observable, takeUntil, debounceTime, startWith, catchError, of, combineLatest, map, BehaviorSubject } from 'rxjs';
 
-import { FamilyService } from '../../../../core/services/family.service';
-import { Family } from '../../../../core/models/family.interface';
+import { FamilyService } from '../../services/family.service';
+import { Family } from '../../models/family.model';
 
 @Component({
   selector: 'app-family-catalog',
@@ -48,9 +48,9 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
     this.familyService.getFamilies()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (families) => {
-          console.log('Loaded families:', families);
-          this.families = families || [];
+        next: (response) => {
+          console.log('Loaded families:', response);
+          this.families = response.families || [];
           this.familiesSubject.next(this.families);
           this.isLoading = false;
         },
