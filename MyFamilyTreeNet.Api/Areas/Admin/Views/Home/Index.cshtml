@@ -1,0 +1,243 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var stats = ViewBag.Stats as AdminDashboardDto;
+    var recentFamilies = ViewBag.RecentFamilies as List<FamilyDto>;
+    var recentUsers = ViewBag.RecentUsers as List<object>;
+}
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Общо потребители</h6>
+                    <h3 class="text-primary">@(stats?.TotalUsers ?? 0)</h3>
+                    <small class="text-success">
+                        <i class="fas fa-arrow-up me-1"></i>
+                        +@(stats?.NewUsersThisMonth ?? 0) този месец
+                    </small>
+                </div>
+                <div class="text-primary">
+                    <i class="fas fa-users fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Общо семейства</h6>
+                    <h3 class="text-info">@(stats?.TotalFamilies ?? 0)</h3>
+                    <small class="text-info">
+                        <i class="fas fa-plus me-1"></i>
+                        +@(stats?.NewFamiliesToday ?? 0) днес
+                    </small>
+                </div>
+                <div class="text-info">
+                    <i class="fas fa-sitemap fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Общо членове</h6>
+                    <h3 class="text-success">@(stats?.TotalMembers ?? 0)</h3>
+                    <small class="text-muted">в семействата</small>
+                </div>
+                <div class="text-success">
+                    <i class="fas fa-user-friends fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h6 class="text-muted mb-2">Активни потребители</h6>
+                    <h3 class="text-warning">@(stats?.ActiveUsers ?? 0)</h3>
+                    <small class="text-muted">последната седмица</small>
+                </div>
+                <div class="text-warning">
+                    <i class="fas fa-chart-line fa-2x"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Secondary Stats -->
+<div class="row mb-4">
+    <div class="col-md-6 mb-3">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Общо снимки</h6>
+                    <h4 class="text-secondary">@(stats?.TotalPhotos ?? 0)</h4>
+                </div>
+                <i class="fas fa-camera text-secondary fa-2x"></i>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-3">
+        <div class="stat-card p-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-muted mb-1">Общо истории</h6>
+                    <h4 class="text-secondary">@(stats?.TotalStories ?? 0)</h4>
+                </div>
+                <i class="fas fa-book text-secondary fa-2x"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Activity -->
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-clock me-2"></i>
+                    Нови семейства
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (recentFamilies?.Any() == true)
+                {
+                    @foreach (var family in recentFamilies)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div>
+                                <h6 class="mb-1">@family.Name</h6>
+                                <small class="text-muted">
+                                    <i class="fas fa-calendar me-1"></i>
+                                    @family.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">@family.MemberCount членове</small>
+                                <a asp-area="Admin" asp-controller="Families" asp-action="Details" asp-route-id="@family.Id" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="text-center">
+                        <a asp-area="Admin" asp-controller="Families" asp-action="Index" class="btn btn-primary btn-sm">
+                            <i class="fas fa-list me-2"></i>
+                            Всички семейства
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>Няма нови семейства</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="stat-card">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-user-plus me-2"></i>
+                    Нови потребители
+                </h6>
+            </div>
+            <div class="card-body">
+                @if (recentUsers?.Any() == true)
+                {
+                    @foreach (dynamic user in recentUsers)
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3 pb-2 border-bottom">
+                            <div class="d-flex align-items-center">
+                                <div class="rounded-circle bg-secondary text-white text-center me-3" style="width: 40px; height: 40px; line-height: 40px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">@($"{user.FirstName} {user.MiddleName} {user.LastName}")</h6>
+                                    <small class="text-muted">@user.Email</small>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <small class="text-muted d-block">@user.CreatedAt.ToString("dd.MM")</small>
+                                <a asp-area="Admin" asp-controller="Users" asp-action="Details" asp-route-id="@user.Id" 
+                                   class="btn btn-sm btn-outline-info">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="text-center">
+                        <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-info btn-sm">
+                            <i class="fas fa-users me-2"></i>
+                            Всички потребители
+                        </a>
+                    </div>
+                }
+                else
+                {
+                    <div class="text-center text-muted py-4">
+                        <i class="fas fa-info-circle fa-2x mb-2"></i>
+                        <p>Няма нови потребители</p>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Actions -->
+<div class="row">
+    <div class="col-12">
+        <div class="stat-card p-4">
+            <h6 class="mb-3">
+                <i class="fas fa-lightning-bolt me-2"></i>
+                Бързи действия
+            </h6>
+            <div class="row">
+                <div class="col-md-3 mb-2">
+                    <a asp-area="Admin" asp-controller="Users" asp-action="Index" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-users me-2"></i>
+                        Управление на потребители
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-area="Admin" asp-controller="Families" asp-action="Index" class="btn btn-outline-info w-100">
+                        <i class="fas fa-sitemap me-2"></i>
+                        Управление на семейства
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-area="Admin" asp-controller="Reports" asp-action="Index" class="btn btn-outline-success w-100">
+                        <i class="fas fa-chart-bar me-2"></i>
+                        Отчети и статистики
+                    </a>
+                </div>
+                <div class="col-md-3 mb-2">
+                    <a asp-area="Admin" asp-controller="Settings" asp-action="Index" class="btn btn-outline-warning w-100">
+                        <i class="fas fa-cog me-2"></i>
+                        Системни настройки
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

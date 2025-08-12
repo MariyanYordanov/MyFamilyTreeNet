@@ -11,6 +11,7 @@
             </div>
             <div class="card-body">
                 <form asp-action="Login" method="post">
+                    @Html.AntiForgeryToken()
                     <div asp-validation-summary="All" class="text-danger"></div>
                     
                     <div class="mb-3">
@@ -22,9 +23,9 @@
                     <div class="mb-3">
                         <label asp-for="Password" class="form-label">Парола</label>
                         <div class="input-group">
-                            <input asp-for="Password" type="password" class="form-control" placeholder="Admin123!" id="password-input" />
-                            <button class="btn btn-outline-secondary" type="button" id="toggle-password">
-                                <i class="fas fa-eye" id="toggle-icon"></i>
+                            <input asp-for="Password" type="password" class="form-control password-field" placeholder="Admin123!" />
+                            <button class="btn btn-outline-secondary toggle-password" type="button">
+                                <i class="fas fa-eye"></i>
                             </button>
                         </div>
                         <span asp-validation-for="Password" class="text-danger"></span>

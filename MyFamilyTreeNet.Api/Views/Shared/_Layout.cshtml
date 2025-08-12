@@ -14,6 +14,8 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     
+    @await RenderSectionAsync("Styles", required: false)
+    
     <meta name="description" content="MyFamilyTreeNet - Създайте и споделете вашата семейна история">
     <link rel="icon" type="image/x-icon" href="~/favicon.ico">
 </head>
