@@ -1,0 +1,109 @@
+@model MyFamilyTreeNet.Api.DTOs.CreateFamilyDto
+
+@{
+    ViewData["Title"] = "Създаване на ново семейство";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h1 class="h3 mb-0">
+                        <i class="fas fa-plus-circle me-2"></i>
+                        Създаване на ново семейство
+                    </h1>
+                </div>
+                <div class="card-body">
+                    <form asp-controller="FamilyMvc" asp-action="Create" method="post" id="familyCreateForm" novalidate>
+                        @Html.AntiForgeryToken()
+                        
+                        <div class="mb-4">
+                            <label asp-for="Name" class="form-label">
+                                <i class="fas fa-users me-2"></i>
+                                Име на семейството *
+                            </label>
+                            <input asp-for="Name" class="form-control" id="Name" placeholder="Въведете името на семейството" required />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Например: "Семейство Петрови" или "Рода Георгиеви"
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">
+                                <i class="fas fa-align-left me-2"></i>
+                                Описание
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="5" 
+                                     placeholder="Разкажете за историята, традициите или особеностите на вашето семейство..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="form-text">
+                                <i class="fas fa-info-circle me-1"></i>
+                                Можете да добавите информация за произхода, значими събития или традиции
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info" role="alert">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-lightbulb me-2"></i>
+                                Полезни съвети
+                            </h6>
+                            <ul class="mb-0">
+                                <li>След създаването ще можете да добавяте членове на семейството</li>
+                                <li>Можете да качвате снимки и споделяте семейни истории</li>
+                                <li>Други потребители ще могат да разглеждат вашето родословно дърво</li>
+                            </ul>
+                        </div>
+
+                        <div class="d-flex justify-content-between">
+                            <a asp-controller="FamilyMvc" asp-action="Index" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Отказ
+                            </a>
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <i class="fas fa-save me-2"></i>
+                                Създай семейство
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Getting Started Guide -->
+            <div class="card mt-4 shadow-sm">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">
+                        <i class="fas fa-question-circle me-2"></i>
+                        Първи стъпки
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+                            <h6>1. Добавете членове</h6>
+                            <p class="text-muted small">Започнете с добавяне на основните членове на семейството</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-camera fa-3x text-info mb-3"></i>
+                            <h6>2. Качете снимки</h6>
+                            <p class="text-muted small">Споделете спомени чрез семейни снимки</p>
+                        </div>
+                        <div class="col-md-4 text-center mb-3">
+                            <i class="fas fa-sitemap fa-3x text-success mb-3"></i>
+                            <h6>3. Изградете дървото</h6>
+                            <p class="text-muted small">Свържете членовете в красиво родословно дърво</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/family-create.js"></script>
+}

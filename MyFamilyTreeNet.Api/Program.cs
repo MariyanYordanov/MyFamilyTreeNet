@@ -8,7 +8,7 @@ using MyFamilyTreeNet.Data.Models;
 using MyFamilyTreeNet.Api.Contracts;
 using MyFamilyTreeNet.Api.Services;
 using MyFamilyTreeNet.Api.Middleware;
-// using MyFamilyTreeNet.Api.Security;
+using MyFamilyTreeNet.Api.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -156,7 +156,7 @@ builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new Microsoft.OpenApi.Models.OpenApiInfo
     {
-        Title = "World Family API",
+        Title = "MyFamilyTreeNet API",
         Version = "v1",
         Description = "Family Social Network & Genealogy Tree API"
     });
@@ -193,14 +193,13 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 // Register application services
 builder.Services.AddScoped<IFamilyService, FamilyService>();
 builder.Services.AddScoped<IMemberService, MemberService>();
-// TODO: Uncomment when services are implemented
-// builder.Services.AddScoped<IRelationshipService, RelationshipService>();
-// builder.Services.AddScoped<IPhotoService, PhotoService>();
-// builder.Services.AddScoped<IStoryService, StoryService>();
+
+builder.Services.AddScoped<IRelationshipService, RelationshipService>();
+builder.Services.AddScoped<IPhotoService, PhotoService>();
+builder.Services.AddScoped<IStoryService, StoryService>();
 
 // Register security services
-// TODO: Uncomment when security service is implemented
-// builder.Services.AddScoped<ISecurityService, MyFamilyTreeNet.Api.Security.SecurityService>();
+builder.Services.AddScoped<ISecurityService, SecurityService>();
 
 var app = builder.Build();
 
@@ -237,14 +236,14 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI(options =>
     {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "World Family API V1");
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "MyFamilyTreeNet API V1");
         options.RoutePrefix = "swagger";
     });
 }
 
 app.UseHttpsRedirection();
 
-// app.UseMiddleware<GlobalExceptionHandlingMiddleware>(); // Temporarily disabled
+app.UseMiddleware<GlobalExceptionHandlingMiddleware>();
 app.UseMiddleware<SecurityHeadersMiddleware>();
 
 app.UseStaticFiles();

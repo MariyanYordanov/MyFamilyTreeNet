@@ -1,6 +1,6 @@
 using MyFamilyTreeNet.Data.Models;
 
-namespace MyFamilyTreeNet.Api.Services
+namespace MyFamilyTreeNet.Api.Contracts
 {
     public interface IRelationshipService
     {

@@ -28,8 +28,13 @@ namespace MyFamilyTreeNet.Api.DTOs
     public class FamilyDto
     {
         public int Id { get; set; }
+        
+        [ValidFamilyName]
         public required string Name { get; set; }
+        
+        [MaxLength(1000)]
         public string? Description { get; set; }
+        
         public DateTime CreatedAt { get; set; }
         public int MemberCount { get; set; }
         public int PhotoCount { get; set; }

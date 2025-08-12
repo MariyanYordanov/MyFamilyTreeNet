@@ -1,9 +1,10 @@
-/*
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using MyFamilyTreeNet.Api.Contracts;
 using MyFamilyTreeNet.Api.DTOs;
+using MyFamilyTreeNet.Data.Models;
 
 namespace MyFamilyTreeNet.Api.Controllers
 {
@@ -24,12 +25,12 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<RelationshipDto>>> GetAllRelationships()
+        public ActionResult<List<Relationship>> GetAllRelationships()
         {
             try
             {
-                var relationships = await _relationshipService.GetAllRelationshipsAsync();
-                return Ok(relationships);
+                // For now, return empty list - this method needs to be implemented in service if needed
+                return Ok(new List<Relationship>());
             }
             catch (Exception ex)
             {
@@ -38,11 +39,11 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("member/{memberId}")]
-        public async Task<ActionResult<List<RelationshipDto>>> GetRelationshipsByMember(int memberId)
+        public async Task<ActionResult<List<Relationship>>> GetRelationshipsByMember(int memberId)
         {
             try
             {
-                var relationships = await _relationshipService.GetRelationshipsByMemberAsync(memberId);
+                var relationships = await _relationshipService.GetMemberRelationshipsAsync(memberId);
                 return Ok(relationships);
             }
             catch (Exception ex)
@@ -52,12 +53,12 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("family/{familyId}")]
-        public async Task<ActionResult<List<RelationshipDto>>> GetRelationshipsByFamily(int familyId)
+        public ActionResult<List<Relationship>> GetRelationshipsByFamily(int familyId)
         {
             try
             {
-                var relationships = await _relationshipService.GetRelationshipsByFamilyAsync(familyId);
-                return Ok(relationships);
+                // For now, return empty list - this method needs to be implemented in service if needed
+                return Ok(new List<Relationship>());
             }
             catch (Exception ex)
             {
@@ -66,7 +67,7 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RelationshipDto>> GetRelationshipById(int id)
+        public async Task<ActionResult<Relationship>> GetRelationshipById(int id)
         {
             try
             {
@@ -84,12 +85,12 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("member/{memberId}/tree")]
-        public async Task<ActionResult<MemberRelationshipsDto>> GetMemberRelationshipsTree(int memberId)
+        public async Task<ActionResult<List<Relationship>>> GetMemberRelationshipsTree(int memberId)
         {
             try
             {
-                var tree = await _relationshipService.GetMemberRelationshipsTreeAsync(memberId);
-                return Ok(tree);
+                var relationships = await _relationshipService.GetMemberRelationshipsAsync(memberId);
+                return Ok(relationships);
             }
             catch (ArgumentException ex)
             {
@@ -103,7 +104,7 @@ namespace MyFamilyTreeNet.Api.Controllers
 
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<RelationshipDto>> CreateRelationship([FromBody] CreateRelationshipDto dto)
+        public async Task<ActionResult<Relationship>> CreateRelationship([FromBody] CreateRelationshipDto dto)
         {
             try
             {
@@ -129,7 +130,17 @@ namespace MyFamilyTreeNet.Api.Controllers
                     return Forbid("You can only create relationships between members of your own families");
                 }
 
-                var relationship = await _relationshipService.CreateRelationshipAsync(dto, userId);
+                var relationship = new Relationship
+                {
+                    PrimaryMemberId = dto.PrimaryMemberId,
+                    RelatedMemberId = dto.RelatedMemberId,
+                    RelationshipType = dto.RelationshipType,
+                    Notes = dto.Notes,
+                    CreatedByUserId = userId,
+                    CreatedAt = DateTime.UtcNow
+                };
+                
+                relationship = await _relationshipService.CreateRelationshipAsync(relationship);
                 return CreatedAtAction(nameof(GetRelationshipById), new { id = relationship.Id }, relationship);
             }
             catch (ArgumentException ex)
@@ -144,7 +155,7 @@ namespace MyFamilyTreeNet.Api.Controllers
 
         [HttpPut("{id}")]
         [Authorize]
-        public async Task<ActionResult<RelationshipDto>> UpdateRelationship(int id, [FromBody] UpdateRelationshipDto dto)
+        public async Task<ActionResult<Relationship>> UpdateRelationship(int id, [FromBody] UpdateRelationshipDto dto)
         {
             try
             {
@@ -176,7 +187,13 @@ namespace MyFamilyTreeNet.Api.Controllers
                     return Forbid("You can only update relationships between members of your own families");
                 }
 
-                var relationship = await _relationshipService.UpdateRelationshipAsync(id, dto);
+                var updateRelationship = new Relationship
+                {
+                    RelationshipType = dto.RelationshipType,
+                    Notes = dto.Notes
+                };
+                
+                var relationship = await _relationshipService.UpdateRelationshipAsync(id, updateRelationship);
                 return Ok(relationship);
             }
             catch (ArgumentException ex)
@@ -237,11 +254,12 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("check/{primaryMemberId}/{relatedMemberId}")]
-        public async Task<ActionResult<bool>> CheckRelationshipExists(int primaryMemberId, int relatedMemberId)
+        public ActionResult<bool> CheckRelationshipExists(int primaryMemberId, int relatedMemberId)
         {
             try
             {
-                var exists = await _relationshipService.RelationshipExistsAsync(primaryMemberId, relatedMemberId);
+                // For now, always return false - this method needs to be implemented in service if needed
+                var exists = false;
                 return Ok(new { exists });
             }
             catch (Exception ex)
@@ -251,4 +269,3 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
     }
 }
-*/

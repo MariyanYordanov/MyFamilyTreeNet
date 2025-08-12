@@ -1,0 +1,262 @@
+@model MyFamilyTreeNet.Api.DTOs.FamilyDto
+
+@{
+    ViewData["Title"] = $"Родословно дърво - {Model.Name}";
+}
+
+<div class="container-fluid mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h1 class="h4 mb-0">
+                            <i class="fas fa-sitemap me-2"></i>
+                            Родословно дърво - @Model.Name
+                        </h1>
+                        <div class="btn-group" role="group">
+                            <button type="button" class="btn btn-outline-light btn-sm" id="zoomIn">
+                                <i class="fas fa-search-plus"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="zoomOut">
+                                <i class="fas fa-search-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-outline-light btn-sm" id="zoomReset">
+                                <i class="fas fa-expand-arrows-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <!-- Family Tree Container -->
+                    <div id="familyTree" class="family-tree-container">
+                        <div id="familyTreeContainer">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">Зарежда се...</span>
+                                </div>
+                                <p class="mt-3 text-muted">Зареждане на родословното дърво...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Control Panel -->
+            <div class="card mt-3 shadow-sm">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h6 class="mb-2">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Информация за семейството
+                            </h6>
+                            <p class="text-muted mb-0">@(Model.Description ?? "Няма описание")</p>
+                        </div>
+                        <div class="col-md-3 text-center">
+                            <div class="bg-light rounded p-2">
+                                <i class="fas fa-users text-primary"></i>
+                                <strong>@Model.MemberCount</strong>
+                                <small class="text-muted d-block">Членове</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <a asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Обратно към детайли
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Legend -->
+            <div class="card mt-3 shadow-sm">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-map me-2"></i>
+                        Легенда
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-md-3 mb-2">
+                            <div class="legend-item">
+                                <i class="fas fa-male text-primary fa-2x"></i>
+                                <small class="d-block">Мъж</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="legend-item">
+                                <i class="fas fa-female text-danger fa-2x"></i>
+                                <small class="d-block">Жена</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="legend-item">
+                                <i class="fas fa-heart text-warning fa-2x"></i>
+                                <small class="d-block">Брак</small>
+                            </div>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <div class="legend-item">
+                                <i class="fas fa-baby text-info fa-2x"></i>
+                                <small class="d-block">Дете</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Member Details Modal -->
+<div class="modal fade" id="memberDetailsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Детайли за член</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Member details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Затвори</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        .family-tree-container {
+            min-height: 600px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 1rem;
+            padding: 2rem;
+            border: 1px solid #dee2e6;
+            overflow: auto;
+            position: relative;
+        }
+
+        .tree-node {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 1rem;
+            padding: 1rem;
+            width: 180px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin: 0.5rem;
+        }
+
+        .tree-node:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+        }
+
+        .tree-node.male {
+            border-color: #007bff;
+            background: linear-gradient(135deg, #ffffff 0%, #e3f2fd 100%);
+        }
+
+        .tree-node.female {
+            border-color: #e91e63;
+            background: linear-gradient(135deg, #ffffff 0%, #fce4ec 100%);
+        }
+
+        .member-photo {
+            width: 70px;
+            height: 70px;
+            margin: 0 auto 0.75rem;
+            position: relative;
+        }
+
+        .member-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .member-avatar {
+            width: 70px;
+            height: 70px;
+            border-radius: 12px;
+            background: linear-gradient(45deg, #6c757d, #495057);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.8rem;
+            border: 2px solid rgba(255,255,255,0.8);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+        }
+
+        .tree-node.male .member-avatar {
+            background: linear-gradient(45deg, #007bff, #0056b3);
+        }
+
+        .tree-node.female .member-avatar {
+            background: linear-gradient(45deg, #e91e63, #ad1457);
+        }
+
+        .member-info {
+            text-align: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .member-name {
+            font-weight: 600;
+            font-size: 0.9rem;
+            color: #333;
+            line-height: 1.2;
+        }
+
+        .member-details {
+            margin-top: 0.25rem;
+        }
+
+        .member-actions {
+            text-align: center;
+        }
+
+        .tree-connection {
+            position: absolute;
+            border: 2px solid #6c757d;
+            z-index: 1;
+        }
+
+        .legend-item {
+            padding: 10px;
+            border-radius: 5px;
+            background: #f8f9fa;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1000;
+        }
+    </style>
+}
+
+@section Scripts {
+    <script src="~/js/family-tree-viewer.js"></script>
+    <script>
+        // Initialize the family tree viewer with data from ViewBag
+        document.addEventListener('DOMContentLoaded', function() {
+            const members = @Html.Raw(Json.Serialize(ViewBag.Members ?? new List<object>()));
+            const relationships = @Html.Raw(Json.Serialize(ViewBag.Relationships ?? new List<object>()));
+            
+            // Initialize the tree viewer with the data
+            initializeFamilyTreeViewer(members, relationships);
+        });
+    </script>
+}
