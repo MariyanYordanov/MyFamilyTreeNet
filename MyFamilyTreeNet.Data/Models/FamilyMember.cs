@@ -11,30 +11,30 @@ namespace MyFamilyTreeNet.Data.Models
         public int FamilyId { get; set; }
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string MiddleName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string LastName { get; set; } = string.Empty;
 
         public DateTime? DateOfBirth { get; set; }
 
         public DateTime? DateOfDeath { get; set; }
 
-        [MaxLength(PlacesLenght)]
+        [MaxLength(PlacesLength)]
         public string? PlaceOfBirth { get; set; }
 
-        [MaxLength(PlacesLenght)]
+        [MaxLength(PlacesLength)]
         public string? PlaceOfDeath { get; set; }
 
         public Gender Gender { get; set; } = Gender.Unknown;
 
-        [MaxLength(BioLenght)]
+        [MaxLength(BioLength)]
         public string? Biography { get; set; }
 
         public string? ProfileImageUrl { get; set; }

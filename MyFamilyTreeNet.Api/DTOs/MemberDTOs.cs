@@ -1,22 +1,23 @@
 using System.ComponentModel.DataAnnotations;
 using MyFamilyTreeNet.Api.Validation;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Api.DTOs
 {
     public class CreateMemberDto
     {
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
         
@@ -29,36 +30,36 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidGender]
         public string? Gender { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLength)]
         [NoHtml]
         public string? Biography { get; set; }
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         [NoHtml]
         public string? PlaceOfBirth { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         [NoHtml]
         public string? PlaceOfDeath { get; set; }
         
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(MinPositiveId, MaxIntValue)]
         public int FamilyId { get; set; }
     }
 
     public class UpdateMemberDto
     {
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
         
@@ -71,14 +72,14 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidGender]
         public string? Gender { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLength)]
         [NoHtml]
         public string? Biography { get; set; }
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         [NoHtml]
         public string? PlaceOfBirth { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         [NoHtml]
         public string? PlaceOfDeath { get; set; }
     }
@@ -87,15 +88,15 @@ namespace MyFamilyTreeNet.Api.DTOs
     {
         public int Id { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
         
@@ -105,16 +106,16 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidGender]
         public string? Gender { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLength)]
         public string? Biography { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         public string? PlaceOfBirth { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(PlaceLength)]
         public string? PlaceOfDeath { get; set; }
         
-        [MaxLength(500)]
+        [MaxLength(NotesLength)]
         [Url]
         public string? ProfileImageUrl { get; set; }
         
@@ -136,7 +137,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [Required]
         public MyFamilyTreeNet.Data.Models.RelationshipType RelationshipType { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(NotesLength)]
         [NoHtml]
         public string? Notes { get; set; }
     }
@@ -148,7 +149,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         public int RelatedMemberId { get; set; }
         public MyFamilyTreeNet.Data.Models.RelationshipType RelationshipType { get; set; }
         
-        [MaxLength(500)]
+        [MaxLength(NotesLength)]
         public string? Notes { get; set; }
         
         public DateTime CreatedAt { get; set; }
@@ -160,7 +161,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidPersonName]
         public string? RelatedMemberName { get; set; }
         
-        [MaxLength(100)]
+        [MaxLength(RelationshipTypeNameLength)]
         public string? RelationshipTypeName { get; set; }
     }
 
@@ -169,7 +170,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [Required]
         public MyFamilyTreeNet.Data.Models.RelationshipType RelationshipType { get; set; }
 
-        [MaxLength(500)]
+        [MaxLength(NotesLength)]
         [NoHtml]
         public string? Notes { get; set; }
     }

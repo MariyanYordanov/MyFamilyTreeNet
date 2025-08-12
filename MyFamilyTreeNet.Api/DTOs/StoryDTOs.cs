@@ -1,33 +1,34 @@
 using System.ComponentModel.DataAnnotations;
 using MyFamilyTreeNet.Api.Validation;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Api.DTOs
 {
     public class CreateStoryDto
     {
         [Required]
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public required string Title { get; set; }
         
         [Required]
-        [MaxLength(10000)]
+        [MaxLength(StoryContentLength)]
         public required string Content { get; set; }
         
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(MinPositiveId, MaxIntValue)]
         public int FamilyId { get; set; }
     }
 
     public class UpdateStoryDto
     {
         [Required]
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public required string Title { get; set; }
         
         [Required]
-        [MaxLength(10000)]
+        [MaxLength(StoryContentLength)]
         public required string Content { get; set; }
     }
 
@@ -35,10 +36,10 @@ namespace MyFamilyTreeNet.Api.DTOs
     {
         public int Id { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         public required string Title { get; set; }
         
-        [MaxLength(10000)]
+        [MaxLength(StoryContentLength)]
         public required string Content { get; set; }
         
         public DateTime? DateOccurred { get; set; }

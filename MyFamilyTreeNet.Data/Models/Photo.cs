@@ -11,10 +11,10 @@ namespace MyFamilyTreeNet.Data.Models
         public int FamilyId { get; set; }
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(TitleLenght)]
+        [MaxLength(TitleLength)]
         public string Title { get; set; } = string.Empty;
 
-        [MaxLength(DescriptionLenght)]
+        [MaxLength(DescriptionLength)]
         public string? Description { get; set; }
 
         [Required]

@@ -19,7 +19,8 @@ public static class SeedData
         }
 
         const string adminEmail = "admin@myfamilytreenet.com";
-        if (await userManager.FindByEmailAsync(adminEmail) == null)
+        var existingAdmin = await userManager.FindByEmailAsync(adminEmail);
+        if (existingAdmin == null)
         {
             var adminUser = new User
             {
@@ -29,13 +30,49 @@ public static class SeedData
                 FirstName = "Admin",
                 MiddleName = "System",
                 LastName = "User",
-                DateOfBirth = new DateTime(1990, 1, 1)
+                DateOfBirth = new DateTime(1990, 1, 1),
+                SecurityStamp = Guid.NewGuid().ToString(),
+                ConcurrencyStamp = Guid.NewGuid().ToString()
             };
 
             var result = await userManager.CreateAsync(adminUser, "Admin123!");
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
+                Console.WriteLine("Admin user created successfully!");
+            }
+            else
+            {
+                foreach (var error in result.Errors)
+                {
+                    Console.WriteLine($"Error creating admin: {error.Description}");
+                }
+            }
+        }
+        else
+        {
+            Console.WriteLine("Admin user already exists. Checking password...");
+            var passwordCheck = await userManager.CheckPasswordAsync(existingAdmin, "Admin123!");
+            if (!passwordCheck)
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
+                var resetResult = await userManager.ResetPasswordAsync(existingAdmin, token, "Admin123!");
+                if (resetResult.Succeeded)
+                {
+                    Console.WriteLine("Admin password reset successful!");
+                }
+                else
+                {
+                    Console.WriteLine("Admin password reset failed!");
+                    foreach (var error in resetResult.Errors)
+                    {
+                        Console.WriteLine($"Reset error: {error.Description}");
+                    }
+                }
+            }
+            else
+            {
+                Console.WriteLine("Admin password is correct!");
             }
         }
 
@@ -65,8 +102,8 @@ public static class SeedData
                     DateOfBirth = dateOfBirth
                 };
 
-                var result = await userManager.CreateAsync(user, "Demo123!");
-                if (result.Succeeded)
+                var createResult = await userManager.CreateAsync(user, "Demo123!");
+                if (createResult.Succeeded)
                 {
                     await userManager.AddToRoleAsync(user, "User");
                     demoUsers.Add(user);
@@ -84,8 +121,8 @@ public static class SeedData
 
         if (!await context.Families.AnyAsync())
         {
-            var adminUser = await userManager.FindByEmailAsync(adminEmail);
-            var adminId = adminUser?.Id ?? "";
+            var foundAdminUser = await userManager.FindByEmailAsync(adminEmail);
+            var adminId = foundAdminUser?.Id ?? "";
             
             var doeFamily = new Family
             {

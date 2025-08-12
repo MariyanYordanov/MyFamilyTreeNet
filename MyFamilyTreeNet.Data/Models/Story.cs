@@ -11,7 +11,7 @@ namespace MyFamilyTreeNet.Data.Models
         public int FamilyId { get; set; }
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(TitleLenght)]
+        [MaxLength(TitleLength)]
         public string Title { get; set; } = string.Empty;
 
         [Required]

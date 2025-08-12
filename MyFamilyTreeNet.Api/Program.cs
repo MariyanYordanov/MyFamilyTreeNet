@@ -9,16 +9,14 @@ using MyFamilyTreeNet.Api.Contracts;
 using MyFamilyTreeNet.Api.Services;
 using MyFamilyTreeNet.Api.Middleware;
 using MyFamilyTreeNet.Api.Security;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();
-builder.Services.AddControllersWithViews(options =>
-{
-    // Global anti-forgery filter for MVC controllers
-    options.Filters.Add(new Microsoft.AspNetCore.Mvc.AutoValidateAntiforgeryTokenAttribute());
-});
+builder.Services.AddControllersWithViews();
 
 // Configure Anti-Forgery tokens
 builder.Services.AddAntiforgery(options =>
@@ -26,8 +24,8 @@ builder.Services.AddAntiforgery(options =>
     options.HeaderName = "X-CSRF-TOKEN";
     options.Cookie.Name = "__RequestVerificationToken";
     options.Cookie.HttpOnly = true;
-    options.Cookie.SecurePolicy = Microsoft.AspNetCore.Http.CookieSecurePolicy.SameAsRequest;
-    options.Cookie.SameSite = Microsoft.AspNetCore.Http.SameSiteMode.Strict;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
+    options.Cookie.SameSite = SameSiteMode.Strict;
 });
 
 // Configure Entity Framework with SQLite (Development) or PostgreSQL (Production)
@@ -60,7 +58,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 });
 
-// Configure Identity
+// Configure Identity с пълна ревизия
 builder.Services.AddIdentity<User, IdentityRole>(options =>
 {
     // Password settings
@@ -69,10 +67,22 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequireUppercase = true;
     options.Password.RequiredLength = 8;
+    options.Password.RequiredUniqueChars = 1;
 
     // User settings
+    options.User.AllowedUserNameCharacters = 
+        "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
     options.User.RequireUniqueEmail = true;
+    
+    // Sign in settings
     options.SignIn.RequireConfirmedEmail = false;
+    options.SignIn.RequireConfirmedPhoneNumber = false;
+    options.SignIn.RequireConfirmedAccount = false;
+    
+    // Lockout settings
+    options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+    options.Lockout.MaxFailedAccessAttempts = 5;
+    options.Lockout.AllowedForNewUsers = true;
 })
 .AddEntityFrameworkStores<AppDbContext>()
 .AddDefaultTokenProviders();
@@ -81,12 +91,8 @@ builder.Services.AddIdentity<User, IdentityRole>(options =>
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 var secretKey = jwtSettings["SecretKey"];
 
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = "JWT_OR_COOKIE";
-    options.DefaultChallengeScheme = "JWT_OR_COOKIE";
-})
-.AddJwtBearer(JwtBearerDefaults.AuthenticationScheme, options =>
+builder.Services.AddAuthentication()
+.AddJwtBearer("Bearer", options =>
 {
     options.TokenValidationParameters = new TokenValidationParameters
     {
@@ -98,29 +104,19 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey ?? "ThisIsAVerySecretKeyForWorldFamilyAppMinimum32Characters"))
     };
-})
-.AddCookie("Cookies", options =>
+});
+
+builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/login";
     options.LogoutPath = "/logout";
     options.AccessDeniedPath = "/Account/AccessDenied";
     options.ExpireTimeSpan = TimeSpan.FromHours(24);
     options.SlidingExpiration = true;
-})
-.AddPolicyScheme("JWT_OR_COOKIE", "JWT_OR_COOKIE", options =>
-{
-    options.ForwardDefaultSelector = context =>
-    {
-        string? authorization = context.Request.Headers["Authorization"];
-        if (!string.IsNullOrEmpty(authorization) && authorization.StartsWith("Bearer "))
-            return JwtBearerDefaults.AuthenticationScheme;
-
-        // Check if this is an API request
-        if (context.Request.Path.StartsWithSegments("/api"))
-            return JwtBearerDefaults.AuthenticationScheme;
-
-        return "Cookies";
-    };
+    options.Cookie.Name = "MyFamilyTreeNetAuth";
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SameSite = SameSiteMode.Lax;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
 });
 
 // Configure CORS for Angular app
@@ -201,6 +197,13 @@ builder.Services.AddScoped<IStoryService, StoryService>();
 // Register security services
 builder.Services.AddScoped<ISecurityService, SecurityService>();
 
+// Configure Kestrel to prevent heartbeat warnings
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MinRequestBodyDataRate = null;
+    options.Limits.MinResponseDataRate = null;
+});
+
 var app = builder.Build();
 
 static string ConvertRenderDatabaseUrl(string databaseUrl)
@@ -254,6 +257,7 @@ app.UseRouting();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllerRoute(
     name: "areas",

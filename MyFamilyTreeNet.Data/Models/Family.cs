@@ -8,10 +8,10 @@ namespace MyFamilyTreeNet.Data.Models
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string Name { get; set; } = string.Empty;
 
-        [MaxLength(DescriptionLenght)]
+        [MaxLength(DescriptionLength)]
         public string? Description { get; set; }
 
         public bool IsPublic { get; set; } = true;

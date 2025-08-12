@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MyFamilyTreeNet.Api.Validation;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Api.DTOs
 {
@@ -14,17 +15,17 @@ namespace MyFamilyTreeNet.Api.DTOs
         public required string Password { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
     }
@@ -48,15 +49,15 @@ namespace MyFamilyTreeNet.Api.DTOs
         [EmailAddress]
         public required string Email { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
         
@@ -64,10 +65,10 @@ namespace MyFamilyTreeNet.Api.DTOs
         
         public DateTime? DateOfBirth { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLength)]
         public string? Bio { get; set; }
         
-        [MaxLength(500)]
+        [MaxLength(ProfilePictureUrlLength)]
         [Url]
         public string? ProfilePictureUrl { get; set; }
     }
@@ -75,27 +76,27 @@ namespace MyFamilyTreeNet.Api.DTOs
     public class UpdateProfileDto
     {
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string FirstName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string MiddleName { get; set; }
         
         [Required]
-        [MaxLength(50)]
+        [MaxLength(NameLength)]
         [ValidPersonName]
         public required string LastName { get; set; }
         
         public string? DateOfBirth { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(BioLength)]
         [NoHtml]
         public string? Bio { get; set; }
         
-        [MaxLength(255)]
+        [MaxLength(ShortProfilePictureUrlLength)]
         public string? ProfilePictureUrl { get; set; }
     }
 

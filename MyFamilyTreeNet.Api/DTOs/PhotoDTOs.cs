@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MyFamilyTreeNet.Api.Validation;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Api.DTOs
 {
@@ -7,25 +8,25 @@ namespace MyFamilyTreeNet.Api.DTOs
     {
         [Required]
         [Url]
-        [MaxLength(500)]
+        [MaxLength(ProfilePictureUrlLength)]
         public required string ImageUrl { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Title { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(DescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
         
         public DateTime? DateTaken { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Location { get; set; }
         
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(MinPositiveId, MaxIntValue)]
         public int FamilyId { get; set; }
     }
 
@@ -34,38 +35,38 @@ namespace MyFamilyTreeNet.Api.DTOs
         [Required]
         public required IFormFile File { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Title { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(DescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
         
         public DateTime? DateTaken { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Location { get; set; }
         
         [Required]
-        [Range(1, int.MaxValue)]
+        [Range(MinPositiveId, MaxIntValue)]
         public int FamilyId { get; set; }
     }
 
     public class UpdatePhotoDto
     {
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Title { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(DescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
         
         public DateTime? DateTaken { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         [NoHtml]
         public string? Location { get; set; }
     }
@@ -75,18 +76,18 @@ namespace MyFamilyTreeNet.Api.DTOs
         public int Id { get; set; }
         
         [Url]
-        [MaxLength(500)]
+        [MaxLength(ProfilePictureUrlLength)]
         public required string PhotoUrl { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         public string? Title { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(DescriptionLength)]
         public string? Description { get; set; }
         
         public DateTime? DateTaken { get; set; }
         
-        [MaxLength(200)]
+        [MaxLength(TitleLength)]
         public string? Location { get; set; }
         
         public DateTime UploadedAt { get; set; }

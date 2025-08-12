@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 using MyFamilyTreeNet.Api.Validation;
+using static MyFamilyTreeNet.Data.Constants;
 
 namespace MyFamilyTreeNet.Api.DTOs
 {
@@ -9,7 +10,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidFamilyName]
         public required string Name { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(FamilyDescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
     }
@@ -20,7 +21,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidFamilyName]
         public required string Name { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(FamilyDescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
     }
@@ -32,7 +33,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidFamilyName]
         public required string Name { get; set; }
         
-        [MaxLength(1000)]
+        [MaxLength(FamilyDescriptionLength)]
         public string? Description { get; set; }
         
         public DateTime CreatedAt { get; set; }

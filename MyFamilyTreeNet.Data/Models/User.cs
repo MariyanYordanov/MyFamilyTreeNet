@@ -13,22 +13,22 @@ namespace MyFamilyTreeNet.Data.Models
         }
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string FirstName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string MiddleName { get; set; } = string.Empty;
 
         [Required(ErrorMessage = RequireField)]
-        [MaxLength(NameLenght)]
+        [MaxLength(NameLength)]
         public string LastName { get; set; } = string.Empty;
 
         public string? ProfilePictureUrl { get; set; }
 
         public DateTime? DateOfBirth { get; set; }
         
-        [MaxLength(BioLenght)]
+        [MaxLength(BioLength)]
         public string? Bio { get; set; }
 
         public DateTime CreatedAt { get; set; }

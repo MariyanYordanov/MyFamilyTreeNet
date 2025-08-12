@@ -37,7 +37,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             
             ViewData["ReturnUrl"] = returnUrl;
             
-            if (!ModelState.IsValid)
+            if (model == null || !ModelState.IsValid)
             {
                 _logger.LogWarning("ModelState is invalid. Errors: {Errors}", 
                     string.Join(", ", ModelState.Values.SelectMany(v => v.Errors.Select(e => e.ErrorMessage))));
