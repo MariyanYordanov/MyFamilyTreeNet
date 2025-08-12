@@ -1,0 +1,248 @@
+@{
+    ViewData["Title"] = "Детайли за потребител";
+    var userDetails = ViewBag.UserDetails;
+    var user = userDetails.User;
+    var roles = userDetails.Roles as IList<string>;
+    var familiesCreated = userDetails.FamiliesCreated;
+    var lastActivity = userDetails.LastActivity;
+}
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h4 class="mb-1">Детайли за потребител</h4>
+        <small class="text-muted">@($"{user.FirstName} {user.MiddleName} {user.LastName}")</small>
+    </div>
+    <div>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Обратно към списъка
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <!-- User Information -->
+    <div class="col-md-8 mb-4">
+        <div class="stat-card">
+            <div class="card-header bg-primary text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-user me-2"></i>
+                    Информация за потребителя
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Име:</label>
+                        <p class="mb-1">@user.FirstName</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Презиме:</label>
+                        <p class="mb-1">@user.MiddleName</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Фамилия:</label>
+                        <p class="mb-1">@user.LastName</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Потребителско име:</label>
+                        <p class="mb-1">@user.UserName</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Email:</label>
+                        <p class="mb-1">
+                            @user.Email
+                            @if (user.EmailConfirmed)
+                            {
+                                <span class="badge bg-success ms-2">Потвърден</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-warning ms-2">Непотвърден</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Телефон:</label>
+                        <p class="mb-1">
+                            @(user.PhoneNumber ?? "Не е посочен")
+                            @if (user.PhoneNumberConfirmed && !string.IsNullOrEmpty(user.PhoneNumber))
+                            {
+                                <span class="badge bg-success ms-2">Потвърден</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Дата на раждане:</label>
+                        <p class="mb-1">@(user.DateOfBirth?.ToString("dd.MM.yyyy") ?? "Не е посочена")</p>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-bold">Биография:</label>
+                        <p class="mb-1">@(user.Bio ?? "Няма")</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Stats and Actions -->
+    <div class="col-md-4 mb-4">
+        <!-- User Stats -->
+        <div class="stat-card mb-3">
+            <div class="card-header bg-info text-white">
+                <h6 class="mb-0">
+                    <i class="fas fa-chart-bar me-2"></i>
+                    Статистики
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="text-center mb-3">
+                    <div class="rounded-circle bg-info text-white mx-auto mb-2" 
+                         style="width: 60px; height: 60px; line-height: 60px;">
+                        <i class="fas fa-sitemap fa-2x"></i>
+                    </div>
+                    <h4 class="text-info">@familiesCreated</h4>
+                    <small class="text-muted">Създадени семейства</small>
+                </div>
+                
+                <hr>
+                
+                <div class="mb-2">
+                    <strong>Регистриран:</strong><br>
+                    <small class="text-muted">@user.CreatedAt.ToString("dd MMMM yyyy г., HH:mm")</small>
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Последен вход:</strong><br>
+                    <small class="text-muted">@lastActivity</small>
+                </div>
+                
+                <div class="mb-2">
+                    <strong>Присъединен:</strong><br>
+                    <small class="text-muted">@(user.JoinedAt?.ToString("dd.MM.yyyy") ?? "Не е известно")</small>
+                </div>
+            </div>
+        </div>
+        
+        <!-- User Roles -->
+        <div class="stat-card mb-3">
+            <div class="card-header bg-warning text-dark">
+                <h6 class="mb-0">
+                    <i class="fas fa-user-shield me-2"></i>
+                    Роли и права
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <strong>Текущи роли:</strong><br>
+                    @if (roles?.Any() == true)
+                    {
+                        @foreach (var role in roles)
+                        {
+                            <span class="badge bg-@(role == "Admin" ? "danger" : "primary") me-1 mb-1">@role</span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="badge bg-secondary">User (по подразбиране)</span>
+                    }
+                </div>
+                
+                <!-- Role Management -->
+                <div class="d-grid gap-2">
+                    @if (roles?.Contains("Admin") == true)
+                    {
+                        <form method="post" asp-action="ToggleRole">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <input type="hidden" name="role" value="Admin" />
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-minus me-2"></i>
+                                Премахни Admin
+                            </button>
+                        </form>
+                    }
+                    else
+                    {
+                        <form method="post" asp-action="ToggleRole">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="userId" value="@user.Id" />
+                            <input type="hidden" name="role" value="Admin" />
+                            <button type="submit" class="btn btn-outline-success btn-sm">
+                                <i class="fas fa-plus me-2"></i>
+                                Направи Admin
+                            </button>
+                        </form>
+                    }
+                </div>
+            </div>
+        </div>
+        
+        <!-- Danger Zone -->
+        @if (roles?.Contains("Admin") != true)
+        {
+            <div class="stat-card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Опасна зона
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-danger small mb-3">
+                        Изтриването на потребител е необратимо действие.
+                    </p>
+                    
+                    @if (familiesCreated > 0)
+                    {
+                        <div class="alert alert-warning">
+                            <small>
+                                <i class="fas fa-info-circle me-1"></i>
+                                Потребителят не може да бъде изтрит, защото е създал @familiesCreated семейства.
+                            </small>
+                        </div>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-danger btn-sm w-100" 
+                                data-bs-toggle="modal" data-bs-target="#deleteModal">
+                            <i class="fas fa-trash me-2"></i>
+                            Изтрий потребител
+                        </button>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Потвърждение за изтриване</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Сигурни ли сте, че искате да изтриете потребител <strong>@($"{user.FirstName} {user.LastName}")</strong>?</p>
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Това действие е необратимо и ще изтрие всички данни на потребителя!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Отказ</button>
+                <form method="post" asp-action="Delete" style="display: inline;">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="userId" value="@user.Id" />
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>
+                        Изтрий завинаги
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
