@@ -18,7 +18,7 @@ import {
   providedIn: 'root'
 })
 export class MemberService {
-  private readonly apiUrl = `${environment.apiUrl}/api/Member`;
+  private readonly apiUrl = `/api/Member`;
   private membersSubject = new BehaviorSubject<Member[]>([]);
   private searchSubject = new BehaviorSubject<string>('');
 

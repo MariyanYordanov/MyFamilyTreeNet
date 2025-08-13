@@ -90,7 +90,7 @@ export class MemberRelationshipsComponent implements OnInit {
 
     this.isLoadingRelationships.set(true);
     
-    this.http.get<Relationship[]>(`${environment.apiUrl}/api/Relationship/member/${member.id}`)
+    this.http.get<Relationship[]>(`/api/Relationship/member/${member.id}`)
       .pipe(
         catchError(error => {
           console.error('Error loading relationships:', error);
@@ -132,11 +132,11 @@ export class MemberRelationshipsComponent implements OnInit {
     const request: CreateRelationshipRequest = {
       primaryMemberId: member.id,
       relatedMemberId: parseInt(formValue.relatedMemberId),
-      relationshipType: parseInt(formValue.relationshipType),
+      relationshipType: formValue.relationshipType,
       notes: formValue.notes || undefined
     };
 
-    this.http.post<Relationship>(`${environment.apiUrl}/api/Relationship`, request)
+    this.http.post<Relationship>(`/api/Relationship`, request)
       .pipe(
         catchError(error => {
           let errorMsg = 'Грешка при създаването на връзката';
@@ -171,7 +171,7 @@ export class MemberRelationshipsComponent implements OnInit {
   }
 
   private deleteRelationship(relationship: Relationship): void {
-    this.http.delete(`${environment.apiUrl}/api/Relationship/${relationship.id}`)
+    this.http.delete(`/api/Relationship/${relationship.id}`)
       .pipe(
         catchError(error => {
           this.errorMessage.set('Грешка при изтриването на връзката');

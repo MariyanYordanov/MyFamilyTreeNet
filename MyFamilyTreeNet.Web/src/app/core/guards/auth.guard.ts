@@ -8,20 +8,22 @@ export const authGuard: CanActivateFn = (route, state) => {
   const authService = inject(AuthService);
   const router = inject(Router);
 
-  return authService.currentUser$.pipe(
-    take(1),
-    map(user => {
-      const isAuthenticated = authService.isAuthenticated();
-      if (!isAuthenticated || !user) {
-        // Store the attempted URL for redirecting after login
-        router.navigate(['/auth/login'], { 
-          queryParams: { returnUrl: state.url } 
-        });
-        return false;
-      }
-      return true;
-    })
-  );
+  // Check authentication status directly - this is more reliable
+  const isAuthenticated = authService.isAuthenticated();
+  console.log('Auth guard - isAuthenticated:', isAuthenticated);
+  console.log('Auth guard - token:', authService.getToken());
+  console.log('Auth guard - current user:', authService.getCurrentUser());
+  
+  if (!isAuthenticated) {
+    console.log('Auth guard - redirecting to login, returnUrl:', state.url);
+    router.navigate(['/auth/login'], { 
+      queryParams: { returnUrl: state.url } 
+    });
+    return false;
+  }
+  
+  console.log('Auth guard - access granted');
+  return true;
 };
 
 export const authMatchGuard: CanMatchFn = (route, segments) => {

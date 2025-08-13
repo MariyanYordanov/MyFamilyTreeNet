@@ -12,7 +12,7 @@ namespace MyFamilyTreeNet.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [IgnoreAntiforgeryToken]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class FamilyController : ControllerBase
     {
         private readonly IFamilyService _familyService;
@@ -170,5 +170,54 @@ namespace MyFamilyTreeNet.Api.Controllers
 
             return Ok(treeData);
         }
+
+        [HttpGet("{id}/tree")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFamilyTree(int id)
+        {
+            var family = await _context.Families
+                .Include(f => f.FamilyMembers)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (family == null)
+            {
+                return NotFound();
+            }
+
+            if (!family.FamilyMembers.Any())
+            {
+                return Ok(null);
+            }
+
+            // Simple approach: return first member as root with basic structure
+            var firstMember = family.FamilyMembers.First();
+            
+            var treeData = new
+            {
+                id = firstMember.Id,
+                name = $"{firstMember.FirstName} {firstMember.LastName}",
+                birthYear = firstMember.DateOfBirth?.Year,
+                deathYear = firstMember.DateOfDeath?.Year,
+                isAlive = !firstMember.DateOfDeath.HasValue,
+                age = !firstMember.DateOfDeath.HasValue && firstMember.DateOfBirth.HasValue
+                    ? DateTime.Now.Year - firstMember.DateOfBirth.Value.Year
+                    : (int?)null,
+                children = family.FamilyMembers.Skip(1).Select(m => new
+                {
+                    id = m.Id,
+                    name = $"{m.FirstName} {m.LastName}",
+                    birthYear = m.DateOfBirth?.Year,
+                    deathYear = m.DateOfDeath?.Year,
+                    isAlive = !m.DateOfDeath.HasValue,
+                    age = !m.DateOfDeath.HasValue && m.DateOfBirth.HasValue
+                        ? DateTime.Now.Year - m.DateOfBirth.Value.Year
+                        : (int?)null,
+                    children = new List<object>()
+                }).ToList()
+            };
+            
+            return Ok(treeData);
+        }
+
     }
 }

@@ -56,15 +56,58 @@ export class LoginComponent implements OnInit {
         .pipe(
           catchError(error => {
             console.error('Login error:', error);
-            alert(error.error?.message || 'Грешка при влизане. Моля опитайте отново.');
+            let errorMessage = 'Грешка при влизане. Моля опитайте отново.';
+            
+            if (error.status === 401) {
+              errorMessage = 'Невалиден имейл или парола.';
+            } else if (error.error?.message) {
+              errorMessage = error.error.message;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            alert(errorMessage);
             return of(null);
           }),
           finalize(() => this.isLoading = false)
         )
         .subscribe(response => {
           if (response) {
-            console.log('Login successful');
-            this.router.navigate([this.returnUrl]);
+            console.log('Login successful', response);
+            console.log('ReturnUrl:', this.returnUrl);
+            
+            // Parse the decoded URL properly for navigation
+            const decodedUrl = decodeURIComponent(this.returnUrl);
+            console.log('Decoded URL:', decodedUrl);
+            
+            // Split URL into path and query string
+            const urlParts = decodedUrl.split('?');
+            const path = urlParts[0];
+            const queryString = urlParts[1];
+            
+            if (queryString) {
+              // Parse query parameters
+              const queryParams: any = {};
+              const pairs = queryString.split('&');
+              pairs.forEach(pair => {
+                const [key, value] = pair.split('=');
+                queryParams[key] = decodeURIComponent(value || '');
+              });
+              
+              console.log('Navigating to path:', path, 'with query params:', queryParams);
+              this.router.navigate([path], { queryParams }).then(success => {
+                console.log('Navigation success:', success);
+              }).catch(error => {
+                console.error('Navigation error:', error);
+              });
+            } else {
+              console.log('Navigating to path:', path);
+              this.router.navigate([path]).then(success => {
+                console.log('Navigation success:', success);
+              }).catch(error => {
+                console.error('Navigation error:', error);
+              });
+            }
           }
         });
     }

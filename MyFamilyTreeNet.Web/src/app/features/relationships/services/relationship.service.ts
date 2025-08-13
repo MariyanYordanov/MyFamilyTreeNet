@@ -48,7 +48,7 @@ export interface CreateRelationshipRequest {
   providedIn: 'root'
 })
 export class RelationshipService {
-  private readonly apiUrl = `${environment.apiUrl}/api/Relationship`;
+  private readonly apiUrl = `/api/Relationship`;
   private http = inject(HttpClient);
   
   private relationshipsSubject = new BehaviorSubject<Relationship[]>([]);

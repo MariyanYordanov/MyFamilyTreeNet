@@ -9,6 +9,7 @@ export interface Family {
   memberCount: number;
   photoCount?: number;
   storyCount?: number;
+  photoUrl?: string;
   members?: FamilyMember[];
   photos?: any[];
   stories?: any[];

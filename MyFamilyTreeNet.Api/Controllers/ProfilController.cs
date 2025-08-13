@@ -10,7 +10,7 @@ namespace MyFamilyTreeNet.Api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     [IgnoreAntiforgeryToken]
     public class ProfileController : ControllerBase
     {

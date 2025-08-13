@@ -1,8 +1,9 @@
 import { Component, OnInit, OnDestroy, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule, Router } from '@angular/router';
 import { Subject, takeUntil, switchMap } from 'rxjs';
 import { MemberService } from '../../services/member.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Member, MemberRelationships } from '../../models/member.model';
 import { DateFormatPipe, NameFormatPipe } from '../../../../shared/pipes';
 import { MemberRelationshipsComponent } from '../member-relationships/member-relationships.component';
@@ -27,7 +28,9 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
 
   constructor(
     private route: ActivatedRoute,
-    private memberService: MemberService
+    private memberService: MemberService,
+    private router: Router,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -75,7 +78,16 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
       },
       error: (error) => {
         console.error('Error loading member data:', error);
-        this.error.set('Грешка при зареждане на данните за члена');
+        if (error.status === 404) {
+          console.log('Member not found, redirecting to members list');
+          this.router.navigate(['/members']);
+        } else if (error.status === 401) {
+          console.log('Unauthorized - clearing token and redirecting to login');
+          this.authService.forceLogout();
+          this.router.navigate(['/auth/login']);
+        } else {
+          this.error.set('Грешка при зареждане на данните за члена');
+        }
         this.loading.set(false);
       }
     });

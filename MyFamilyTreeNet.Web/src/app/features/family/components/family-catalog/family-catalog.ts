@@ -5,6 +5,7 @@ import { FormsModule } from '@angular/forms';
 import { Subject, Observable, takeUntil, debounceTime, startWith, catchError, of, combineLatest, map, BehaviorSubject } from 'rxjs';
 
 import { FamilyService } from '../../services/family.service';
+import { AuthService } from '../../../../core/services/auth.service';
 import { Family } from '../../models/family.model';
 
 @Component({
@@ -28,12 +29,27 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
   isLoading = true;
   error: string | null = null;
   searchTerm = '';
+  isLoggedIn = false;
+  currentUser: any = null;
 
-  constructor(private familyService: FamilyService) {}
+  constructor(
+    private familyService: FamilyService,
+    private authService: AuthService
+  ) {}
 
   ngOnInit(): void {
+    this.checkAuthStatus();
     this.setupSearch();
-    this.loadFamilies();
+  }
+
+  private checkAuthStatus(): void {
+    this.authService.currentUser$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(user => {
+        this.isLoggedIn = !!user;
+        this.currentUser = user;
+        this.loadFamilies(); // Load families after auth status is determined
+      });
   }
 
   ngOnDestroy(): void {
@@ -45,7 +61,11 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
     
-    this.familyService.getFamilies()
+    const familiesObservable = this.isLoggedIn && this.currentUser 
+      ? this.familyService.getUserFamilies(this.currentUser.id)
+      : this.familyService.getFamilies();
+    
+    familiesObservable
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response) => {
@@ -55,7 +75,9 @@ export class FamilyCatalogComponent implements OnInit, OnDestroy {
           this.isLoading = false;
         },
         error: (error) => {
-          this.error = 'Възникна грешка при зареждането на семействата.';
+          this.error = this.isLoggedIn 
+            ? 'Възникна грешка при зареждането на вашите семейства.'
+            : 'Възникна грешка при зареждането на семействата.';
           this.isLoading = false;
           this.familiesSubject.next([]);
           console.error('Error loading families:', error);

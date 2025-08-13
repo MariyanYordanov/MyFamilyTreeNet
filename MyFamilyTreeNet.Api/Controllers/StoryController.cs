@@ -11,7 +11,7 @@ namespace MyFamilyTreeNet.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [IgnoreAntiforgeryToken]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class StoryController : ControllerBase
     {
         private readonly IStoryService _storyService;

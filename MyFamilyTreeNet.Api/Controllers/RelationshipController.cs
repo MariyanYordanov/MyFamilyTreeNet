@@ -103,7 +103,7 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpPost]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<Relationship>> CreateRelationship([FromBody] CreateRelationshipDto dto)
         {
             try
@@ -154,7 +154,7 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult<Relationship>> UpdateRelationship(int id, [FromBody] UpdateRelationshipDto dto)
         {
             try
@@ -207,7 +207,7 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize]
+        [Authorize(AuthenticationSchemes = "Bearer")]
         public async Task<ActionResult> DeleteRelationship(int id)
         {
             try

@@ -19,6 +19,8 @@ import { FamilyTreeComponent } from '../family-tree/family-tree.component';
 export class FamilyDetailComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
   
+  console = console; // Allow console access in template
+  
   family = signal<Family | null>(null);
   members = signal<Member[]>([]);
   loading = signal(false);

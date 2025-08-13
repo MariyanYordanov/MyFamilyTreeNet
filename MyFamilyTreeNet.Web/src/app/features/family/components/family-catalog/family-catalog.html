@@ -3,9 +3,11 @@
   <div class="text-center mb-5">
     <h1 class="display-4 text-primary mb-3">
       <i class="fas fa-users me-3"></i>
-      Каталог на семейства
+      <span *ngIf="isLoggedIn">Моите семейства</span>
+      <span *ngIf="!isLoggedIn">Каталог на семейства</span>
     </h1>
-    <p class="lead text-muted mb-4">Разгледайте семейните истории и открийте връзки</p>
+    <p class="lead text-muted mb-4" *ngIf="isLoggedIn">Управлявайте вашите семейства и семейните истории</p>
+    <p class="lead text-muted mb-4" *ngIf="!isLoggedIn">Разгледайте семейните истории и открийте връзки</p>
     
     <div class="d-flex justify-content-center">
       <div class="input-group" style="max-width: 400px;">

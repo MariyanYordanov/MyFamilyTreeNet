@@ -12,7 +12,7 @@ namespace MyFamilyTreeNet.Api.Controllers
     [ApiController]
     [Route("api/[controller]")]
     [IgnoreAntiforgeryToken]
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Bearer")]
     public class MemberController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -117,18 +117,27 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("{id}")]
+        [AllowAnonymous]
         public async Task<ActionResult<FamilyMemberDto>> GetMember(int id)
         {
             try
             {
                 var currentUserId = GetCurrentUserId();
+                var isAuthenticated = !string.IsNullOrEmpty(currentUserId);
+                
                 var member = await _context.FamilyMembers
                     .Include(m => m.Family)
-                    .FirstOrDefaultAsync(m => m.Id == id && m.Family.CreatedByUserId == currentUserId);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (member == null)
                 {
                     return NotFound("Членът не е намерен");
+                }
+
+                // Check permissions - allow if public family or user owns it
+                if (!member.Family.IsPublic && (!isAuthenticated || member.Family.CreatedByUserId != currentUserId))
+                {
+                    return Forbid("Нямате достъп до този член от частно семейство");
                 }
 
                 var memberDto = _mapper.Map<FamilyMemberDto>(member);
@@ -256,18 +265,27 @@ namespace MyFamilyTreeNet.Api.Controllers
         }
 
         [HttpGet("{id}/relationships")]
+        [AllowAnonymous]
         public async Task<ActionResult<MemberRelationshipsDto>> GetMemberRelationships(int id)
         {
             try
             {
                 var currentUserId = GetCurrentUserId();
+                var isAuthenticated = !string.IsNullOrEmpty(currentUserId);
+                
                 var member = await _context.FamilyMembers
                     .Include(m => m.Family)
-                    .FirstOrDefaultAsync(m => m.Id == id && m.Family.CreatedByUserId == currentUserId);
+                    .FirstOrDefaultAsync(m => m.Id == id);
 
                 if (member == null)
                 {
                     return NotFound("Членът не е намерен");
+                }
+
+                // Check permissions - allow if public family or user owns it
+                if (!member.Family.IsPublic && (!isAuthenticated || member.Family.CreatedByUserId != currentUserId))
+                {
+                    return Forbid("Нямате достъп до връзките на този член от частно семейство");
                 }
 
                 var relationships = await _context.Relationships

@@ -129,7 +129,8 @@
                           </div>
                           <div class="flex-grow-1">
                             <h6 class="mb-1">
-                              <a [routerLink]="['/members', member.id]" class="text-decoration-none">
+                              <a [routerLink]="['/members', member.id]" class="text-decoration-none" 
+                                 (click)="console.log('Clicking member ID:', member.id)">
                                 {{ member.firstName | nameFormat:member.middleName:member.lastName:'short' }}
                               </a>
                             </h6>

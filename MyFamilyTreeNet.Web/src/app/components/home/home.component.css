@@ -1,0 +1,94 @@
+.hero-section {
+  padding: 3rem 0;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 2rem !important;
+}
+
+.family-card {
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: none;
+  overflow: hidden;
+}
+
+.family-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+
+.family-image {
+  height: 200px;
+  object-fit: cover;
+  transition: transform 0.3s ease;
+}
+
+.family-card:hover .family-image {
+  transform: scale(1.05);
+}
+
+.card-img-overlay {
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+}
+
+.features-section {
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  padding: 2rem;
+  margin-top: 3rem;
+}
+
+.features-section i {
+  margin-bottom: 1rem;
+}
+
+.btn {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+}
+
+.spinner-border {
+  width: 3rem;
+  height: 3rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 2rem 0;
+  }
+  
+  .display-4 {
+    font-size: 2rem;
+  }
+  
+  .btn-lg {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+  }
+}
+
+/* Animation for cards */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.family-card {
+  animation: fadeInUp 0.6s ease-out forwards;
+}
+
+.family-card:nth-child(1) { animation-delay: 0.1s; }
+.family-card:nth-child(2) { animation-delay: 0.2s; }
+.family-card:nth-child(3) { animation-delay: 0.3s; }

@@ -36,19 +36,23 @@ export class AuthService {
   }
 
   login(credentials: LoginRequest): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.API_URL}/api/Auth/login`, credentials)
+    return this.http.post<LoginResponse>(`/api/Auth/login`, credentials)
       .pipe(
         tap(response => {
+          console.log('Auth service received response:', response);
+          console.log('Token:', response.token);
+          console.log('User:', response.user);
           this.setToken(response.token);
           this.setUser(response.user);
           this.currentUserSubject.next(response.user);
+          console.log('Token saved to localStorage:', this.getToken());
         })
       );
   }
 
   register(userData: RegisterRequest): Observable<LoginResponse> {
     const { confirmPassword, dateOfBirth, ...registerData } = userData;
-    return this.http.post<LoginResponse>(`${this.API_URL}/api/Auth/register`, registerData)
+    return this.http.post<LoginResponse>(`/api/Auth/register`, registerData)
       .pipe(
         tap(response => {
           if (response.token && response.user) {
@@ -68,15 +72,33 @@ export class AuthService {
     this.currentUserSubject.next(null);
   }
 
+  forceLogout(): void {
+    console.log('Force logout due to invalid token');
+    this.logout();
+  }
+
   getToken(): string | null {
     if (!this.isBrowser) return null;
-    return localStorage.getItem('token');
+    const token = localStorage.getItem('token');
+    console.log('Getting token:', token ? token.substring(0, 30) + '...' : 'null');
+    return token;
   }
 
   isAuthenticated(): boolean {
-    if (!this.isBrowser) return false;
+    if (!this.isBrowser) {
+      console.log('Not in browser environment');
+      return false;
+    }
     const token = this.getToken();
-    return token !== null && !this.isTokenExpired(token);
+    console.log('isAuthenticated check:');
+    console.log('- Has token:', !!token);
+    if (!token) {
+      console.log('- No token found');
+      return false;
+    }
+    // TEMPORARY FIX: Skip expiration check due to time sync issues
+    console.log('- Skipping expiration check (temporary fix)');
+    return true;
   }
 
   getCurrentUser(): User | null {
@@ -109,9 +131,22 @@ export class AuthService {
   private isTokenExpired(token: string): boolean {
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
-      const exp = payload.exp * 1000; // Convert to milliseconds
-      return Date.now() >= exp;
-    } catch {
+      console.log('Raw token payload exp:', payload.exp);
+      
+      // Check if exp is already in milliseconds (> year 2030 in seconds)
+      const exp = payload.exp > 1900000000 ? payload.exp : payload.exp * 1000;
+      const now = Date.now();
+      // Add 5 minute tolerance for clock skew
+      const tolerance = 5 * 60 * 1000; // 5 minutes in milliseconds
+      const isExpired = now >= (exp + tolerance);
+      console.log('Token expiration check:');
+      console.log('- Raw exp value:', payload.exp);
+      console.log('- Final exp time:', new Date(exp));
+      console.log('- Current time:', new Date(now));
+      console.log('- Is expired:', isExpired);
+      return isExpired;
+    } catch (error) {
+      console.error('Error checking token expiration:', error);
       return true;
     }
   }

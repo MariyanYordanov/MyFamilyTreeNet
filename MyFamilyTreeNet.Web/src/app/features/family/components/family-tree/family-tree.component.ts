@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, Input, ElementRef, ViewChild, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, Input, ElementRef, ViewChild, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { FamilyService } from '../../services/family.service';
@@ -28,9 +28,9 @@ export interface TreeNode {
   templateUrl: './family-tree.component.html',
   styleUrls: ['./family-tree.component.scss']
 })
-export class FamilyTreeComponent implements OnInit, OnDestroy {
+export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() familyId!: number;
-  @ViewChild('treeContainer', { static: true }) treeContainer!: ElementRef;
+  @ViewChild('treeContainer', { static: false }) treeContainer!: ElementRef;
 
   private familyService = inject(FamilyService);
   private router = inject(Router);
@@ -43,9 +43,27 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
   treeData: TreeNode | null = null;
 
   ngOnInit() {
-    if (this.familyId) {
-      this.loadTreeData();
-    }
+    // Don't load data here, wait for view to be initialized
+  }
+
+  ngAfterViewInit() {
+    console.log('AfterViewInit - Container element:', this.treeContainer?.nativeElement);
+    console.log('FamilyId:', this.familyId);
+    
+    // Use setTimeout to ensure container is fully rendered
+    setTimeout(() => {
+      console.log('Delayed check - Container element:', this.treeContainer?.nativeElement);
+      if (this.familyId) {
+        if (this.treeContainer?.nativeElement) {
+          console.log('Loading tree data...');
+          this.loadTreeData();
+        } else {
+          console.error('Container element not found after timeout');
+        }
+      } else {
+        console.log('No familyId provided');
+      }
+    }, 150);
   }
 
   ngOnDestroy() {
@@ -61,9 +79,13 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
     // Call the same endpoint as MVC version
     this.familyService.getFamilyTreeData(this.familyId).subscribe({
       next: (data) => {
+        console.log('Tree data received:', data);
         this.treeData = data;
         this.isLoading = false;
-        this.initializeTree();
+        // Wait a bit more for view to be fully ready
+        setTimeout(() => {
+          this.initializeTree();
+        }, 200);
       },
       error: (error) => {
         console.error('Error loading tree data:', error);
@@ -74,7 +96,16 @@ export class FamilyTreeComponent implements OnInit, OnDestroy {
   }
 
   private initializeTree() {
+    console.log('Initializing tree with data:', this.treeData);
+    console.log('Container element:', this.treeContainer?.nativeElement);
+    
     if (!this.treeData || !this.treeContainer?.nativeElement) {
+      console.error('Tree data or container missing:', {
+        hasData: !!this.treeData,
+        hasContainer: !!this.treeContainer?.nativeElement,
+        containerRef: this.treeContainer
+      });
+      this.error = 'Грешка при инициализиране на дървото';
       return;
     }
 

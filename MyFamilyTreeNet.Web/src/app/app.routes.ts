@@ -4,8 +4,15 @@ import { authGuard } from './core/guards/auth.guard';
 export const routes: Routes = [
     {
         path: '',
-        redirectTo: '/families',
-        pathMatch: 'full'
+        loadComponent: () => import('./components/home/home.component').then(c => c.HomeComponent)
+    },
+    {
+        path: 'home',
+        loadComponent: () => import('./components/home/home.component').then(c => c.HomeComponent)
+    },
+    {
+        path: 'auth',
+        loadChildren: () => import('./features/auth/auth.routes').then(m => m.authRoutes)
     },
     {
         path: 'families',
@@ -20,10 +27,6 @@ export const routes: Routes = [
         loadChildren: () => import('./features/relationships/relationships.routes').then(m => m.relationshipRoutes)
     },
     {
-        path: 'auth',
-        loadChildren: () => import('./features/auth/auth.routes').then(m => m.authRoutes)
-    },
-    {
         path: 'profile',
         loadChildren: () => import('./features/profile/profile.routes').then(m => m.profileRoutes)
     },
@@ -31,5 +34,9 @@ export const routes: Routes = [
         path: 'admin',
         loadChildren: () => import('./features/admin/admin.routes').then(m => m.adminRoutes),
         canActivate: [authGuard]
+    },
+    {
+        path: '**',
+        redirectTo: ''
     }
 ];

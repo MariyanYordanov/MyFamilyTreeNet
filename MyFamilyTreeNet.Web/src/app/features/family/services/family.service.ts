@@ -15,7 +15,7 @@ import {
   providedIn: 'root'
 })
 export class FamilyService {
-  private readonly apiUrl = `${environment.apiUrl}/api/Family`;
+  private readonly apiUrl = `/api/Family`;
   private familiesSubject = new BehaviorSubject<Family[]>([]);
   private selectedFamilySubject = new BehaviorSubject<Family | null>(null);
 
@@ -152,7 +152,7 @@ export class FamilyService {
 
   // Get family tree data for visualization
   getFamilyTreeData(familyId: number): Observable<any> {
-    return this.http.get<any>(`${environment.apiUrl}/FamilyMvc/GetFamilyTreeData/${familyId}`)
+    return this.http.get<any>(`${this.apiUrl}/${familyId}/tree`)
       .pipe(
         catchError(this.handleError<any>('getFamilyTreeData'))
       );

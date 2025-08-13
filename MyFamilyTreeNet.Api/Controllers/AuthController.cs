@@ -150,11 +150,17 @@ namespace MyFamilyTreeNet.Api.Controllers
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
+            var expirationHours = Convert.ToDouble(_configuration["JwtSettings:ExpirationInHours"]);
+            var expirationTime = DateTime.Now.AddHours(expirationHours);
+            
+            _logger.LogInformation("JWT Token generation - ExpirationInHours: {Hours}", expirationHours);
+            _logger.LogInformation("JWT Token generation - Expiration time: {ExpirationTime}", expirationTime);
+            
             var token = new JwtSecurityToken(
                 issuer: _configuration["JwtSettings:Issuer"],
                 audience: _configuration["JwtSettings:Audience"],
                 claims: claims,
-                expires: DateTime.Now.AddDays(Convert.ToDouble(_configuration["JwtSettings:ExpirationDays"])),
+                expires: expirationTime,
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);

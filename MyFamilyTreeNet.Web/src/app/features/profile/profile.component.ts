@@ -86,7 +86,7 @@ export class ProfileComponent implements OnInit {
   private loadUserProfile(): void {
     this.isLoading.set(true);
     
-    this.http.get<User>(`${environment.apiUrl}/api/Profile`)
+    this.http.get<User>(`/api/Profile`)
       .pipe(
         catchError(error => {
           this.errorMessage.set('Грешка при зареждането на профила');
@@ -129,7 +129,7 @@ export class ProfileComponent implements OnInit {
       bio: formValue.bio || undefined
     };
 
-    this.http.put(`${environment.apiUrl}/api/Profile`, updateRequest)
+    this.http.put(`/api/Profile`, updateRequest)
       .pipe(
         catchError(error => {
           this.errorMessage.set('Грешка при актуализирането на профила');
@@ -160,7 +160,7 @@ export class ProfileComponent implements OnInit {
       confirmPassword: formValue.confirmPassword
     };
 
-    this.http.post(`${environment.apiUrl}/api/Profile/change-password`, changePasswordRequest)
+    this.http.post(`/api/Profile/change-password`, changePasswordRequest)
       .pipe(
         catchError(error => {
           let errorMsg = 'Грешка при промяната на паролата';
