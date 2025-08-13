@@ -240,8 +240,11 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
             if (family == null)
             {
+                _logger.LogWarning("Family not found for GetFamilyTreeData: {FamilyId}, User: {UserId}", id, currentUserId);
                 return Json(new { error = "Семейството не е намерено" });
             }
+
+            _logger.LogInformation("Found family with {MemberCount} members", family.FamilyMembers.Count);
 
             var relationships = await _context.Relationships
                 .Include(r => r.PrimaryMember)
@@ -249,14 +252,22 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 .Where(r => r.PrimaryMember.FamilyId == id)
                 .ToListAsync();
 
+            _logger.LogInformation("Found {RelationshipCount} relationships", relationships.Count);
+
             var treeData = BuildTreeData(family.FamilyMembers.ToList(), relationships);
+            _logger.LogInformation("Tree data built: {TreeData}", System.Text.Json.JsonSerializer.Serialize(treeData));
+            
             return Json(treeData);
         }
 
         private object BuildTreeData(List<FamilyMember> members, List<Relationship> relationships)
         {
             if (!members.Any())
-                return new { name = "Няма членове", children = new object[0] };
+                return new { 
+                    id = "empty",
+                    name = "Няма членове", 
+                    children = new object[0] 
+                };
 
             var memberDict = new Dictionary<int, dynamic>();
             foreach (var member in members)
@@ -273,10 +284,25 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 };
             }
 
-            var rootMember = members.OrderBy(m => m.DateOfBirth ?? DateTime.MaxValue).First();
+            // Find root member (oldest by birth or first created)
+            var rootMember = members.OrderBy(m => m.DateOfBirth ?? DateTime.MaxValue)
+                                   .ThenBy(m => m.CreatedAt)
+                                   .First();
             dynamic root = memberDict[rootMember.Id];
 
-            BuildChildrenRecursive(root, members, relationships, memberDict, new HashSet<int>());
+            // If we have relationships, build hierarchical tree
+            if (relationships.Any())
+            {
+                BuildChildrenRecursive(root, members, relationships, memberDict, new HashSet<int>());
+            }
+            else
+            {
+                // If no relationships, add all other members as siblings at root level
+                foreach (var member in members.Where(m => m.Id != rootMember.Id))
+                {
+                    ((List<object>)root.children).Add(memberDict[member.Id]);
+                }
+            }
 
             return root;
         }
@@ -286,17 +312,39 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             if (visited.Contains(node.id)) return;
             visited.Add(node.id);
 
-            var childRelationships = relationships
-                .Where(r => r.PrimaryMemberId == node.id && r.RelationshipType == RelationshipType.Child)
+            // Find all relationships where this node is the primary member
+            var nodeRelationships = relationships
+                .Where(r => r.PrimaryMemberId == node.id || r.RelatedMemberId == node.id)
                 .ToList();
 
-            foreach (var rel in childRelationships)
+            foreach (var rel in nodeRelationships)
             {
-                if (memberMap.ContainsKey(rel.RelatedMemberId) && !visited.Contains(rel.RelatedMemberId))
+                int relatedId = rel.PrimaryMemberId == node.id ? rel.RelatedMemberId : rel.PrimaryMemberId;
+                
+                if (memberMap.ContainsKey(relatedId) && !visited.Contains(relatedId))
                 {
-                    var childNode = memberMap[rel.RelatedMemberId];
-                    ((List<object>)node.children).Add(childNode);
-                    BuildChildrenRecursive(childNode, members, relationships, memberMap, visited);
+                    var relatedNode = memberMap[relatedId];
+                    
+                    // Add relationship type information to the related node
+                    relatedNode.relationshipType = rel.RelationshipType.ToString();
+                    relatedNode.relationshipFromPrimary = rel.PrimaryMemberId == node.id;
+                    
+                    // For tree structure, add as child if it's a child relationship
+                    if (rel.RelationshipType == RelationshipType.Child && rel.PrimaryMemberId == node.id)
+                    {
+                        ((List<object>)node.children).Add(relatedNode);
+                        BuildChildrenRecursive(relatedNode, members, relationships, memberMap, visited);
+                    }
+                    // For parent relationships, add current node as child of parent
+                    else if (rel.RelationshipType == RelationshipType.Parent && rel.RelatedMemberId == node.id)
+                    {
+                        // This will be handled when we process the parent node
+                    }
+                    // For siblings, spouses etc., add them at the same level (as children of same parent or special handling)
+                    else if (rel.RelationshipType == RelationshipType.Sibling || rel.RelationshipType == RelationshipType.Spouse)
+                    {
+                        ((List<object>)node.children).Add(relatedNode);
+                    }
                 }
             }
         }

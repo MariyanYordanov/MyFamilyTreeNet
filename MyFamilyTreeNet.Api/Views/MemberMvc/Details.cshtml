@@ -166,10 +166,14 @@
                 {
                     <div class="col-12">
                         <div class="card shadow-sm">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">
                                     <i class="fas fa-network-wired me-2"></i>Семейни връзки
                                 </h5>
+                                <a asp-controller="RelationshipMvc" asp-action="Create" asp-route-primaryMemberId="@Model.Id" 
+                                   class="btn btn-primary btn-sm">
+                                    <i class="fas fa-plus me-1"></i>Добави връзка
+                                </a>
                             </div>
                             <div class="card-body">
                                 <div class="row g-3">
@@ -213,6 +217,39 @@
                                                             case MyFamilyTreeNet.Data.Models.RelationshipType.Grandchild:
                                                                 @("Внук/Внучка")
                                                                 break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.GreatGrandparent:
+                                                                @("Прадядо/Прабаба")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.GreatGrandchild:
+                                                                @("Правнук/Правнучка")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Uncle:
+                                                                @("Чичо/Вуйчо")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Aunt:
+                                                                @("Леля/Тетка")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Nephew:
+                                                                @("Племенник")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Niece:
+                                                                @("Племенничка")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.Cousin:
+                                                                @("Братовчед/Сестричка")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.StepParent:
+                                                                @("Доведен родител")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.StepChild:
+                                                                @("Доведено дете")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.StepSibling:
+                                                                @("Доведен брат/сестра")
+                                                                break;
+                                                            case MyFamilyTreeNet.Data.Models.RelationshipType.HalfSibling:
+                                                                @("Полубрат/Полусестра")
+                                                                break;
                                                             default:
                                                                 @("Друго")
                                                                 break;
@@ -224,18 +261,23 @@
                                                         <small class="text-muted fst-italic">@relationship.Notes</small>
                                                     }
                                                 </div>
-                                                @if (relationship.PrimaryMemberId == Model.Id)
-                                                {
-                                                    <a asp-action="Details" asp-route-id="@relationship.RelatedMemberId" class="btn btn-outline-primary btn-sm">
-                                                        <i class="fas fa-eye"></i>
+                                                <div class="d-flex gap-1">
+                                                    @if (relationship.PrimaryMemberId == Model.Id)
+                                                    {
+                                                        <a asp-action="Details" asp-route-id="@relationship.RelatedMemberId" class="btn btn-outline-primary btn-sm" title="Виж профил">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    }
+                                                    else
+                                                    {
+                                                        <a asp-action="Details" asp-route-id="@relationship.PrimaryMemberId" class="btn btn-outline-primary btn-sm" title="Виж профил">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    }
+                                                    <a asp-controller="RelationshipMvc" asp-action="Delete" asp-route-id="@relationship.Id" class="btn btn-outline-danger btn-sm" title="Изтрий връзка">
+                                                        <i class="fas fa-trash"></i>
                                                     </a>
-                                                }
-                                                else
-                                                {
-                                                    <a asp-action="Details" asp-route-id="@relationship.PrimaryMemberId" class="btn btn-outline-primary btn-sm">
-                                                        <i class="fas fa-eye"></i>
-                                                    </a>
-                                                }
+                                                </div>
                                             </div>
                                         </div>
                                     }
@@ -252,10 +294,9 @@
                                 <i class="fas fa-network-wired fa-3x text-muted mb-3"></i>
                                 <h5>Няма добавени семейни връзки</h5>
                                 <p class="text-muted mb-3">Добавете връзки с други членове на семейството за да се покажат тук.</p>
-                                <button class="btn btn-primary" disabled>
+                                <a asp-controller="RelationshipMvc" asp-action="Create" asp-route-primaryMemberId="@Model.Id" class="btn btn-primary">
                                     <i class="fas fa-plus me-1"></i>Добави връзка
-                                </button>
-                                <small class="d-block text-muted mt-2">Функционалността ще бъде добавена скоро</small>
+                                </a>
                             </div>
                         </div>
                     </div>

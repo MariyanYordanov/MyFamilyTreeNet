@@ -1,219 +1,336 @@
 @model MyFamilyTreeNet.Data.Models.Family
 @{
-    ViewData["Title"] = $"Детайли за {Model.Name}";
-    var statistics = ViewBag.Statistics;
-    var relationships = ViewBag.Relationships as List<MyFamilyTreeNet.Data.Models.Relationship>;
+    ViewData["Title"] = $"Семейство {Model.Name}";
+    var relationships = ViewBag.Relationships as List<MyFamilyTreeNet.Data.Models.Relationship> ?? new List<MyFamilyTreeNet.Data.Models.Relationship>();
+    var statistics = ViewBag.Statistics as dynamic;
+    var canEdit = ViewBag.CanEdit ?? false;
 }
 
-<div class="container-fluid py-4">
+<div class="container py-4">
     <!-- Header -->
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h1 class="mb-0">
-                        <i class="fas fa-users me-2"></i>@Model.Name
-                    </h1>
-                    <p class="text-muted mb-0">@(Model.Description ?? "Семейно дърво")</p>
-                </div>
-                <div class="d-flex gap-2">
-                    <button class="btn btn-outline-secondary" onclick="refreshTree()">
-                        <i class="fas fa-sync-alt me-1"></i>Обнови
-                    </button>
-                    <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-primary">
-                        <i class="fas fa-edit me-1"></i>Редактиране
-                    </a>
-                </div>
-            </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="text-primary">
+                <i class="fas fa-users me-2"></i>@Model.Name
+            </h1>
+            @if (!string.IsNullOrWhiteSpace(Model.Description))
+            {
+                <p class="text-muted mb-0">@Model.Description</p>
+            }
+        </div>
+        <div class="d-flex gap-2">
+            @if (canEdit)
+            {
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
+                    <i class="fas fa-edit me-1"></i>Редактирай
+                </a>
+                <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-primary">
+                    <i class="fas fa-user-plus me-1"></i>Добави член
+                </a>
+            }
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left me-1"></i>Назад
+            </a>
         </div>
     </div>
 
     <!-- Statistics Cards -->
-    <div class="row g-4 mb-4">
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-users fa-2x text-primary mb-2"></i>
-                    <h3 class="mb-0">@statistics.TotalMembers</h3>
-                    <small class="text-muted">Общо членове</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-heart fa-2x text-success mb-2"></i>
-                    <h3 class="mb-0">@statistics.AliveMembers</h3>
-                    <small class="text-muted">Живи</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-cross fa-2x text-secondary mb-2"></i>
-                    <h3 class="mb-0">@statistics.DeceasedMembers</h3>
-                    <small class="text-muted">Починали</small>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card border-0 shadow-sm h-100">
-                <div class="card-body text-center">
-                    <i class="fas fa-layer-group fa-2x text-info mb-2"></i>
-                    <h3 class="mb-0">@statistics.Generations</h3>
-                    <small class="text-muted">Поколения</small>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Family Tree Visualization -->
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow-sm">
-                <div class="card-header bg-white">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-sitemap me-2"></i>Семейно дърво
-                        </h5>
-                        <div class="d-flex gap-2">
-                            <small class="text-muted me-3">
-                                <i class="fas fa-circle text-success me-1"></i>Живи
-                                <i class="fas fa-circle text-secondary ms-2 me-1"></i>Починали
-                            </small>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="centerTree()">
-                                <i class="fas fa-expand-arrows-alt me-1"></i>Центриране
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-body p-0" style="height: 600px; overflow: hidden; position: relative;">
-                    <div id="family-tree-container" class="w-100 h-100" style="border: 1px solid #eee;"></div>
-                    
-                    @if (!Model.FamilyMembers.Any())
-                    {
-                        <div class="position-absolute top-50 start-50 translate-middle text-center">
-                            <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                            <h4>Няма добавени членове</h4>
-                            <p class="text-muted">Започнете като добавите първия член на семейството.</p>
-                            <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-primary">
-                                <i class="fas fa-user-plus me-1"></i>Добави член
-                            </a>
-                        </div>
-                    }
-                </div>
-                
-                @if (Model.FamilyMembers.Any())
-                {
-                    <div class="card-footer bg-light">
-                        <div class="row align-items-center">
-                            <div class="col-md-6">
-                                <small class="text-muted">
-                                    Кликнете върху член за да видите неговия профил. Използвайте мишката за навигация в дървото.
-                                </small>
-                            </div>
-                            <div class="col-md-6 text-end">
-                                <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-sm btn-primary">
-                                    <i class="fas fa-user-plus me-1"></i>Добави член
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <!-- Members List -->
-    @if (Model.FamilyMembers.Any())
+    @if (statistics != null)
     {
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card shadow-sm">
-                    <div class="card-header">
-                        <h5 class="mb-0">
-                            <i class="fas fa-list me-2"></i>Всички членове
-                        </h5>
-                    </div>
+        <div class="row mb-4">
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
                     <div class="card-body">
-                        <div class="row g-3">
-                            @foreach (var member in Model.FamilyMembers.OrderBy(m => m.FirstName))
-                            {
-                                <div class="col-lg-3 col-md-4 col-sm-6">
-                                    <div class="card border-0 bg-light h-100">
-                                        <div class="card-body p-3">
-                                            <div class="d-flex align-items-center">
-                                                <div class="rounded-circle d-flex align-items-center justify-content-center me-3" 
-                                                     style="width: 40px; height: 40px; color: white; font-weight: bold; background-color: @(member.DateOfDeath == null ? "#28a745" : "#6c757d")">
-                                                    @(member.FirstName.Substring(0, 1))@(member.LastName.Substring(0, 1))
-                                                </div>
-                                                <div class="flex-grow-1">
-                                                    <h6 class="mb-1">
-                                                        <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@member.Id" class="text-decoration-none">
-                                                            @member.FirstName @member.MiddleName @member.LastName
-                                                        </a>
-                                                    </h6>
-                                                    @if (member.DateOfBirth != null)
-                                                    {
-                                                        <small class="text-muted">
-                                                            @if (member.DateOfDeath != null)
-                                                            {
-                                                                @($"{member.DateOfBirth.Value.Year} - {member.DateOfDeath.Value.Year}")
-                                                            }
-                                                            else
-                                                            {
-                                                                @($"р. {member.DateOfBirth.Value.Year}")
-                                                            }
-                                                        </small>
-                                                    }
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        </div>
+                        <h3 class="mb-0">@statistics.TotalMembers</h3>
+                        <small class="text-muted">Общо членове</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="mb-0 text-success">@statistics.AliveMembers</h3>
+                        <small class="text-muted">Живи</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="mb-0 text-secondary">@statistics.DeceasedMembers</h3>
+                        <small class="text-muted">Починали</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="mb-0">@statistics.AverageAge</h3>
+                        <small class="text-muted">Средна възраст</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="mb-0">@statistics.Generations</h3>
+                        <small class="text-muted">Поколения</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-6 mb-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h3 class="mb-0">@Model.Stories.Count</h3>
+                        <small class="text-muted">Истории</small>
                     </div>
                 </div>
             </div>
         </div>
     }
-</div>
 
-@section Styles {
-    <link rel="stylesheet" href="~/css/family-tree.css" />
-}
+    <!-- Tabs -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#members" type="button">
+                <i class="fas fa-users me-1"></i>Членове (@Model.FamilyMembers.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tree" type="button">
+                <i class="fas fa-sitemap me-1"></i>Семейно дърво
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#photos" type="button">
+                <i class="fas fa-camera me-1"></i>Снимки (@Model.Photos.Count)
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#stories" type="button">
+                <i class="fas fa-book me-1"></i>Истории (@Model.Stories.Count)
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+        <!-- Members Tab -->
+        <div class="tab-pane fade show active" id="members" role="tabpanel">
+            @if (Model.FamilyMembers.Any())
+            {
+                <div class="row">
+                    @foreach (var member in Model.FamilyMembers.OrderBy(m => m.DateOfBirth))
+                    {
+                        <div class="col-md-4 col-sm-6 mb-3">
+                            <div class="card h-100">
+                                <div class="card-body">
+                                    <h5 class="card-title">
+                                        <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@member.Id" class="text-decoration-none">
+                                            @member.FirstName @member.MiddleName @member.LastName
+                                        </a>
+                                    </h5>
+                                    <p class="card-text">
+                                        @if (member.DateOfBirth.HasValue)
+                                        {
+                                            <small class="text-muted">
+                                                <i class="fas fa-birthday-cake me-1"></i>
+                                                @member.DateOfBirth.Value.ToString("dd.MM.yyyy")
+                                                @if (member.DateOfDeath.HasValue)
+                                                {
+                                                    <span> - @member.DateOfDeath.Value.ToString("dd.MM.yyyy")</span>
+                                                }
+                                                else
+                                                {
+                                                    <span class="badge bg-success ms-1">Жив</span>
+                                                }
+                                            </small>
+                                        }
+                                    </p>
+                                    @if (!string.IsNullOrWhiteSpace(member.Biography))
+                                    {
+                                        <p class="card-text small">
+                                            @(member.Biography.Length > 100 ? member.Biography.Substring(0, 100) + "..." : member.Biography)
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Все още няма добавени членове в това семейство.</p>
+                    @if (canEdit)
+                    {
+                        <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-primary">
+                            <i class="fas fa-user-plus me-1"></i>Добави първи член
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+
+        <!-- Tree Tab -->
+        <div class="tab-pane fade" id="tree" role="tabpanel">
+            @if (Model.FamilyMembers.Any())
+            {
+                <div class="card">
+                    <div class="card-body">
+                        <div id="family-tree-container" style="width: 100%; height: 600px; border: 1px solid #ddd;"></div>
+                        <div class="mt-3 text-center">
+                            <button class="btn btn-sm btn-outline-secondary" onclick="centerTree()">
+                                <i class="fas fa-compress me-1"></i>Центрирай
+                            </button>
+                            <span class="text-muted ms-3">Използвайте мишката за мащабиране и преместване</span>
+                        </div>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Добавете членове за да видите семейното дърво.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Photos Tab -->
+        <div class="tab-pane fade" id="photos" role="tabpanel">
+            @if (Model.Photos.Any())
+            {
+                <div class="row">
+                    @foreach (var photo in Model.Photos.OrderByDescending(p => p.DateTaken))
+                    {
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <div class="card">
+                                <img src="@photo.ImageUrl" class="card-img-top" alt="@photo.Title">
+                                <div class="card-body">
+                                    <h6 class="card-title">@photo.Title</h6>
+                                    @if (photo.DateTaken.HasValue)
+                                    {
+                                        <p class="card-text small text-muted">
+                                            @photo.DateTaken.Value.ToString("dd.MM.yyyy")
+                                        </p>
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Все още няма качени снимки.</p>
+                </div>
+            }
+        </div>
+
+        <!-- Stories Tab -->
+        <div class="tab-pane fade" id="stories" role="tabpanel">
+            @if (Model.Stories.Any())
+            {
+                @foreach (var story in Model.Stories.OrderByDescending(s => s.CreatedAt))
+                {
+                    <div class="card mb-3">
+                        <div class="card-body">
+                            <h5 class="card-title">@story.Title</h5>
+                            <p class="card-text">@story.Content</p>
+                            <p class="card-text">
+                                <small class="text-muted">
+                                    Създадена на @story.CreatedAt.ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                            </p>
+                        </div>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-book fa-3x text-muted mb-3"></i>
+                    <p class="text-muted">Все още няма написани истории.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="~/css/family-tree.css" />
+    <script src="~/js/family-tree.js"></script>
+    
     <script>
-        const familyId = @Model.Id;
-        const modelName = '@Model.Name';
-        
-        // Sample data for testing
-        const sampleData = [
-            { id: 1, firstName: 'Иван', lastName: 'Петров', birthDate: '1980-01-01', deathDate: null },
-            { id: 2, firstName: 'Мария', lastName: 'Петрова', birthDate: '1985-05-15', deathDate: null }
-        ];
-        
-        // Functions for buttons
-        function refreshTree() {
-            location.reload();
-        }
-        
-        function centerTree() {
-            if (typeof initializeFamilyTree === 'function') {
-                initializeFamilyTree(familyId, sampleData);
-            }
-        }
-        
-        // Initialize tree when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            if (typeof initializeFamilyTree === 'function') {
-                initializeFamilyTree(familyId, sampleData);
+            // Check if we should auto-open tree tab
+            const urlParams = new URLSearchParams(window.location.search);
+            const tab = urlParams.get('tab');
+            
+            if (tab === 'tree') {
+                const treeTab = document.querySelector('[data-bs-target="#tree"]');
+                if (treeTab) {
+                    const tabInstance = new bootstrap.Tab(treeTab);
+                    tabInstance.show();
+                }
+            }
+            
+            // Initialize family tree when tree tab is shown
+            const treeTab = document.querySelector('[data-bs-target="#tree"]');
+            if (treeTab) {
+                treeTab.addEventListener('shown.bs.tab', function() {
+                    loadFamilyTree();
+                });
+                
+                // If tree tab is already active (from URL), load immediately
+                if (tab === 'tree') {
+                    setTimeout(() => loadFamilyTree(), 100);
+                }
             }
         });
+
+        function loadFamilyTree() {
+            // Wait for the tab to fully render and become visible
+            setTimeout(() => {
+                const container = document.getElementById('family-tree-container');
+                if (!container) {
+                    console.error('Tree container not found');
+                    return;
+                }
+
+                // Check if container is visible
+                if (!container.offsetParent) {
+                    console.error('Tree container is not visible');
+                    // Try again after a longer delay
+                    setTimeout(loadFamilyTree, 300);
+                    return;
+                }
+                
+                console.log('Loading family tree data...');
+                fetch('/FamilyMvc/GetFamilyTreeData/@Model.Id')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Family tree data received:', data);
+                        if (data && data.id) {
+                            initializeFamilyTree(@Model.Id, [data]);
+                        } else {
+                            console.log('No valid tree data received');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error loading family tree data:', error);
+                    });
+            }, 200);
+        }
+
+        function centerTree() {
+            // This will be called from family-tree.js
+        }
     </script>
-    <script src="~/js/family-tree.js"></script>
 }

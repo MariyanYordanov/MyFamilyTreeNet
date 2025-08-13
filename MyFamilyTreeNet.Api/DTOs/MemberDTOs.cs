@@ -27,7 +27,6 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidDeathDate("DateOfBirth")]
         public DateTime? DateOfDeath { get; set; }
         
-        [ValidGender]
         public string? Gender { get; set; }
         
         [MaxLength(BioLength)]
@@ -69,7 +68,6 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidDeathDate("DateOfBirth")]
         public DateTime? DateOfDeath { get; set; }
         
-        [ValidGender]
         public string? Gender { get; set; }
         
         [MaxLength(BioLength)]
@@ -103,7 +101,6 @@ namespace MyFamilyTreeNet.Api.DTOs
         public DateTime? DateOfBirth { get; set; }
         public DateTime? DateOfDeath { get; set; }
         
-        [ValidGender]
         public string? Gender { get; set; }
         
         [MaxLength(BioLength)]

@@ -150,7 +150,13 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateMemberDto dto)
         {
+            _logger.LogInformation($"=== CREATE MEMBER STARTED ===");
+            _logger.LogInformation($"FirstName: {dto.FirstName}, MiddleName: {dto.MiddleName}, LastName: {dto.LastName}");
+            _logger.LogInformation($"FamilyId: {dto.FamilyId}, Gender: {dto.Gender}");
+            _logger.LogInformation($"DateOfBirth: {dto.DateOfBirth}, PlaceOfBirth: {dto.PlaceOfBirth}");
+            
             var currentUserId = GetCurrentUserId();
+            _logger.LogInformation($"CurrentUserId: {currentUserId}");
 
             // Verify family ownership
             var family = await _context.Families
@@ -170,6 +176,16 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             if (!dto.DateOfDeath.HasValue && !string.IsNullOrWhiteSpace(dto.PlaceOfDeath))
             {
                 ModelState.AddModelError("PlaceOfDeath", "Не може да има място на смърт без дата на смърт.");
+            }
+
+            _logger.LogInformation($"ModelState.IsValid: {ModelState.IsValid}");
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("=== MODELSTATE INVALID ===");
+                foreach (var error in ModelState)
+                {
+                    _logger.LogWarning($"Key: {error.Key}, Errors: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
             }
 
             if (ModelState.IsValid)
@@ -197,7 +213,15 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                     _context.FamilyMembers.Add(member);
                     var result = await _context.SaveChangesAsync();
                     
-                    _logger.LogInformation($"SaveChanges result: {result} records affected");
+                    _logger.LogInformation($"SaveChanges result: {result} records affected, Member ID: {member.Id}");
+
+                    if (result == 0)
+                    {
+                        _logger.LogError("SaveChanges returned 0 - no records were saved!");
+                        ModelState.AddModelError("", "Членът не беше запазен в базата данни!");
+                        await ReloadCreateViewData(dto.FamilyId, currentUserId);
+                        return View(dto);
+                    }
 
                     TempData["SuccessMessage"] = "Членът беше добавен успешно!";
                     return RedirectToAction("Details", "FamilyMvc", new { id = member.FamilyId });

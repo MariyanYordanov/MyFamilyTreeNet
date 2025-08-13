@@ -1,0 +1,120 @@
+@model MyFamilyTreeNet.Data.Models.Family
+@{
+    ViewData["Title"] = "Редактиране на семейство";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-edit me-2"></i>Редактиране на семейство
+                    </h2>
+                    <p class="text-muted mb-0">Променете информацията за семейството</p>
+                </div>
+                <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Основна информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Family Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">
+                                Име на семейството <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">
+                                Описание
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="form-text">
+                                <span id="description-counter">@(Model.Description?.Length ?? 0)</span>/1000 символа
+                            </div>
+                        </div>
+
+                        <!-- Privacy Setting -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="IsPublic" class="form-check-input" type="checkbox" />
+                                <label asp-for="IsPublic" class="form-check-label">
+                                    Публично семейство
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Ако е отметнато, семейството ще бъде видимо за всички потребители. 
+                                В противен случай ще бъде видимо само за вас.
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Запази промените
+                            </button>
+                            
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Family Info -->
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-info-circle me-2"></i>Информация за семейството</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Създадено на:</strong> @Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</p>
+                                <p class="mb-1"><strong>Членове:</strong> @Model.FamilyMembers.Count</p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-1"><strong>Снимки:</strong> @Model.Photos.Count</p>
+                                <p class="mb-1"><strong>Истории:</strong> @Model.Stories.Count</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        // Character counter for description
+        document.addEventListener('DOMContentLoaded', function() {
+            const descriptionInput = document.getElementById('Description');
+            const counter = document.getElementById('description-counter');
+            
+            if (descriptionInput && counter) {
+                descriptionInput.addEventListener('input', function() {
+                    counter.textContent = this.value.length;
+                });
+            }
+        });
+    </script>
+}

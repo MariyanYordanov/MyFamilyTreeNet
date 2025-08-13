@@ -1,13 +1,50 @@
 // Family Tree D3.js Implementation
 
-function initializeFamilyTree(familyId, members) {
+function getRelationshipText(relationshipType) {
+    switch(relationshipType) {
+        case 'Parent': return 'родител';
+        case 'Child': return 'дете';
+        case 'Spouse': return 'съпруг/а';
+        case 'Sibling': return 'брат/сестра';
+        case 'Grandparent': return 'дядо/баба';
+        case 'Grandchild': return 'внук/внучка';
+        case 'GreatGrandparent': return 'прадядо/прабаба';
+        case 'GreatGrandchild': return 'правнук/правнучка';
+        case 'Uncle': return 'чичо/вуйчо';
+        case 'Aunt': return 'леля/тетка';
+        case 'Nephew': return 'племенник';
+        case 'Niece': return 'племенничка';
+        case 'Cousin': return 'братовчед/сестричка';
+        case 'StepParent': return 'доведен родител';
+        case 'StepChild': return 'доведено дете';
+        case 'StepSibling': return 'доведен брат/сестра';
+        case 'HalfSibling': return 'полубрат/полусестра';
+        case 'Other': return 'друго';
+        default: return 'връзка';
+    }
+}
+
+function initializeFamilyTree(familyId, treeData) {
     // Check if D3.js is loaded
     if (typeof d3 === 'undefined') {
         console.error('D3.js is not loaded');
         return;
     }
+    
     const container = d3.select('#family-tree-container');
-    const width = container.node().getBoundingClientRect().width;
+    if (!container.node()) {
+        console.error('Family tree container not found');
+        return;
+    }
+    
+    const containerNode = container.node();
+    if (!containerNode.offsetParent) {
+        console.error('Family tree container is hidden');
+        return;
+    }
+    
+    const rect = containerNode.getBoundingClientRect();
+    const width = rect.width > 0 ? rect.width : 800; // fallback width
     const height = 600;
 
     // Clear existing content
@@ -30,47 +67,8 @@ function initializeFamilyTree(familyId, members) {
 
     svg.call(zoom);
 
-    // Convert flat members array to hierarchical data
-    function buildHierarchy(members) {
-        const memberMap = {};
-        members.forEach(m => {
-            memberMap[m.id] = {
-                id: m.id,
-                name: `${m.firstName} ${m.lastName}`,
-                birthDate: m.birthDate,
-                deathDate: m.deathDate,
-                children: []
-            };
-        });
-
-        // Build parent-child relationships
-        const roots = [];
-        members.forEach(m => {
-            if (m.fatherId || m.motherId) {
-                const parentId = m.fatherId || m.motherId;
-                if (memberMap[parentId]) {
-                    memberMap[parentId].children.push(memberMap[m.id]);
-                } else {
-                    roots.push(memberMap[m.id]);
-                }
-            } else {
-                roots.push(memberMap[m.id]);
-            }
-        });
-
-        // Return single root or create artificial root
-        if (roots.length === 1) {
-            return roots[0];
-        } else {
-            return {
-                id: 'root',
-                name: 'Семейство',
-                children: roots
-            };
-        }
-    }
-
-    const root = d3.hierarchy(buildHierarchy(members));
+    // Use the tree data directly (already hierarchical from server)
+    const root = d3.hierarchy(treeData[0]);
     
     // Create tree layout
     const treeLayout = d3.tree()
@@ -82,11 +80,49 @@ function initializeFamilyTree(familyId, members) {
     const links = g.selectAll('.link')
         .data(root.links())
         .enter()
-        .append('path')
+        .append('g')
+        .attr('class', 'link-group');
+
+    // Add the link path
+    links.append('path')
         .attr('class', 'link')
         .attr('d', d3.linkVertical()
             .x(d => d.x)
             .y(d => d.y));
+
+    // Add relationship labels on links
+    links.append('text')
+        .attr('class', 'link-label')
+        .attr('x', d => (d.source.x + d.target.x) / 2)
+        .attr('y', d => (d.source.y + d.target.y) / 2 - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '10px')
+        .attr('fill', '#666')
+        .attr('background', 'white')
+        .text(d => {
+            // Try to determine relationship from data
+            if (d.target.data.relationshipType) {
+                return getRelationshipText(d.target.data.relationshipType);
+            }
+            return 'връзка';
+        });
+
+    // Add white background to labels for better readability
+    links.selectAll('.link-label')
+        .each(function() {
+            const bbox = this.getBBox();
+            d3.select(this.parentNode)
+                .insert('rect', '.link-label')
+                .attr('x', bbox.x - 2)
+                .attr('y', bbox.y - 1)
+                .attr('width', bbox.width + 4)
+                .attr('height', bbox.height + 2)
+                .attr('fill', 'white')
+                .attr('fill-opacity', 0.8)
+                .attr('stroke', '#ddd')
+                .attr('stroke-width', 0.5)
+                .attr('rx', 2);
+        });
 
     // Draw nodes
     const nodes = g.selectAll('.node')
@@ -115,9 +151,9 @@ function initializeFamilyTree(familyId, members) {
         .attr('font-size', '10px')
         .attr('fill', '#666')
         .text(d => {
-            const birth = d.data.birthDate ? new Date(d.data.birthDate).getFullYear() : '?';
-            const death = d.data.deathDate ? new Date(d.data.deathDate).getFullYear() : '';
-            return death ? `${birth} - ${death}` : `р. ${birth}`;
+            const birth = d.data.birthYear || '?';
+            const death = d.data.deathYear || '';
+            return death ? `${birth} - ${death}` : d.data.isAlive !== false ? `р. ${birth}` : birth;
         });
 
     // Add click handlers
@@ -152,17 +188,25 @@ function initializeFamilyTree(familyId, members) {
 
     // Handle window resize
     window.addEventListener('resize', function() {
-        const newWidth = container.node().getBoundingClientRect().width;
-        svg.attr('width', newWidth);
-        treeLayout.size([newWidth - 100, height - 100]);
-        treeLayout(root);
-        
-        // Update links and nodes positions
-        links.attr('d', d3.linkVertical()
-            .x(d => d.x)
-            .y(d => d.y));
-        nodes.attr('transform', d => `translate(${d.x},${d.y})`);
-        
-        centerTree();
+        if (containerNode.offsetParent) {
+            const newRect = containerNode.getBoundingClientRect();
+            const newWidth = newRect.width > 0 ? newRect.width : width;
+            svg.attr('width', newWidth);
+            treeLayout.size([newWidth - 100, height - 100]);
+            treeLayout(root);
+            
+            // Update links and nodes positions
+            links.select('path').attr('d', d3.linkVertical()
+                .x(d => d.x)
+                .y(d => d.y));
+            
+            links.select('.link-label')
+                .attr('x', d => (d.source.x + d.target.x) / 2)
+                .attr('y', d => (d.source.y + d.target.y) / 2 - 5);
+            
+            nodes.attr('transform', d => `translate(${d.x},${d.y})`);
+            
+            centerTree();
+        }
     });
 }

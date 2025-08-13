@@ -1,0 +1,141 @@
+@model MyFamilyTreeNet.Data.Models.Relationship
+@{
+    ViewData["Title"] = "Изтриване на връзка";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2 class="text-danger">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Изтриване на връзка
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Сигурни ли сте, че искате да изтриете тази връзка?
+                    </p>
+                </div>
+                <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@Model.PrimaryMemberId" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+
+            <!-- Relationship Info Card -->
+            <div class="card border-warning mb-4">
+                <div class="card-header bg-warning bg-opacity-10">
+                    <h5 class="mb-0 text-warning">
+                        <i class="fas fa-link me-2"></i>Информация за връзката
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex align-items-center">
+                        <!-- Primary Member -->
+                        <div class="text-center flex-fill">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white mb-2" 
+                                 style="width: 60px; height: 60px; font-size: 1.2rem; font-weight: bold; background-color: #007bff;">
+                                @Model.PrimaryMember.FirstName.Substring(0, 1)@Model.PrimaryMember.LastName.Substring(0, 1)
+                            </div>
+                            <h6 class="mb-1">@Model.PrimaryMember.FirstName @Model.PrimaryMember.LastName</h6>
+                            <small class="text-muted">Основен член</small>
+                        </div>
+
+                        <!-- Relationship Arrow -->
+                        <div class="text-center px-3">
+                            <i class="fas fa-arrow-right fa-2x text-muted"></i>
+                            <div class="mt-2">
+                                <span class="badge bg-secondary">
+                                    @switch (Model.RelationshipType)
+                                    {
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Parent:
+                                            @("Родител")
+                                            break;
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Child:
+                                            @("Дете")
+                                            break;
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Spouse:
+                                            @("Съпруг/а")
+                                            break;
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Sibling:
+                                            @("Брат/Сестра")
+                                            break;
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Grandparent:
+                                            @("Дядо/Баба")
+                                            break;
+                                        case MyFamilyTreeNet.Data.Models.RelationshipType.Grandchild:
+                                            @("Внук/Внучка")
+                                            break;
+                                        default:
+                                            @("Друго")
+                                            break;
+                                    }
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Related Member -->
+                        <div class="text-center flex-fill">
+                            <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white mb-2" 
+                                 style="width: 60px; height: 60px; font-size: 1.2rem; font-weight: bold; background-color: #28a745;">
+                                @Model.RelatedMember.FirstName.Substring(0, 1)@Model.RelatedMember.LastName.Substring(0, 1)
+                            </div>
+                            <h6 class="mb-1">@Model.RelatedMember.FirstName @Model.RelatedMember.LastName</h6>
+                            <small class="text-muted">Свързан член</small>
+                        </div>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(Model.Notes))
+                    {
+                        <hr>
+                        <div class="text-center">
+                            <h6><i class="fas fa-sticky-note me-2"></i>Бележки</h6>
+                            <p class="text-muted fst-italic mb-0">@Model.Notes</p>
+                        </div>
+                    }
+
+                    <hr>
+                    <div class="text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-calendar me-1"></i>
+                            Създадена на: @Model.CreatedAt.ToString("dd MMMM yyyy", new System.Globalization.CultureInfo("bg-BG"))
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Warning Message -->
+            <div class="alert alert-danger" role="alert">
+                <h6><i class="fas fa-exclamation-triangle me-2"></i>Внимание!</h6>
+                <p class="mb-0">
+                    Изтриването на тази връзка е необратимо действие. След изтриването връзката няма да може да бъде възстановена.
+                </p>
+            </div>
+
+            <!-- Action Buttons -->
+            <form asp-action="Delete" method="post">
+                <input asp-for="Id" type="hidden" />
+                <div class="d-flex gap-2 justify-content-center">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-1"></i>Да, изтрий връзката
+                    </button>
+                    <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@Model.PrimaryMemberId" 
+                       class="btn btn-outline-secondary">
+                        <i class="fas fa-times me-1"></i>Не, отказвам
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-focus the delete button after a delay
+        setTimeout(() => {
+            const deleteBtn = document.querySelector('button[type="submit"]');
+            if (deleteBtn) {
+                deleteBtn.focus();
+            }
+        }, 500);
+    </script>
+}

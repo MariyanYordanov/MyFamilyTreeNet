@@ -47,10 +47,10 @@ namespace MyFamilyTreeNet.Api.Validation
                 }
             }
 
-            // Check for valid characters (letters, spaces, hyphens, apostrophes)
-            if (!Regex.IsMatch(familyName, @"^[a-zA-Z\s\-']+$"))
+            // Check for valid characters (letters including Cyrillic, spaces, hyphens, apostrophes)
+            if (!Regex.IsMatch(familyName, @"^[\p{L}\s\-']+$"))
             {
-                ErrorMessage = "Family name can only contain letters, spaces, hyphens, and apostrophes.";
+                ErrorMessage = "Името на семейството може да съдържа само букви, интервали, тирета и апострофи.";
                 return false;
             }
 

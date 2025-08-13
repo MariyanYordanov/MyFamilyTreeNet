@@ -41,6 +41,10 @@
     text-anchor: middle;
 }
 
+.link-group {
+    transition: all 0.3s ease;
+}
+
 .link {
     fill: none;
     stroke: #666;
@@ -48,7 +52,21 @@
     transition: stroke 0.3s ease;
 }
 
-.link:hover {
+.link-group:hover .link {
     stroke: #007bff;
     stroke-width: 2px;
+}
+
+.link-label {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    fill: #495057;
+    text-anchor: middle;
+    pointer-events: none;
+}
+
+.link-group:hover .link-label {
+    fill: #007bff;
+    font-weight: 700;
 }

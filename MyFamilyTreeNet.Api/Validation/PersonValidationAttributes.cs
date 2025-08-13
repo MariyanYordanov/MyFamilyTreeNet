@@ -110,23 +110,23 @@ namespace MyFamilyTreeNet.Api.Validation
             }
 
             // Check maximum length
-            if (name.Length > 30)
+            if (name.Length > 50)
             {
-                ErrorMessage = "Name cannot exceed 30 characters.";
+                ErrorMessage = "Името не може да надвишава 50 символа.";
                 return false;
             }
 
-            // Check for valid characters (letters, spaces, hyphens, apostrophes)
-            if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[a-zA-Z\s\-']+$"))
+            // Check for valid characters (letters including Cyrillic, spaces, hyphens, apostrophes)
+            if (!System.Text.RegularExpressions.Regex.IsMatch(name, @"^[\p{L}\s\-']+$"))
             {
-                ErrorMessage = "Name can only contain letters, spaces, hyphens, and apostrophes.";
+                ErrorMessage = "Името може да съдържа само букви, интервали, тирета и апострофи.";
                 return false;
             }
 
             // Must start with a letter
             if (!char.IsLetter(name[0]))
             {
-                ErrorMessage = "Name must start with a letter.";
+                ErrorMessage = "Името трябва да започва с буква.";
                 return false;
             }
 

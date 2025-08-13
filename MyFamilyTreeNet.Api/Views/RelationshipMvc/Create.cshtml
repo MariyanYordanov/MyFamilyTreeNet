@@ -1,0 +1,144 @@
+@model MyFamilyTreeNet.Data.Models.Relationship
+@{
+    ViewData["Title"] = "Добавяне на връзка";
+    var primaryMember = ViewBag.PrimaryMember as MyFamilyTreeNet.Data.Models.FamilyMember;
+    var relatedMembers = ViewBag.RelatedMembers as SelectList;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-link me-2"></i>Добавяне на връзка
+                    </h2>
+                    <p class="text-muted mb-0">
+                        Създайте връзка за <strong>@primaryMember?.FirstName @primaryMember?.MiddleName @primaryMember?.LastName</strong>
+                    </p>
+                </div>
+                <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@primaryMember?.Id" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Информация за връзката
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <input asp-for="PrimaryMemberId" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Related Member -->
+                        <div class="mb-3">
+                            <label asp-for="RelatedMemberId" class="form-label">
+                                Свързан член <span class="text-danger">*</span>
+                            </label>
+                            @if (relatedMembers != null && relatedMembers.Any())
+                            {
+                                @Html.DropDownListFor(m => m.RelatedMemberId, relatedMembers, "-- Изберете член --", new { @class = "form-select" })
+                            }
+                            else
+                            {
+                                <p class="text-muted">Няма други членове в това семейство.</p>
+                            }
+                            <span asp-validation-for="RelatedMemberId" class="text-danger"></span>
+                        </div>
+
+                        <!-- Relationship Type -->
+                        <div class="mb-3">
+                            <label asp-for="RelationshipType" class="form-label">
+                                Тип на връзката <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="RelationshipType" class="form-select">
+                                <option value="">-- Изберете тип --</option>
+                                <optgroup label="Основни връзки">
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Parent">Родител</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Child">Дете</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Spouse">Съпруг/а</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Sibling">Брат/Сестра</option>
+                                </optgroup>
+                                <optgroup label="Дядовци и бабички">
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Grandparent">Дядо/Баба</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Grandchild">Внук/Внучка</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.GreatGrandparent">Прадядо/Прабаба</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.GreatGrandchild">Правнук/Правнучка</option>
+                                </optgroup>
+                                <optgroup label="Чичовци, лели и племенници">
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Uncle">Чичо/Вуйчо</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Aunt">Леля/Тетка</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Nephew">Племенник</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Niece">Племенничка</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Cousin">Братовчед/Сестричка</option>
+                                </optgroup>
+                                <optgroup label="Доведени родственици">
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.StepParent">Доведен родител</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.StepChild">Доведено дете</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.StepSibling">Доведен брат/сестра</option>
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.HalfSibling">Полубрат/Полусестра</option>
+                                </optgroup>
+                                <optgroup label="Други">
+                                    <option value="@MyFamilyTreeNet.Data.Models.RelationshipType.Other">Друго</option>
+                                </optgroup>
+                            </select>
+                            <span asp-validation-for="RelationshipType" class="text-danger"></span>
+                            <div class="form-text">
+                                Изберете как @primaryMember?.FirstName е свързан/а с избрания член
+                            </div>
+                        </div>
+
+                        <!-- Notes -->
+                        <div class="mb-4">
+                            <label asp-for="Notes" class="form-label">
+                                Бележки
+                            </label>
+                            <textarea asp-for="Notes" class="form-control" rows="3" 
+                                      placeholder="Допълнителна информация за връзката..."></textarea>
+                            <span asp-validation-for="Notes" class="text-danger"></span>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            @if (relatedMembers != null && relatedMembers.Any())
+                            {
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save me-1"></i>Създай връзка
+                                </button>
+                            }
+                            
+                            <a asp-controller="MemberMvc" asp-action="Details" asp-route-id="@primaryMember?.Id" 
+                               class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Полезни съвети</h6>
+                        <ul class="mb-0 small">
+                            <li>Връзката описва как първият член е свързан с втория</li>
+                            <li>Например: Ако Иван е бащата на Мария, изберете "Родител"</li>
+                            <li>Можете да добавите допълнителни бележки за по-сложни връзки</li>
+                            <li>Всяка връзка може да бъде премахната по-късно</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
