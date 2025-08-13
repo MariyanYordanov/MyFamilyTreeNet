@@ -1,0 +1,174 @@
+@model MyFamilyTreeNet.Api.Models.ViewModels.ProfileViewModel
+@{
+    ViewData["Title"] = "Моят профил";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-user me-2"></i>Моят профил
+                    </h2>
+                    <p class="text-muted mb-0">Управление на личните данни</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-outline-warning" asp-action="ChangePassword">
+                        <i class="fas fa-key me-1"></i>Смени парола
+                    </a>
+                    <a class="btn btn-outline-secondary" href="/">
+                        <i class="fas fa-home me-1"></i>Начало
+                    </a>
+                </div>
+            </div>
+
+            <div class="row">
+                <!-- Profile Info -->
+                <div class="col-md-8">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-info-circle me-2"></i>Лична информация
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post">
+                                <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+                                <!-- Email (readonly) -->
+                                <div class="mb-3">
+                                    <label asp-for="Email" class="form-label">
+                                        <i class="fas fa-envelope me-1"></i>Имейл адрес
+                                    </label>
+                                    <input asp-for="Email" class="form-control" readonly />
+                                    <div class="form-text">Имейл адресът не може да бъде променен.</div>
+                                </div>
+
+                                <!-- Name Fields -->
+                                <div class="row mb-3">
+                                    <div class="col-md-4">
+                                        <label asp-for="FirstName" class="form-label">
+                                            Име <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="FirstName" class="form-control" placeholder="Иван" />
+                                        <span asp-validation-for="FirstName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="MiddleName" class="form-label">Презиме</label>
+                                        <input asp-for="MiddleName" class="form-control" placeholder="Петров" />
+                                        <span asp-validation-for="MiddleName" class="text-danger"></span>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label asp-for="LastName" class="form-label">
+                                            Фамилия <span class="text-danger">*</span>
+                                        </label>
+                                        <input asp-for="LastName" class="form-control" placeholder="Иванов" />
+                                        <span asp-validation-for="LastName" class="text-danger"></span>
+                                    </div>
+                                </div>
+
+                                <!-- Date of Birth -->
+                                <div class="mb-3">
+                                    <label asp-for="DateOfBirth" class="form-label">
+                                        <i class="fas fa-birthday-cake me-1"></i>Дата на раждане
+                                    </label>
+                                    <input asp-for="DateOfBirth" type="date" class="form-control" />
+                                    <span asp-validation-for="DateOfBirth" class="text-danger"></span>
+                                </div>
+
+                                <!-- Bio -->
+                                <div class="mb-4">
+                                    <label asp-for="Bio" class="form-label">
+                                        <i class="fas fa-pen me-1"></i>Биография
+                                    </label>
+                                    <textarea asp-for="Bio" class="form-control" rows="4" 
+                                              placeholder="Разкажете за себе си..."></textarea>
+                                    <span asp-validation-for="Bio" class="text-danger"></span>
+                                    <div class="form-text">
+                                        <span id="bio-counter">@(Model.Bio?.Length ?? 0)</span>/500 символа
+                                    </div>
+                                </div>
+
+                                <!-- Action Buttons -->
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save me-1"></i>Запази промените
+                                    </button>
+                                    <button type="reset" class="btn btn-outline-secondary">
+                                        <i class="fas fa-undo me-1"></i>Нулиране
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Info -->
+                <div class="col-md-4">
+                    <div class="card shadow-sm">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <i class="fas fa-user-cog me-2"></i>Информация за акаунта
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <small class="text-muted">Регистриран на:</small>
+                                <div>@Model.CreatedAt.ToString("dd.MM.yyyy HH:mm")</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <small class="text-muted">Пълно име:</small>
+                                <div>@Model.FirstName @Model.MiddleName @Model.LastName</div>
+                            </div>
+                            
+                            @if (Model.DateOfBirth.HasValue)
+                            {
+                                <div class="mb-3">
+                                    <small class="text-muted">Възраст:</small>
+                                    <div>
+                                        @{
+                                            var age = DateTime.Now.Year - Model.DateOfBirth.Value.Year;
+                                            if (DateTime.Now.Date < Model.DateOfBirth.Value.AddYears(age))
+                                                age--;
+                                        }
+                                        @age години
+                                    </div>
+                                </div>
+                            }
+
+                            <hr />
+                            
+                            <div class="d-grid">
+                                <a asp-action="ChangePassword" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-key me-1"></i>Смени парола
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        // Character counter for bio
+        document.addEventListener('DOMContentLoaded', function() {
+            const bioInput = document.querySelector('textarea[name="Bio"]');
+            const counter = document.getElementById('bio-counter');
+            
+            if (bioInput && counter) {
+                bioInput.addEventListener('input', function() {
+                    counter.textContent = this.value.length;
+                });
+            }
+        });
+    </script>
+}

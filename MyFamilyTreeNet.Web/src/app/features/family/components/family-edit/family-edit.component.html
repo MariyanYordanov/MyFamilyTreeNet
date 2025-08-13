@@ -1,0 +1,111 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-edit me-2"></i>
+            Редактиране на семейство
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Зареждане...</span>
+            </div>
+            <p class="mt-3 text-muted">Зареждане на данните за семейството...</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error && !isLoading" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close float-end" (click)="error = null"></button>
+          </div>
+
+          <!-- Edit Form -->
+          <form *ngIf="!isLoading && family" [formGroup]="familyForm" (ngSubmit)="onSubmit()" novalidate>
+            <!-- Family Name -->
+            <div class="mb-3">
+              <label for="name" class="form-label">
+                <i class="fas fa-home me-1"></i>
+                Име на семейството <span class="text-danger">*</span>
+              </label>
+              <input 
+                type="text" 
+                class="form-control" 
+                id="name" 
+                formControlName="name"
+                [class.is-invalid]="name?.invalid && name?.touched"
+                placeholder="Въведете име на семейството">
+              
+              <div class="invalid-feedback" *ngIf="name?.invalid && name?.touched">
+                <div *ngIf="name?.errors?.['required']">Името на семейството е задължително</div>
+                <div *ngIf="name?.errors?.['minlength']">Името трябва да е поне 2 символа</div>
+                <div *ngIf="name?.errors?.['maxlength']">Името не може да е повече от 100 символа</div>
+              </div>
+            </div>
+
+            <!-- Family Description -->
+            <div class="mb-3">
+              <label for="description" class="form-label">
+                <i class="fas fa-align-left me-1"></i>
+                Описание
+              </label>
+              <textarea 
+                class="form-control" 
+                id="description" 
+                formControlName="description"
+                rows="4"
+                [class.is-invalid]="description?.invalid && description?.touched"
+                placeholder="Въведете описание на семейството (незадължително)"></textarea>
+              
+              <div class="invalid-feedback" *ngIf="description?.invalid && description?.touched">
+                <div *ngIf="description?.errors?.['maxlength']">Описанието не може да е повече от 500 символа</div>
+              </div>
+            </div>
+
+            <!-- Privacy Settings -->
+            <div class="mb-4">
+              <div class="form-check">
+                <input 
+                  class="form-check-input" 
+                  type="checkbox" 
+                  id="isPublic" 
+                  formControlName="isPublic">
+                <label class="form-check-label" for="isPublic">
+                  <i class="fas fa-globe me-1"></i>
+                  Публично семейство
+                  <small class="text-muted d-block">
+                    Когато е отметнато, семейството ще бъде видимо за всички потребители
+                  </small>
+                </label>
+              </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="onCancel()"
+                [disabled]="isSubmitting">
+                <i class="fas fa-times me-1"></i>
+                Отказ
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="familyForm.invalid || isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!isSubmitting" class="fas fa-save me-1"></i>
+                {{ isSubmitting ? 'Запазване...' : 'Запази промените' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -81,7 +81,12 @@ export enum RelationshipType {
   Sibling = 3,
   Grandparent = 4,
   Grandchild = 5,
-  Other = 6
+  Uncle = 6,
+  Aunt = 7,
+  Cousin = 8,
+  Nephew = 9,
+  Niece = 10,
+  Other = 11
 }
 
 export interface FamilyTree {

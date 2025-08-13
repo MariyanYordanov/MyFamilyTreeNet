@@ -1,0 +1,62 @@
+@model MyFamilyTreeNet.Data.Models.FamilyMember
+@{
+    ViewData["Title"] = "Изтриване на член";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Изтриване на член
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="text-danger"><strong>Внимание!</strong> Сигурни ли сте, че искате да изтриете този член?</p>
+                    
+                    <h6>@Model.FirstName @Model.MiddleName @Model.LastName</h6>
+                    <p class="text-muted">Семейство: @Model.Family.Name</p>
+                    
+                    <div class="alert alert-warning">
+                        <p class="mb-0">Това действие ще изтрие напълно информацията за този член и не може да бъде отменено.</p>
+                    </div>
+
+                    @if (ViewBag.HasRelationships == true)
+                    {
+                        <div class="alert alert-danger">
+                            <h6><i class="fas fa-exclamation-triangle me-2"></i>Този член има семейни връзки!</h6>
+                            <p>Членът има <strong>@ViewBag.RelationshipsCount</strong> семейни връзки, които също ще бъдат изтрити.</p>
+                            <p class="mb-0">Сигурни ли сте, че искате да продължите?</p>
+                        </div>
+                    }
+                    
+                    <form asp-action="Delete" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        @if (ViewBag.HasRelationships == true)
+                        {
+                            <input name="deleteRelationships" type="hidden" value="true" />
+                        }
+                        <div class="d-flex gap-2">
+                            @if (ViewBag.HasRelationships == true)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-1"></i>Да, изтрий с връзките
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash me-1"></i>Да, изтрий
+                                </button>
+                            }
+                            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

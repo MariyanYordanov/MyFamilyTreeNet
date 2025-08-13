@@ -118,14 +118,15 @@ namespace MyFamilyTreeNet.Api.Controllers
             var family = new Family
             {
                 Name = updateFamilyDto.Name,
-                Description = updateFamilyDto.Description
+                Description = updateFamilyDto.Description,
+                IsPublic = updateFamilyDto.IsPublic
             };
 
             var updatedFamily = await _familyService.UpdateFamilyAsync(id, family);
             if (updatedFamily == null)
                 return NotFound(new { message = "Family not found" });
 
-            return NoContent();
+            return Ok(updatedFamily);
         }
 
         [HttpDelete("{id}")]

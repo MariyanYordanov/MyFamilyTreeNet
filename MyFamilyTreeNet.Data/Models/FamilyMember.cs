@@ -37,7 +37,8 @@ namespace MyFamilyTreeNet.Data.Models
         [MaxLength(BioLength)]
         public string? Biography { get; set; }
 
-        public string? ProfileImageUrl { get; set; }
+        [MaxLength(500)]
+        public string? ProfilePictureUrl { get; set; }
 
         [Required]
         public string AddedByUserId { get; set; } = string.Empty;

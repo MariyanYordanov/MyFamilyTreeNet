@@ -14,6 +14,9 @@ namespace MyFamilyTreeNet.Data.Models
         [MaxLength(DescriptionLength)]
         public string? Description { get; set; }
 
+        [MaxLength(500)]
+        public string? PhotoUrl { get; set; }
+
         public bool IsPublic { get; set; } = true;
 
         [Required]

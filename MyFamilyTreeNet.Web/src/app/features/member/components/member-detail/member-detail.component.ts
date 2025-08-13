@@ -5,11 +5,12 @@ import { Subject, takeUntil, switchMap } from 'rxjs';
 import { MemberService } from '../../services/member.service';
 import { Member, MemberRelationships } from '../../models/member.model';
 import { DateFormatPipe, NameFormatPipe } from '../../../../shared/pipes';
+import { MemberRelationshipsComponent } from '../member-relationships/member-relationships.component';
 
 @Component({
   selector: 'app-member-detail',
   standalone: true,
-  imports: [CommonModule, RouterModule, DateFormatPipe, NameFormatPipe],
+  imports: [CommonModule, RouterModule, DateFormatPipe, NameFormatPipe, MemberRelationshipsComponent],
   templateUrl: './member-detail.component.html',
   styleUrl: './member-detail.component.scss'
 })
@@ -22,6 +23,7 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   
   memberId: number | null = null;
+  familyId = signal<number | null>(null);
 
   constructor(
     private route: ActivatedRoute,
@@ -62,6 +64,7 @@ export class MemberDetailComponent implements OnInit, OnDestroy {
     return this.memberService.getMember(memberId).pipe(
       switchMap(member => {
         this.member.set(member);
+        this.familyId.set(member.familyId); // Set family ID for relationships component
         return this.memberService.getMemberRelationships(memberId);
       }),
       takeUntil(this.destroy$)

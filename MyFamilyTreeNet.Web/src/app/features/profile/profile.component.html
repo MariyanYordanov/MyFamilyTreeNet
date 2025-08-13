@@ -1,0 +1,222 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-user me-2"></i>
+            Моят профил
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Success/Error Messages -->
+          @if (successMessage()) {
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+              <i class="fas fa-check-circle me-2"></i>
+              {{ successMessage() }}
+              <button type="button" class="btn-close" (click)="successMessage.set('')"></button>
+            </div>
+          }
+          
+          @if (errorMessage()) {
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ errorMessage() }}
+              <button type="button" class="btn-close" (click)="errorMessage.set('')"></button>
+            </div>
+          }
+
+          <!-- Profile Information -->
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <div class="profile-avatar mb-3">
+                @if (currentUser()?.profilePictureUrl) {
+                  <img [src]="currentUser()?.profilePictureUrl" alt="Profile" class="rounded-circle img-fluid" style="width: 150px; height: 150px; object-fit: cover;">
+                } @else {
+                  <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 150px; height: 150px;">
+                    <i class="fas fa-user fa-4x text-white"></i>
+                  </div>
+                }
+              </div>
+              <h5>{{ currentUser()?.firstName }} {{ currentUser()?.middleName }} {{ currentUser()?.lastName }}</h5>
+              <p class="text-muted">{{ currentUser()?.email }}</p>
+              @if (currentUser()?.dateOfBirth) {
+                <p class="text-muted">
+                  <i class="fas fa-birthday-cake me-2"></i>
+                  {{ formatDate(currentUser()?.dateOfBirth) }}
+                </p>
+              }
+            </div>
+            
+            <div class="col-md-8">
+              <!-- Profile Form -->
+              <form [formGroup]="profileForm" (ngSubmit)="updateProfile()">
+                <div class="mb-3">
+                  <label for="firstName" class="form-label">Име *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="firstName"
+                    formControlName="firstName"
+                    [class.is-invalid]="profileForm.get('firstName')?.invalid && profileForm.get('firstName')?.touched">
+                  @if (profileForm.get('firstName')?.hasError('required') && profileForm.get('firstName')?.touched) {
+                    <div class="invalid-feedback">Името е задължително</div>
+                  }
+                </div>
+
+                <div class="mb-3">
+                  <label for="middleName" class="form-label">Презиме *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="middleName"
+                    formControlName="middleName"
+                    [class.is-invalid]="profileForm.get('middleName')?.invalid && profileForm.get('middleName')?.touched">
+                  @if (profileForm.get('middleName')?.hasError('required') && profileForm.get('middleName')?.touched) {
+                    <div class="invalid-feedback">Презимето е задължително</div>
+                  }
+                </div>
+
+                <div class="mb-3">
+                  <label for="lastName" class="form-label">Фамилия *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="lastName"
+                    formControlName="lastName"
+                    [class.is-invalid]="profileForm.get('lastName')?.invalid && profileForm.get('lastName')?.touched">
+                  @if (profileForm.get('lastName')?.hasError('required') && profileForm.get('lastName')?.touched) {
+                    <div class="invalid-feedback">Фамилията е задължителна</div>
+                  }
+                </div>
+
+                <div class="mb-3">
+                  <label for="dateOfBirth" class="form-label">Дата на раждане</label>
+                  <input 
+                    type="date" 
+                    class="form-control" 
+                    id="dateOfBirth"
+                    formControlName="dateOfBirth">
+                </div>
+
+                <div class="mb-3">
+                  <label for="bio" class="form-label">Биография</label>
+                  <textarea 
+                    class="form-control" 
+                    id="bio"
+                    rows="4"
+                    formControlName="bio"
+                    placeholder="Разкажете нещо за себе си..."
+                    maxlength="1000"></textarea>
+                  <div class="form-text">{{ profileForm.get('bio')?.value?.length || 0 }}/1000 символа</div>
+                </div>
+
+                <div class="d-flex justify-content-between">
+                  <button type="submit" class="btn btn-primary" [disabled]="profileForm.invalid || isLoading()">
+                    @if (isLoading()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="fas fa-save me-2"></i>
+                    Запази промените
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <!-- Change Password Section -->
+          <div class="row">
+            <div class="col-md-12">
+              <h5 class="mb-3">
+                <i class="fas fa-key me-2"></i>
+                Промяна на паролата
+              </h5>
+              
+              <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+                <div class="row">
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label for="currentPassword" class="form-label">Текуща парола *</label>
+                      <div class="input-group">
+                        <input 
+                          [type]="showCurrentPassword() ? 'text' : 'password'"
+                          class="form-control" 
+                          id="currentPassword"
+                          formControlName="currentPassword"
+                          [class.is-invalid]="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
+                        <button type="button" class="btn btn-outline-secondary" (click)="toggleCurrentPassword()">
+                          <i [class]="showCurrentPassword() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                      </div>
+                      @if (passwordForm.get('currentPassword')?.hasError('required') && passwordForm.get('currentPassword')?.touched) {
+                        <div class="invalid-feedback">Текущата парола е задължителна</div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label for="newPassword" class="form-label">Нова парола *</label>
+                      <div class="input-group">
+                        <input 
+                          [type]="showNewPassword() ? 'text' : 'password'"
+                          class="form-control" 
+                          id="newPassword"
+                          formControlName="newPassword"
+                          [class.is-invalid]="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
+                        <button type="button" class="btn btn-outline-secondary" (click)="toggleNewPassword()">
+                          <i [class]="showNewPassword() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                      </div>
+                      @if (passwordForm.get('newPassword')?.hasError('required') && passwordForm.get('newPassword')?.touched) {
+                        <div class="invalid-feedback">Новата парола е задължителна</div>
+                      }
+                      @if (passwordForm.get('newPassword')?.hasError('minlength') && passwordForm.get('newPassword')?.touched) {
+                        <div class="invalid-feedback">Паролата трябва да е поне 8 символа</div>
+                      }
+                    </div>
+                  </div>
+
+                  <div class="col-md-4">
+                    <div class="mb-3">
+                      <label for="confirmPassword" class="form-label">Потвърди паролата *</label>
+                      <div class="input-group">
+                        <input 
+                          [type]="showConfirmPassword() ? 'text' : 'password'"
+                          class="form-control" 
+                          id="confirmPassword"
+                          formControlName="confirmPassword"
+                          [class.is-invalid]="passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.touched">
+                        <button type="button" class="btn btn-outline-secondary" (click)="toggleConfirmPassword()">
+                          <i [class]="showConfirmPassword() ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                        </button>
+                      </div>
+                      @if (passwordForm.get('confirmPassword')?.hasError('required') && passwordForm.get('confirmPassword')?.touched) {
+                        <div class="invalid-feedback">Потвърждението на паролата е задължително</div>
+                      }
+                      @if (passwordForm.get('confirmPassword')?.hasError('passwordMismatch') && passwordForm.get('confirmPassword')?.touched) {
+                        <div class="invalid-feedback">Паролите не съвпадат</div>
+                      }
+                    </div>
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-end">
+                  <button type="submit" class="btn btn-warning" [disabled]="passwordForm.invalid || isChangingPassword()">
+                    @if (isChangingPassword()) {
+                      <span class="spinner-border spinner-border-sm me-2"></span>
+                    }
+                    <i class="fas fa-key me-2"></i>
+                    Промени паролата
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

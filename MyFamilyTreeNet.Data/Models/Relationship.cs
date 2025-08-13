@@ -24,9 +24,9 @@ namespace MyFamilyTreeNet.Data.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
 
-        public virtual FamilyMember PrimaryMember { get; set; } = null!;
-        public virtual FamilyMember RelatedMember { get; set; } = null!;
-        public virtual User CreatedBy { get; set; } = null!;
+        public virtual FamilyMember? PrimaryMember { get; set; }
+        public virtual FamilyMember? RelatedMember { get; set; }
+        public virtual User? CreatedBy { get; set; }
     }
 
     public enum RelationshipType

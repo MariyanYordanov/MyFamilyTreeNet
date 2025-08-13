@@ -1,0 +1,115 @@
+@{
+    ViewData["Title"] = "Качване на снимка";
+    var member = ViewBag.Member as MyFamilyTreeNet.Data.Models.FamilyMember;
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-camera me-2"></i>Качване на снимка
+                    </h2>
+                    <p class="text-muted mb-0">Качете снимка за @member.FirstName @member.LastName</p>
+                </div>
+                <a class="btn btn-outline-secondary" asp-controller="MemberMvc" asp-action="Details" asp-route-id="@member.Id">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+
+            <!-- Current Photo -->
+            @if (!string.IsNullOrEmpty(member.ProfilePictureUrl))
+            {
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-image me-2"></i>Текуща снимка
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <img src="@member.ProfilePictureUrl" alt="@member.FirstName @member.LastName" 
+                             class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                    </div>
+                </div>
+            }
+
+            <!-- Upload Form -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-upload me-2"></i>Качване на нова снимка
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data" asp-action="MemberPhoto" asp-route-memberId="@member.Id">
+                        <div class="mb-3">
+                            <label for="photo" class="form-label">
+                                Изберете снимка <span class="text-danger">*</span>
+                            </label>
+                            <input type="file" class="form-control" id="photo" name="photo" accept=".jpg,.jpeg,.png,.gif,.webp" required />
+                            <div class="form-text">
+                                Позволени формати: JPG, JPEG, PNG, GIF, WEBP. Максимален размер: 5MB.
+                            </div>
+                        </div>
+
+                        <!-- Preview -->
+                        <div class="mb-3">
+                            <div id="imagePreview" class="text-center" style="display: none;">
+                                <img id="previewImg" class="img-thumbnail" style="max-width: 200px; max-height: 200px;" />
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-upload me-1"></i>Качи снимката
+                            </button>
+                            <a class="btn btn-outline-secondary" asp-controller="MemberMvc" asp-action="Details" asp-route-id="@member.Id">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Полезни съвети</h6>
+                        <ul class="mb-0 small">
+                            <li>За най-добри резултати използвайте квадратни снимки (1:1 съотношение)</li>
+                            <li>Препоръчителен размер: минимум 200x200 пиксела</li>
+                            <li>Ако качите нова снимка, старата ще бъде заменена</li>
+                            <li>Снимката ще се показва в профила и семейното дърво</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Image preview functionality
+        document.getElementById('photo').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewImg = document.getElementById('previewImg');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    preview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            } else {
+                preview.style.display = 'none';
+            }
+        });
+    </script>
+}

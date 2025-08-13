@@ -138,41 +138,13 @@
             </div>
           </div>
 
-          @if (relationships() && relationships()!.relationships.length > 0) {
+          <!-- Relationships Management Component -->
+          @if (familyId()) {
             <div class="col-12">
-              <div class="card shadow-sm">
-                <div class="card-header">
-                  <h5 class="mb-0">
-                    <i class="fas fa-network-wired me-2"></i>Семейни връзки
-                  </h5>
-                </div>
-                <div class="card-body">
-                  <div class="row g-3">
-                    @for (relationship of relationships()!.relationships; track relationship.id) {
-                      <div class="col-md-6">
-                        <div class="d-flex align-items-center p-3 border rounded">
-                          <div class="flex-grow-1">
-                            <h6 class="mb-1">
-                              {{ relationship.primaryMemberId === member()!.id ? relationship.relatedMemberName : relationship.primaryMemberName }}
-                            </h6>
-                            <small class="text-muted">
-                              {{ getRelationshipTypeText(relationship.relationshipType) }}
-                            </small>
-                            @if (relationship.notes) {
-                              <br>
-                              <small class="text-muted fst-italic">{{ relationship.notes }}</small>
-                            }
-                          </div>
-                          <a [routerLink]="['/members', relationship.primaryMemberId === member()!.id ? relationship.relatedMemberId : relationship.primaryMemberId]" 
-                             class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-eye"></i>
-                          </a>
-                        </div>
-                      </div>
-                    }
-                  </div>
-                </div>
-              </div>
+              <app-member-relationships 
+                [currentMember]="member" 
+                [familyId]="familyId()!">
+              </app-member-relationships>
             </div>
           }
 

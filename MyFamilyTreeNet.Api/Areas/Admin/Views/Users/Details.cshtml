@@ -191,8 +191,43 @@
                 </div>
                 <div class="card-body">
                     <p class="text-danger small mb-3">
-                        Изтриването на потребител е необратимо действие.
+                        Блокирането и изтриването на потребител е необратимо действие.
                     </p>
+                    
+                    <!-- Lock/Unlock User -->
+                    <div class="d-grid gap-2 mb-3">
+                        @{
+                            bool isLocked = user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.UtcNow;
+                        }
+                        @if (isLocked)
+                        {
+                            <form method="post" asp-action="ToggleLock" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <button type="submit" class="btn btn-success btn-sm w-100">
+                                    <i class="fas fa-unlock me-2"></i>
+                                    Отблокирай потребител
+                                </button>
+                            </form>
+                            <div class="alert alert-warning">
+                                <small>
+                                    <i class="fas fa-lock me-1"></i>
+                                    Потребителят е блокиран до @user.LockoutEnd.Value.ToString("dd.MM.yyyy HH:mm")
+                                </small>
+                            </div>
+                        }
+                        else
+                        {
+                            <form method="post" asp-action="ToggleLock" style="display: inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="userId" value="@user.Id" />
+                                <button type="submit" class="btn btn-warning btn-sm w-100">
+                                    <i class="fas fa-lock me-2"></i>
+                                    Блокирай потребител
+                                </button>
+                            </form>
+                        }
+                    </div>
                     
                     @if (familiesCreated > 0)
                     {

@@ -1,0 +1,50 @@
+<div class="tree-wrapper">
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="d-flex justify-content-center align-items-center" style="height: 300px;">
+    <div class="text-center">
+      <div class="spinner-border text-primary mb-3" role="status">
+        <span class="visually-hidden">Зареждане...</span>
+      </div>
+      <p class="text-muted">Зареждане на семейното дърво...</p>
+    </div>
+  </div>
+
+  <!-- Error State -->
+  <div *ngIf="error && !isLoading" class="alert alert-danger" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    {{ error }}
+    <button type="button" class="btn btn-sm btn-outline-danger ms-2" (click)="refresh()">
+      <i class="fas fa-redo me-1"></i>Опитай отново
+    </button>
+  </div>
+
+  <!-- Empty State -->
+  <div *ngIf="!isLoading && !error && !treeData" class="text-center py-5">
+    <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+    <p class="text-muted">Добавете членове за да видите семейното дърво.</p>
+  </div>
+
+  <!-- Tree Visualization -->
+  <div *ngIf="!isLoading && !error && treeData" class="tree-container-wrapper">
+    <div class="tree-controls mb-3 d-flex justify-content-between align-items-center">
+      <div class="tree-info">
+        <small class="text-muted">
+          <i class="fas fa-mouse me-1"></i>
+          Използвайте мишката за мащабиране и преместване
+        </small>
+      </div>
+      <div class="tree-actions">
+        <button class="btn btn-sm btn-outline-secondary me-2" (click)="centerTree()">
+          <i class="fas fa-compress me-1"></i>Центрирай
+        </button>
+        <button class="btn btn-sm btn-outline-primary" (click)="refresh()">
+          <i class="fas fa-sync me-1"></i>Обнови
+        </button>
+      </div>
+    </div>
+    
+    <div class="tree-container" #treeContainer>
+      <!-- SVG will be dynamically created here by D3.js -->
+    </div>
+  </div>
+</div>

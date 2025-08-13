@@ -18,7 +18,7 @@ import {
   providedIn: 'root'
 })
 export class MemberService {
-  private readonly apiUrl = `${environment.apiUrl}/member`;
+  private readonly apiUrl = `${environment.apiUrl}/api/Member`;
   private membersSubject = new BehaviorSubject<Member[]>([]);
   private searchSubject = new BehaviorSubject<string>('');
 
@@ -105,6 +105,13 @@ export class MemberService {
 
   getFamilyTree(familyId: number): Observable<FamilyTree> {
     return this.http.get<FamilyTree>(`${this.apiUrl}/family/${familyId}/tree`);
+  }
+
+  // Get members by family ID (convenience method)
+  getMembersByFamily(familyId: number): Observable<Member[]> {
+    return this.getMembers({ familyId }).pipe(
+      map(response => response.members)
+    );
   }
 
   searchMembers(searchTerm: string): void {

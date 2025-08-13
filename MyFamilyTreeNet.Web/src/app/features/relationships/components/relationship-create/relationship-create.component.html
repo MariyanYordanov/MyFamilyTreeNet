@@ -1,0 +1,150 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="card shadow">
+        <div class="card-header bg-primary text-white">
+          <h4 class="mb-0">
+            <i class="fas fa-link me-2"></i>
+            Създаване на връзка
+          </h4>
+        </div>
+        <div class="card-body">
+          <!-- Loading State -->
+          <div *ngIf="isLoading" class="text-center py-4">
+            <div class="spinner-border text-primary" role="status">
+              <span class="visually-hidden">Зареждане...</span>
+            </div>
+            <p class="mt-3 text-muted">Зареждане на данните...</p>
+          </div>
+
+          <!-- Error State -->
+          <div *ngIf="error && !isLoading" class="alert alert-danger" role="alert">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            {{ error }}
+            <button type="button" class="btn-close float-end" (click)="error = null"></button>
+          </div>
+
+          <!-- Primary Member Info -->
+          <div *ngIf="primaryMember && !isLoading" class="alert alert-info mb-4">
+            <h6 class="mb-2">
+              <i class="fas fa-user me-2"></i>
+              Основен член:
+            </h6>
+            <strong>{{ primaryMember.firstName }} {{ primaryMember.middleName }} {{ primaryMember.lastName }}</strong>
+            <div class="mt-1">
+              <small class="text-muted">
+                <i class="fas fa-calendar me-1"></i>
+                {{ primaryMember.dateOfBirth | date:'dd.MM.yyyy' }}
+                <span *ngIf="primaryMember.dateOfDeath">
+                  - {{ primaryMember.dateOfDeath | date:'dd.MM.yyyy' }}
+                </span>
+              </small>
+            </div>
+          </div>
+
+          <!-- Relationship Form -->
+          <form *ngIf="!isLoading && primaryMember" [formGroup]="relationshipForm" (ngSubmit)="onSubmit()" novalidate>
+            <!-- Related Member Selection -->
+            <div class="mb-3">
+              <label for="relatedMemberId" class="form-label">
+                <i class="fas fa-user me-1"></i>
+                Свързан член <span class="text-danger">*</span>
+              </label>
+              <select 
+                class="form-select" 
+                id="relatedMemberId" 
+                formControlName="relatedMemberId"
+                [class.is-invalid]="relatedMemberId?.invalid && relatedMemberId?.touched">
+                <option value="">Изберете член</option>
+                <option *ngFor="let member of availableMembers" [value]="member.id">
+                  {{ member.firstName }} {{ member.middleName }} {{ member.lastName }}
+                  <span *ngIf="member.dateOfBirth">
+                    ({{ member.dateOfBirth | date:'yyyy' }}{{ member.dateOfDeath ? ' - ' + (member.dateOfDeath | date:'yyyy') : '' }})
+                  </span>
+                </option>
+              </select>
+              
+              <div class="invalid-feedback" *ngIf="relatedMemberId?.invalid && relatedMemberId?.touched">
+                <div *ngIf="relatedMemberId?.errors?.['required']">Изборът на свързан член е задължителен</div>
+              </div>
+            </div>
+
+            <!-- Relationship Type -->
+            <div class="mb-3">
+              <label for="relationshipType" class="form-label">
+                <i class="fas fa-sitemap me-1"></i>
+                Тип връзка <span class="text-danger">*</span>
+              </label>
+              <select 
+                class="form-select" 
+                id="relationshipType" 
+                formControlName="relationshipType"
+                [class.is-invalid]="relationshipType?.invalid && relationshipType?.touched">
+                <option value="">Изберете тип връзка</option>
+                <option *ngFor="let type of relationshipTypes" [value]="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+              
+              <div class="invalid-feedback" *ngIf="relationshipType?.invalid && relationshipType?.touched">
+                <div *ngIf="relationshipType?.errors?.['required']">Изборът на тип връзка е задължителен</div>
+              </div>
+            </div>
+
+            <!-- Relationship Preview -->
+            <div *ngIf="getRelationshipPreview()" class="alert alert-success mb-3">
+              <h6 class="mb-1">
+                <i class="fas fa-eye me-2"></i>
+                Преглед на връзката:
+              </h6>
+              <strong>{{ getRelationshipPreview() }}</strong>
+            </div>
+
+            <!-- Notes -->
+            <div class="mb-4">
+              <label for="notes" class="form-label">
+                <i class="fas fa-sticky-note me-1"></i>
+                Бележки
+              </label>
+              <textarea 
+                class="form-control" 
+                id="notes" 
+                formControlName="notes"
+                rows="3"
+                [class.is-invalid]="notes?.invalid && notes?.touched"
+                placeholder="Допълнителни бележки за връзката (незадължително)"></textarea>
+              
+              <div class="invalid-feedback" *ngIf="notes?.invalid && notes?.touched">
+                <div *ngIf="notes?.errors?.['maxlength']">Бележките не могат да са повече от 500 символа</div>
+              </div>
+              
+              <small class="form-text text-muted">
+                Можете да добавите допълнителна информация за връзката
+              </small>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex gap-2 justify-content-end">
+              <button 
+                type="button" 
+                class="btn btn-outline-secondary"
+                (click)="onCancel()"
+                [disabled]="isSubmitting">
+                <i class="fas fa-times me-1"></i>
+                Отказ
+              </button>
+              <button 
+                type="submit" 
+                class="btn btn-primary"
+                [disabled]="relationshipForm.invalid || isSubmitting">
+                <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
+                <i *ngIf="!isSubmitting" class="fas fa-save me-1"></i>
+                {{ isSubmitting ? 'Създаване...' : 'Създай връзка' }}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

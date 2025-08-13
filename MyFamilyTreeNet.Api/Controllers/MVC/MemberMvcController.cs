@@ -280,6 +280,11 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 return RedirectToAction(nameof(Index));
             }
 
+            // Remove validation errors for navigation properties
+            ModelState.Remove("AddedByUserId");
+            ModelState.Remove("AddedBy");
+            ModelState.Remove("Family");
+
             // Verify family ownership
             var family = await _context.Families
                 .FirstOrDefaultAsync(f => f.Id == member.FamilyId && f.CreatedByUserId == currentUserId);
@@ -352,7 +357,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, bool deleteRelationships = false)
         {
             var currentUserId = GetCurrentUserId();
             var member = await _context.FamilyMembers
@@ -361,14 +366,24 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
             if (member != null)
             {
-                // Check for relationships
-                var hasRelationships = await _context.Relationships
-                    .AnyAsync(r => r.PrimaryMemberId == id || r.RelatedMemberId == id);
+                // Get all relationships for this member
+                var relationships = await _context.Relationships
+                    .Where(r => r.PrimaryMemberId == id || r.RelatedMemberId == id)
+                    .ToListAsync();
 
-                if (hasRelationships)
+                if (relationships.Any() && !deleteRelationships)
                 {
-                    TempData["ErrorMessage"] = "Не може да се изтрие член, който има семейни връзки. Моля премахнете връзките първо.";
-                    return RedirectToAction(nameof(Delete), new { id });
+                    TempData["ErrorMessage"] = "Не може да се изтрие член, който има семейни връзки. Моля потвърдете изтриването на връзките.";
+                    ViewBag.HasRelationships = true;
+                    ViewBag.RelationshipsCount = relationships.Count;
+                    return View("Delete", member);
+                }
+
+                // Delete relationships if requested
+                if (relationships.Any())
+                {
+                    _context.Relationships.RemoveRange(relationships);
+                    _logger.LogInformation("Deleted {Count} relationships for member {MemberId}", relationships.Count, id);
                 }
 
                 _context.FamilyMembers.Remove(member);

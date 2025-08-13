@@ -1,0 +1,61 @@
+<div class="container-fluid py-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2>
+        <i class="fas fa-cog me-2"></i>
+        Системни настройки
+      </h2>
+      <p class="text-muted">Конфигурация на системата</p>
+    </div>
+  </div>
+
+  <div class="alert alert-warning" role="alert">
+    <i class="fas fa-exclamation-triangle me-2"></i>
+    <strong>Внимание:</strong> Този компонент също е lazy-loaded за демонстрация на optimization техниките.
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">Bundle Size Optimization</h6>
+        </div>
+        <div class="card-body">
+          <p>Използвани техники:</p>
+          <ul class="list-group list-group-flush">
+            <li class="list-group-item">✅ D3.js Tree-shaking</li>
+            <li class="list-group-item">✅ Lazy Loading Routes</li>
+            <li class="list-group-item">✅ Standalone Components</li>
+            <li class="list-group-item">⏳ CSS Purging (следва)</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header">
+          <h6 class="mb-0">Performance Metrics</h6>
+        </div>
+        <div class="card-body">
+          <div class="mb-3">
+            <label class="form-label">Initial Bundle:</label>
+            <div class="progress">
+              <div class="progress-bar bg-success" role="progressbar" style="width: 75%">
+                Optimized
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Lazy Chunks:</label>
+            <div class="progress">
+              <div class="progress-bar bg-info" role="progressbar" style="width: 90%">
+                Excellent
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

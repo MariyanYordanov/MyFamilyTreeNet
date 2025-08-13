@@ -25,11 +25,8 @@
             <p class="text-muted mb-0">{{ family()!.description || 'Семейно дърво' }}</p>
           </div>
           <div class="d-flex gap-2">
-            <button class="btn btn-outline-secondary" (click)="refreshTree()" [disabled]="loading()">
+            <button class="btn btn-outline-secondary" (click)="refreshData()" [disabled]="loading()">
               <i class="fas fa-sync-alt me-1"></i>Обнови
-            </button>
-            <button class="btn btn-outline-primary" (click)="exportTree()">
-              <i class="fas fa-download me-1"></i>Експорт
             </button>
             <a [routerLink]="['/families', familyId, 'edit']" class="btn btn-primary">
               <i class="fas fa-edit me-1"></i>Редактиране
@@ -78,68 +75,45 @@
       </div>
     </div>
 
-    <div class="row">
-      <div class="col-12">
-        <div class="card shadow-sm">
-          <div class="card-header bg-white">
-            <div class="d-flex justify-content-between align-items-center">
-              <h5 class="mb-0">
-                <i class="fas fa-sitemap me-2"></i>Семейно дърво
-              </h5>
-              <div class="d-flex gap-2">
-                <small class="text-muted me-3">
-                  <i class="fas fa-circle text-success me-1"></i>Живи
-                  <i class="fas fa-circle text-secondary ms-2 me-1"></i>Починали
-                </small>
-                <button class="btn btn-sm btn-outline-secondary" onclick="document.getElementById('family-tree-container').scrollIntoView({behavior: 'smooth', block: 'center'})">
-                  <i class="fas fa-expand-arrows-alt me-1"></i>Центриране
-                </button>
-              </div>
-            </div>
-          </div>
-          <div class="card-body p-0" style="height: 600px; overflow: hidden; position: relative;">
-            <div id="family-tree-container" class="w-100 h-100" style="border: 1px solid #eee;"></div>
-            
-            @if (members().length === 0) {
-              <div class="position-absolute top-50 start-50 translate-middle text-center">
-                <i class="fas fa-users fa-4x text-muted mb-3"></i>
-                <h4>Няма добавени членове</h4>
-                <p class="text-muted">Започнете като добавите първия член на семейството.</p>
-                <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-primary">
+    <!-- Tabs Navigation -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+      <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="members-tab" data-bs-toggle="tab" data-bs-target="#members" type="button" role="tab">
+          <i class="fas fa-users me-1"></i>Членове ({{ statistics().totalMembers }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="tree-tab" data-bs-toggle="tab" data-bs-target="#tree" type="button" role="tab">
+          <i class="fas fa-sitemap me-1"></i>Семейно дърво
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="photos-tab" data-bs-toggle="tab" data-bs-target="#photos" type="button" role="tab">
+          <i class="fas fa-camera me-1"></i>Снимки ({{ family()!.photos?.length || 0 }})
+        </button>
+      </li>
+      <li class="nav-item" role="presentation">
+        <button class="nav-link" id="stories-tab" data-bs-toggle="tab" data-bs-target="#stories" type="button" role="tab">
+          <i class="fas fa-book me-1"></i>Истории ({{ family()!.stories?.length || 0 }})
+        </button>
+      </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div class="tab-content">
+      <!-- Members Tab -->
+      <div class="tab-pane fade show active" id="members" role="tabpanel">
+        @if (members().length > 0) {
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <div class="d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                  <i class="fas fa-list me-2"></i>Всички членове
+                </h5>
+                <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-sm btn-primary">
                   <i class="fas fa-user-plus me-1"></i>Добави член
                 </a>
               </div>
-            }
-          </div>
-          
-          @if (members().length > 0) {
-            <div class="card-footer bg-light">
-              <div class="row align-items-center">
-                <div class="col-md-6">
-                  <small class="text-muted">
-                    Кликнете върху член за да видите неговия профил. Използвайте мишката за навигация в дървото.
-                  </small>
-                </div>
-                <div class="col-md-6 text-end">
-                  <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-sm btn-primary">
-                    <i class="fas fa-user-plus me-1"></i>Добави член
-                  </a>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
-      </div>
-    </div>
-
-    @if (members().length > 0) {
-      <div class="row mt-4">
-        <div class="col-12">
-          <div class="card shadow-sm">
-            <div class="card-header">
-              <h5 class="mb-0">
-                <i class="fas fa-list me-2"></i>Всички членове
-              </h5>
             </div>
             <div class="card-body">
               <div class="row g-3">
@@ -182,10 +156,54 @@
               </div>
             </div>
           </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="fas fa-users fa-4x text-muted mb-3"></i>
+            <h4>Няма добавени членове</h4>
+            <p class="text-muted">Започнете като добавите първия член на семейството.</p>
+            <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-primary">
+              <i class="fas fa-user-plus me-1"></i>Добави член
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Tree Tab -->
+      <div class="tab-pane fade" id="tree" role="tabpanel">
+        @if (members().length > 0) {
+          <div class="card shadow-sm">
+            <div class="card-body p-3">
+              <app-family-tree [familyId]="familyId!"></app-family-tree>
+            </div>
+          </div>
+        } @else {
+          <div class="text-center py-5">
+            <i class="fas fa-sitemap fa-3x text-muted mb-3"></i>
+            <p class="text-muted">Добавете членове за да видите семейното дърво.</p>
+            <a [routerLink]="['/members/create']" [queryParams]="{familyId: familyId}" class="btn btn-primary">
+              <i class="fas fa-user-plus me-1"></i>Добави член
+            </a>
+          </div>
+        }
+      </div>
+
+      <!-- Photos Tab -->
+      <div class="tab-pane fade" id="photos" role="tabpanel">
+        <div class="text-center py-5">
+          <i class="fas fa-camera fa-3x text-muted mb-3"></i>
+          <h4>Снимки</h4>
+          <p class="text-muted">Тази функционалност ще бъде добавена скоро.</p>
         </div>
       </div>
-    }
+
+      <!-- Stories Tab -->
+      <div class="tab-pane fade" id="stories" role="tabpanel">
+        <div class="text-center py-5">
+          <i class="fas fa-book fa-3x text-muted mb-3"></i>
+          <h4>Семейни истории</h4>
+          <p class="text-muted">Тази функционалност ще бъде добавена скоро.</p>
+        </div>
+      </div>
+    </div>
   }
 </div>
-
-<script src="https://d3js.org/d3.v7.min.js"></script>

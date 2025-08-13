@@ -15,7 +15,7 @@ import {
   providedIn: 'root'
 })
 export class FamilyService {
-  private readonly apiUrl = `${environment.apiUrl}/api/families`;
+  private readonly apiUrl = `${environment.apiUrl}/api/Family`;
   private familiesSubject = new BehaviorSubject<Family[]>([]);
   private selectedFamilySubject = new BehaviorSubject<Family | null>(null);
 
@@ -36,8 +36,19 @@ export class FamilyService {
       if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
     }
 
-    return this.http.get<FamilyListResponse>(this.apiUrl, { params: httpParams })
+    return this.http.get<Family[]>(this.apiUrl, { params: httpParams })
       .pipe(
+        map(families => {
+          // Convert array response to expected FamilyListResponse format
+          const response: FamilyListResponse = {
+            families: families,
+            totalCount: families.length,
+            page: 1,
+            pageSize: families.length,
+            totalPages: 1
+          };
+          return response;
+        }),
         tap(response => this.familiesSubject.next(response.families)),
         catchError(this.handleError<FamilyListResponse>('getFamilies'))
       );
@@ -70,8 +81,9 @@ export class FamilyService {
   }
 
   // Update an existing family
-  updateFamily(familyData: FamilyUpdateRequest): Observable<Family> {
-    return this.http.put<Family>(`${this.apiUrl}/${familyData.id}`, familyData)
+  updateFamily(id: number, familyData: Omit<FamilyUpdateRequest, 'id'>): Observable<Family> {
+    const updateRequest = { ...familyData, id };
+    return this.http.put<Family>(`${this.apiUrl}/${id}`, updateRequest)
       .pipe(
         tap(updatedFamily => {
           const currentFamilies = this.familiesSubject.value;
@@ -136,6 +148,14 @@ export class FamilyService {
   // Get current selected family value
   getSelectedFamily(): Family | null {
     return this.selectedFamilySubject.value;
+  }
+
+  // Get family tree data for visualization
+  getFamilyTreeData(familyId: number): Observable<any> {
+    return this.http.get<any>(`${environment.apiUrl}/FamilyMvc/GetFamilyTreeData/${familyId}`)
+      .pipe(
+        catchError(this.handleError<any>('getFamilyTreeData'))
+      );
   }
 
   // Clear all cached data

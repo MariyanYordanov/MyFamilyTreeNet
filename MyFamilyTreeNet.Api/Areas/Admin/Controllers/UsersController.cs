@@ -65,10 +65,12 @@ namespace MyFamilyTreeNet.Api.Areas.Admin.Controllers
                 foreach (var user in users)
                 {
                     var roles = await _userManager.GetRolesAsync(user);
+                    var isLocked = await _userManager.IsLockedOutAsync(user);
                     usersWithRoles.Add(new
                     {
                         User = user,
                         Roles = roles,
+                        IsLocked = isLocked,
                         FamilyCount = await _context.Families.CountAsync(f => f.CreatedByUserId == user.Id)
                     });
                 }
@@ -165,6 +167,63 @@ namespace MyFamilyTreeNet.Api.Areas.Admin.Controllers
             {
                 _logger.LogError(ex, "Error toggling role {Role} for user {UserId}", role, userId);
                 TempData["ErrorMessage"] = "Възникна грешка при промяната на ролята.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        // POST: /Admin/Users/ToggleLock
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ToggleLock(string userId)
+        {
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    TempData["ErrorMessage"] = "Потребителят не е намерен.";
+                    return RedirectToAction(nameof(Index));
+                }
+
+                // Check if user is locked
+                bool isLocked = await _userManager.IsLockedOutAsync(user);
+                
+                if (isLocked)
+                {
+                    // Unlock user
+                    var result = await _userManager.SetLockoutEndDateAsync(user, null);
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = $"Потребителят {user.FirstName} {user.LastName} беше отблокиран.";
+                        _logger.LogInformation("User {UserId} unlocked by admin", userId);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Възникна грешка при отблокирането на потребителя.";
+                    }
+                }
+                else
+                {
+                    // Lock user for 100 years (effectively permanent)
+                    var lockoutEnd = DateTimeOffset.UtcNow.AddYears(100);
+                    var result = await _userManager.SetLockoutEndDateAsync(user, lockoutEnd);
+                    if (result.Succeeded)
+                    {
+                        TempData["SuccessMessage"] = $"Потребителят {user.FirstName} {user.LastName} беше блокиран.";
+                        _logger.LogInformation("User {UserId} locked by admin", userId);
+                    }
+                    else
+                    {
+                        TempData["ErrorMessage"] = "Възникна грешка при блокирането на потребителя.";
+                    }
+                }
+
+                return RedirectToAction(nameof(Details), new { id = userId });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error toggling lock status for user {UserId}", userId);
+                TempData["ErrorMessage"] = "Възникна грешка при промяната на статуса на потребителя.";
                 return RedirectToAction(nameof(Index));
             }
         }

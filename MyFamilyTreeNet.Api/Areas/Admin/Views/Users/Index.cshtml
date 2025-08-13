@@ -89,6 +89,10 @@
                                 {
                                     <i class="fas fa-exclamation-circle text-warning ms-1" title="Непотвърден email"></i>
                                 }
+                                @if (userInfo.IsLocked)
+                                {
+                                    <span class="badge bg-danger ms-1">Блокиран</span>
+                                }
                             </td>
                             <td>
                                 @if (userInfo.Roles.Any())

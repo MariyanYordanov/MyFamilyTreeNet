@@ -25,6 +25,65 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             return User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         }
 
+        private Relationship? CreateReverseRelationship(Relationship originalRelationship, string userId)
+        {
+            RelationshipType? reverseType = GetReverseRelationshipType(originalRelationship.RelationshipType);
+            
+            if (reverseType == null)
+                return null;
+
+            return new Relationship
+            {
+                PrimaryMemberId = originalRelationship.RelatedMemberId,
+                RelatedMemberId = originalRelationship.PrimaryMemberId,
+                RelationshipType = reverseType.Value,
+                Notes = !string.IsNullOrEmpty(originalRelationship.Notes) 
+                    ? $"Автоматично създадена обратна връзка: {originalRelationship.Notes}"
+                    : "Автоматично създадена обратна връзка",
+                CreatedByUserId = userId,
+                CreatedAt = DateTime.UtcNow
+            };
+        }
+
+        private bool IsSymmetricRelationship(RelationshipType type)
+        {
+            return type switch
+            {
+                RelationshipType.Spouse => true,
+                RelationshipType.Sibling => true,
+                RelationshipType.Cousin => true,
+                RelationshipType.StepSibling => true,
+                RelationshipType.HalfSibling => true,
+                _ => false
+            };
+        }
+
+        private RelationshipType? GetReverseRelationshipType(RelationshipType originalType)
+        {
+            return originalType switch
+            {
+                RelationshipType.Parent => RelationshipType.Child,
+                RelationshipType.Child => RelationshipType.Parent,
+                RelationshipType.Spouse => RelationshipType.Spouse, // Spouse is bidirectional
+                RelationshipType.Sibling => RelationshipType.Sibling, // Sibling is bidirectional
+                RelationshipType.Grandparent => RelationshipType.Grandchild,
+                RelationshipType.Grandchild => RelationshipType.Grandparent,
+                RelationshipType.Uncle => RelationshipType.Nephew, // Assuming male, could be more complex
+                RelationshipType.Aunt => RelationshipType.Niece, // Assuming female, could be more complex
+                RelationshipType.Nephew => RelationshipType.Uncle, // Simplified - could be Uncle or Aunt
+                RelationshipType.Niece => RelationshipType.Aunt, // Simplified - could be Uncle or Aunt
+                RelationshipType.Cousin => RelationshipType.Cousin, // Cousin is bidirectional
+                RelationshipType.GreatGrandparent => RelationshipType.GreatGrandchild,
+                RelationshipType.GreatGrandchild => RelationshipType.GreatGrandparent,
+                RelationshipType.StepParent => RelationshipType.StepChild,
+                RelationshipType.StepChild => RelationshipType.StepParent,
+                RelationshipType.StepSibling => RelationshipType.StepSibling, // Bidirectional
+                RelationshipType.HalfSibling => RelationshipType.HalfSibling, // Bidirectional
+                RelationshipType.Other => null, // Don't auto-create reverse for "Other"
+                _ => null
+            };
+        }
+
         // GET: RelationshipMvc/Create?primaryMemberId=1
         public async Task<IActionResult> Create(int primaryMemberId)
         {
@@ -72,56 +131,116 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(Relationship relationship)
         {
+            _logger.LogInformation("=== RELATIONSHIP CREATE POST STARTED ===");
+            _logger.LogInformation("PrimaryMemberId: {Primary}, RelatedMemberId: {Related}, Type: {Type}", 
+                relationship.PrimaryMemberId, relationship.RelatedMemberId, relationship.RelationshipType);
+            
             var currentUserId = GetCurrentUserId();
+            _logger.LogInformation("Current User ID: {UserId}", currentUserId);
 
             // Проверка дали членовете принадлежат на потребителя
+            _logger.LogInformation("Checking primary member access...");
             var primaryMember = await _context.FamilyMembers
                 .Include(m => m.Family)
                 .FirstOrDefaultAsync(m => m.Id == relationship.PrimaryMemberId && 
                                          m.Family.CreatedByUserId == currentUserId);
-
+            
+            _logger.LogInformation("Primary member found: {Found}", primaryMember != null);
+            
+            _logger.LogInformation("Checking related member access...");
             var relatedMember = await _context.FamilyMembers
                 .Include(m => m.Family)
                 .FirstOrDefaultAsync(m => m.Id == relationship.RelatedMemberId && 
                                          m.Family.CreatedByUserId == currentUserId);
+            
+            _logger.LogInformation("Related member found: {Found}", relatedMember != null);
 
             if (primaryMember == null || relatedMember == null)
             {
+                _logger.LogWarning("Member access check failed");
                 ModelState.AddModelError("", "Членовете не са намерени или нямате достъп до тях.");
             }
 
-            // Проверка за дублирана връзка
+            // Проверка за дублирана връзка (в двете посоки)
+            _logger.LogInformation("Checking for existing relationships...");
             var existingRelationship = await _context.Relationships
-                .AnyAsync(r => r.PrimaryMemberId == relationship.PrimaryMemberId && 
-                              r.RelatedMemberId == relationship.RelatedMemberId);
+                .AnyAsync(r => (r.PrimaryMemberId == relationship.PrimaryMemberId && 
+                               r.RelatedMemberId == relationship.RelatedMemberId) ||
+                              (r.PrimaryMemberId == relationship.RelatedMemberId &&
+                               r.RelatedMemberId == relationship.PrimaryMemberId));
 
+            _logger.LogInformation("Existing relationship found: {Found}", existingRelationship);
+            
             if (existingRelationship)
             {
-                ModelState.AddModelError("", "Тази връзка вече съществува.");
+                _logger.LogWarning("Duplicate relationship detected");
+                ModelState.AddModelError("", "Връзка между тези членове вече съществува.");
             }
 
+            _logger.LogInformation("ModelState.IsValid: {Valid}", ModelState.IsValid);
+            
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState validation failed. Errors:");
+                foreach (var error in ModelState)
+                {
+                    if (error.Value.Errors.Any())
+                    {
+                        _logger.LogWarning("Field {Field}: {Errors}", error.Key, 
+                            string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage)));
+                    }
+                }
+            }
+            
+            // Remove validation errors for navigation properties and set required fields
+            relationship.CreatedByUserId = currentUserId;
+            ModelState.Remove("CreatedBy");
+            ModelState.Remove("PrimaryMember");
+            ModelState.Remove("RelatedMember");
+            ModelState.Remove("CreatedByUserId");
+            
             if (ModelState.IsValid)
             {
-                relationship.CreatedAt = DateTime.UtcNow;
-                relationship.CreatedByUserId = currentUserId;
-
-                _context.Relationships.Add(relationship);
-                await _context.SaveChangesAsync();
-
-                TempData["SuccessMessage"] = "Връзката беше добавена успешно!";
-                
-                // Redirect to family tree visualization
-                var family = await _context.FamilyMembers
-                    .Where(m => m.Id == relationship.PrimaryMemberId)
-                    .Select(m => m.Family)
-                    .FirstOrDefaultAsync();
-                
-                if (family != null)
+                try
                 {
-                    return RedirectToAction("Details", "FamilyMvc", new { id = family.Id, tab = "tree" });
+                    _logger.LogInformation("Starting relationship creation process...");
+                    relationship.CreatedAt = DateTime.UtcNow;
+
+                    _logger.LogInformation("Adding relationship to context...");
+                    _context.Relationships.Add(relationship);
+
+                    // Create reverse relationship automatically only for asymmetric relationships
+                    var reverseRelationship = CreateReverseRelationship(relationship, currentUserId);
+                    if (reverseRelationship != null && !IsSymmetricRelationship(relationship.RelationshipType))
+                    {
+                        _logger.LogInformation("Adding reverse relationship to context...");
+                        _context.Relationships.Add(reverseRelationship);
+                    }
+
+                    _logger.LogInformation("Saving changes to database...");
+                    await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation("Relationships saved successfully. Creating redirect...");
+
+                    TempData["SuccessMessage"] = "Връзката беше добавена успешно!";
+                    
+                    _logger.LogInformation("SUCCESS: Relationship created, redirecting to tree view");
+                    
+                    // Get family ID for redirect - use primaryMember already loaded
+                    if (primaryMember?.Family != null)
+                    {
+                        _logger.LogInformation("Redirecting to FamilyMvc/Details/{FamilyId}?tab=tree", primaryMember.Family.Id);
+                        return RedirectToAction("Details", "FamilyMvc", new { id = primaryMember.Family.Id, tab = "tree" });
+                    }
+                    
+                    _logger.LogInformation("Fallback redirect to MemberMvc/Details/{MemberId}", relationship.PrimaryMemberId);
+                    return RedirectToAction("Details", "MemberMvc", new { id = relationship.PrimaryMemberId });
                 }
-                
-                return RedirectToAction("Details", "MemberMvc", new { id = relationship.PrimaryMemberId });
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating relationship: {Message}", ex.Message);
+                    ModelState.AddModelError("", $"Грешка при създаване на връзката: {ex.Message}");
+                }
             }
 
             // Reload data for the view

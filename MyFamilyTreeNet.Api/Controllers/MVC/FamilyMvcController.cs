@@ -209,14 +209,47 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> DeleteConfirmed(int id, bool deleteAll = false)
         {
             var currentUserId = GetCurrentUserId();
             var family = await _context.Families
+                .Include(f => f.FamilyMembers)
                 .FirstOrDefaultAsync(f => f.Id == id && f.CreatedByUserId == currentUserId);
 
             if (family != null)
             {
+                // Check if family has members
+                if (family.FamilyMembers.Any() && !deleteAll)
+                {
+                    var memberCount = family.FamilyMembers.Count;
+                    TempData["ErrorMessage"] = $"Не може да се изтрие семейство с {memberCount} членове. Моля потвърдете изтриването на всички данни.";
+                    ViewBag.HasMembers = true;
+                    ViewBag.MemberCount = memberCount;
+                    return View("Delete", family);
+                }
+
+                // Delete all relationships for family members
+                var memberIds = family.FamilyMembers.Select(m => m.Id).ToList();
+                if (memberIds.Any())
+                {
+                    var relationships = await _context.Relationships
+                        .Where(r => memberIds.Contains(r.PrimaryMemberId) || memberIds.Contains(r.RelatedMemberId))
+                        .ToListAsync();
+                    
+                    if (relationships.Any())
+                    {
+                        _context.Relationships.RemoveRange(relationships);
+                        _logger.LogInformation("Deleted {Count} relationships for family {FamilyId}", relationships.Count, id);
+                    }
+                }
+
+                // Delete all family members
+                if (family.FamilyMembers.Any())
+                {
+                    _context.FamilyMembers.RemoveRange(family.FamilyMembers);
+                    _logger.LogInformation("Deleted {Count} members for family {FamilyId}", family.FamilyMembers.Count, id);
+                }
+
                 _context.Families.Remove(family);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Семейството беше изтрито успешно!";
@@ -255,33 +288,182 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             _logger.LogInformation("Found {RelationshipCount} relationships", relationships.Count);
 
             var treeData = BuildTreeData(family.FamilyMembers.ToList(), relationships);
-            _logger.LogInformation("Tree data built: {TreeData}", System.Text.Json.JsonSerializer.Serialize(treeData));
+            
+            // Log detailed tree structure
+            var jsonOptions = new System.Text.Json.JsonSerializerOptions { WriteIndented = true };
+            var treeDataJson = System.Text.Json.JsonSerializer.Serialize(treeData, jsonOptions);
+            _logger.LogInformation("Tree data built: {TreeData}", treeDataJson);
             
             return Json(treeData);
+        }
+
+        private string GetRelationshipDescription(RelationshipType type)
+        {
+            return type switch
+            {
+                RelationshipType.Parent => "Родител",
+                RelationshipType.Child => "Дете", 
+                RelationshipType.Spouse => "Съпруг/а",
+                RelationshipType.Sibling => "Брат/Сестра",
+                RelationshipType.Grandparent => "Дядо/Баба",
+                RelationshipType.Grandchild => "Внук/Внучка",
+                RelationshipType.Uncle => "Чичо/Вуйчо",
+                RelationshipType.Aunt => "Леля/Тетка",
+                RelationshipType.Nephew => "Племенник",
+                RelationshipType.Niece => "Племенничка",
+                RelationshipType.Cousin => "Братовчед/Сестричка",
+                RelationshipType.GreatGrandparent => "Прадядо/Прабаба",
+                RelationshipType.GreatGrandchild => "Правнук/Правнучка",
+                RelationshipType.StepParent => "Доведен родител",
+                RelationshipType.StepChild => "Доведено дете",
+                RelationshipType.StepSibling => "Доведен брат/сестра",
+                RelationshipType.HalfSibling => "Полубрат/Полусестра",
+                RelationshipType.Other => "Друго",
+                _ => "Неизвестна връзка"
+            };
+        }
+
+        private string GetGenderAwareRelationshipDescription(RelationshipType type, FamilyMember person, FamilyMember relatedPerson)
+        {
+            return type switch
+            {
+                RelationshipType.Parent => person.Gender switch
+                {
+                    Gender.Male => "Баща",
+                    Gender.Female => "Майка", 
+                    _ => "Родител"
+                },
+                RelationshipType.Child => person.Gender switch
+                {
+                    Gender.Male => "Син",
+                    Gender.Female => "Дъщеря",
+                    _ => "Дете"
+                },
+                RelationshipType.Spouse => person.Gender switch
+                {
+                    Gender.Male => "Съпруг",
+                    Gender.Female => "Съпруга",
+                    _ => "Съпруг/а"
+                },
+                RelationshipType.Sibling => person.Gender switch
+                {
+                    Gender.Male => "Брат",
+                    Gender.Female => "Сестра",
+                    _ => "Брат/Сестра"
+                },
+                RelationshipType.Grandparent => person.Gender switch
+                {
+                    Gender.Male => "Дядо",
+                    Gender.Female => "Баба",
+                    _ => "Дядо/Баба"
+                },
+                RelationshipType.Grandchild => person.Gender switch
+                {
+                    Gender.Male => "Внук",
+                    Gender.Female => "Внучка",
+                    _ => "Внук/Внучка"
+                },
+                RelationshipType.Uncle => "Чичо/Вуйчо",
+                RelationshipType.Aunt => "Леля/Тетка", 
+                RelationshipType.Nephew => "Племенник",
+                RelationshipType.Niece => "Племенничка",
+                RelationshipType.Cousin => person.Gender switch
+                {
+                    Gender.Male => "Братовчед",
+                    Gender.Female => "Сестричка", 
+                    _ => "Братовчед/Сестричка"
+                },
+                RelationshipType.GreatGrandparent => person.Gender switch
+                {
+                    Gender.Male => "Прадядо",
+                    Gender.Female => "Прабаба",
+                    _ => "Прадядо/Прабаба"
+                },
+                RelationshipType.GreatGrandchild => person.Gender switch
+                {
+                    Gender.Male => "Правнук",
+                    Gender.Female => "Правнучка",
+                    _ => "Правнук/Правнучка"
+                },
+                RelationshipType.StepParent => person.Gender switch
+                {
+                    Gender.Male => "Доведен баща",
+                    Gender.Female => "Доведена майка",
+                    _ => "Доведен родител"
+                },
+                RelationshipType.StepChild => person.Gender switch
+                {
+                    Gender.Male => "Доведен син",
+                    Gender.Female => "Доведена дъщеря",
+                    _ => "Доведено дете"
+                },
+                RelationshipType.StepSibling => person.Gender switch
+                {
+                    Gender.Male => "Доведен брат",
+                    Gender.Female => "Доведена сестра",
+                    _ => "Доведен брат/сестра"
+                },
+                RelationshipType.HalfSibling => person.Gender switch
+                {
+                    Gender.Male => "Полубрат",
+                    Gender.Female => "Полусестра",
+                    _ => "Полубрат/Полусестра"
+                },
+                RelationshipType.Other => "Друго",
+                _ => "Неизвестна връзка"
+            };
+        }
+
+        private RelationshipType? GetReverseRelationshipTypeForDisplay(RelationshipType originalType)
+        {
+            return originalType switch
+            {
+                RelationshipType.Parent => RelationshipType.Child,
+                RelationshipType.Child => RelationshipType.Parent,
+                RelationshipType.Spouse => RelationshipType.Spouse,
+                RelationshipType.Sibling => RelationshipType.Sibling,
+                RelationshipType.Grandparent => RelationshipType.Grandchild,
+                RelationshipType.Grandchild => RelationshipType.Grandparent,
+                RelationshipType.Uncle => RelationshipType.Nephew, // Simplified
+                RelationshipType.Aunt => RelationshipType.Niece, // Simplified
+                RelationshipType.Nephew => RelationshipType.Uncle, // Simplified
+                RelationshipType.Niece => RelationshipType.Aunt, // Simplified
+                RelationshipType.Cousin => RelationshipType.Cousin,
+                RelationshipType.GreatGrandparent => RelationshipType.GreatGrandchild,
+                RelationshipType.GreatGrandchild => RelationshipType.GreatGrandparent,
+                RelationshipType.StepParent => RelationshipType.StepChild,
+                RelationshipType.StepChild => RelationshipType.StepParent,
+                RelationshipType.StepSibling => RelationshipType.StepSibling,
+                RelationshipType.HalfSibling => RelationshipType.HalfSibling,
+                RelationshipType.Other => null,
+                _ => null
+            };
         }
 
         private object BuildTreeData(List<FamilyMember> members, List<Relationship> relationships)
         {
             if (!members.Any())
-                return new { 
-                    id = "empty",
-                    name = "Няма членове", 
-                    children = new object[0] 
-                };
+            {
+                dynamic empty = new System.Dynamic.ExpandoObject();
+                empty.id = "empty";
+                empty.name = "Няма членове";
+                empty.children = new object[0];
+                return empty;
+            }
 
             var memberDict = new Dictionary<int, dynamic>();
             foreach (var member in members)
             {
-                memberDict[member.Id] = new 
-                {
-                    id = member.Id,
-                    name = $"{member.FirstName} {member.LastName}",
-                    birthYear = member.DateOfBirth?.Year,
-                    deathYear = member.DateOfDeath?.Year,
-                    isAlive = member.DateOfDeath == null,
-                    age = CalculateAge(member.DateOfBirth, member.DateOfDeath),
-                    children = new List<object>()
-                };
+                dynamic node = new System.Dynamic.ExpandoObject();
+                node.id = member.Id;
+                node.name = $"{member.FirstName} {member.LastName}";
+                node.birthYear = member.DateOfBirth?.Year;
+                node.deathYear = member.DateOfDeath?.Year;
+                node.isAlive = member.DateOfDeath == null;
+                node.age = CalculateAge(member.DateOfBirth, member.DateOfDeath);
+                node.relationshipType = null;
+                node.children = new List<object>();
+                memberDict[member.Id] = node;
             }
 
             // Find root member (oldest by birth or first created)
@@ -300,7 +482,9 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 // If no relationships, add all other members as siblings at root level
                 foreach (var member in members.Where(m => m.Id != rootMember.Id))
                 {
-                    ((List<object>)root.children).Add(memberDict[member.Id]);
+                    var memberNode = memberDict[member.Id];
+                    memberNode.relationshipType = GetGenderAwareRelationshipDescription(RelationshipType.Sibling, member, rootMember);
+                    ((List<object>)root.children).Add(memberNode);
                 }
             }
 
@@ -325,9 +509,26 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 {
                     var relatedNode = memberMap[relatedId];
                     
-                    // Add relationship type information to the related node
-                    relatedNode.relationshipType = rel.RelationshipType.ToString();
-                    relatedNode.relationshipFromPrimary = rel.PrimaryMemberId == node.id;
+                    // Get the FamilyMember objects for gender-aware descriptions
+                    var currentMember = members.First(m => m.Id == node.id);
+                    var relatedMember = members.First(m => m.Id == relatedId);
+                    
+                    // Set correct relationship type for the label
+                    string relationshipTypeForLabel;
+                    if (rel.PrimaryMemberId == node.id)
+                    {
+                        // This node is primary, show what the related node is to this node
+                        relationshipTypeForLabel = GetGenderAwareRelationshipDescription(rel.RelationshipType, relatedMember, currentMember);
+                    }
+                    else
+                    {
+                        // This node is related, show what this node is to the primary  
+                        var reverseType = GetReverseRelationshipTypeForDisplay(rel.RelationshipType);
+                        relationshipTypeForLabel = reverseType != null ? 
+                            GetGenderAwareRelationshipDescription(reverseType.Value, currentMember, relatedMember) : 
+                            GetGenderAwareRelationshipDescription(rel.RelationshipType, currentMember, relatedMember);
+                    }
+                    relatedNode.relationshipType = relationshipTypeForLabel;
                     
                     // For tree structure, add as child if it's a child relationship
                     if (rel.RelationshipType == RelationshipType.Child && rel.PrimaryMemberId == node.id)
@@ -335,19 +536,25 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                         ((List<object>)node.children).Add(relatedNode);
                         BuildChildrenRecursive(relatedNode, members, relationships, memberMap, visited);
                     }
-                    // For parent relationships, add current node as child of parent
+                    // For parent relationships where this node is the child
                     else if (rel.RelationshipType == RelationshipType.Parent && rel.RelatedMemberId == node.id)
                     {
                         // This will be handled when we process the parent node
+                        // The current node should be added as child of the parent
                     }
-                    // For siblings, spouses etc., add them at the same level (as children of same parent or special handling)
-                    else if (rel.RelationshipType == RelationshipType.Sibling || rel.RelationshipType == RelationshipType.Spouse)
+                    // For siblings, spouses etc., add them at the same level
+                    else if (rel.RelationshipType == RelationshipType.Sibling)
+                    {
+                        ((List<object>)node.children).Add(relatedNode);
+                    }
+                    else if (rel.RelationshipType == RelationshipType.Spouse)
                     {
                         ((List<object>)node.children).Add(relatedNode);
                     }
                 }
             }
         }
+
 
         private object CalculateStatistics(List<FamilyMember> members)
         {

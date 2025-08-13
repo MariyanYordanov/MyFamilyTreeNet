@@ -68,7 +68,8 @@ function initializeFamilyTree(familyId, treeData) {
     svg.call(zoom);
 
     // Use the tree data directly (already hierarchical from server)
-    const root = d3.hierarchy(treeData[0]);
+    console.log('Tree data received:', treeData);
+    const root = d3.hierarchy(treeData);
     
     // Create tree layout
     const treeLayout = d3.tree()
@@ -101,9 +102,13 @@ function initializeFamilyTree(familyId, treeData) {
         .attr('background', 'white')
         .text(d => {
             // Try to determine relationship from data
+            console.log('Link data:', d.target.data);
             if (d.target.data.relationshipType) {
-                return getRelationshipText(d.target.data.relationshipType);
+                const translatedText = getRelationshipText(d.target.data.relationshipType);
+                console.log('Relationship type:', d.target.data.relationshipType, '-> translated:', translatedText);
+                return translatedText;
             }
+            console.log('No relationshipType found, using default');
             return 'връзка';
         });
 

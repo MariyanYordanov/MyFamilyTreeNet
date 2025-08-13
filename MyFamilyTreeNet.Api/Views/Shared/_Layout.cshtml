@@ -66,8 +66,8 @@
                                     <span class="d-none d-md-inline">@(User.Identity?.Name ?? "User")</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end">
-                                    <li><a class="dropdown-item" asp-area="" asp-controller="Home" asp-action="Dashboard">
-                                        <i class="fas fa-tachometer-alt me-2"></i>Моят профил
+                                    <li><a class="dropdown-item" asp-area="" asp-controller="AccountMvc" asp-action="Profile">
+                                        <i class="fas fa-user me-2"></i>Моят профил
                                     </a></li>
                                     <li><a class="dropdown-item" asp-area="" asp-controller="FamilyMvc" asp-action="Create">
                                         <i class="fas fa-plus me-2"></i>Създай семейство

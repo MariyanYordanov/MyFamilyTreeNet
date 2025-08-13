@@ -24,8 +24,14 @@
                 <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-primary">
                     <i class="fas fa-edit me-1"></i>Редактирай
                 </a>
+                <a asp-controller="UploadMvc" asp-action="FamilyPhoto" asp-route-familyId="@Model.Id" class="btn btn-outline-success">
+                    <i class="fas fa-camera me-1"></i>Снимка
+                </a>
                 <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-primary">
                     <i class="fas fa-user-plus me-1"></i>Добави член
+                </a>
+                <a asp-action="Delete" asp-route-id="@Model.Id" class="btn btn-outline-danger">
+                    <i class="fas fa-trash me-1"></i>Изтрий
                 </a>
             }
             <a asp-action="Index" class="btn btn-outline-secondary">
