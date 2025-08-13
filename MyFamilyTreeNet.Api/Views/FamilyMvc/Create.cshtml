@@ -1,0 +1,122 @@
+@model MyFamilyTreeNet.Api.DTOs.CreateFamilyDto
+@{
+    ViewData["Title"] = "Създаване на семейство";
+}
+
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="fas fa-users me-2"></i>Създаване на семейство
+                    </h2>
+                    <p class="text-muted mb-0">Създайте ново семейно дърво и започнете да добавяте членове</p>
+                </div>
+                <a asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-1"></i>Назад
+                </a>
+            </div>
+
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>Основна информация
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Family Name -->
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label">
+                                Име на семейството <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="Name" class="form-control" placeholder="Семейство Петрови" />
+                            <span asp-validation-for="Name" class="text-danger"></span>
+                            <div class="form-text">Въведете фамилното име или името на семейството</div>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label">
+                                Описание
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                      placeholder="Кратко описание на семейството, неговата история или значими моменти..."></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                            <div class="form-text">
+                                <span id="description-counter">0</span>/1000 символа
+                            </div>
+                        </div>
+
+                        <!-- Privacy Setting -->
+                        <div class="mb-4">
+                            <div class="form-check">
+                                <input asp-for="IsPublic" class="form-check-input" type="checkbox" checked />
+                                <label asp-for="IsPublic" class="form-check-label">
+                                    Публично семейство
+                                </label>
+                            </div>
+                            <div class="form-text">
+                                Ако е отметнато, семейството ще бъде видимо за всички потребители. 
+                                В противен случай ще бъде видимо само за вас.
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 flex-wrap">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-1"></i>Създай семейство
+                            </button>
+                            
+                            <button type="reset" class="btn btn-outline-secondary">
+                                <i class="fas fa-undo me-1"></i>Нулиране
+                            </button>
+                            
+                            <a asp-action="Index" class="btn btn-outline-danger">
+                                <i class="fas fa-times me-1"></i>Отказ
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Text -->
+            <div class="mt-4">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6><i class="fas fa-lightbulb me-2"></i>Полезни съвети</h6>
+                        <ul class="mb-0 small">
+                            <li>Името на семейството е задължително и трябва да бъде уникално</li>
+                            <li>Описанието помага на другите да разберат повече за вашето семейство</li>
+                            <li>Публичните семейства могат да бъдат разглеждани от всички потребители</li>
+                            <li>След създаване можете да започнете добавяне на членове</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/form-helpers.js"></script>
+    <script>
+        // Character counter for description
+        document.addEventListener('DOMContentLoaded', function() {
+            const descriptionInput = document.getElementById('Description');
+            const counter = document.getElementById('description-counter');
+            
+            if (descriptionInput && counter) {
+                descriptionInput.addEventListener('input', function() {
+                    counter.textContent = this.value.length;
+                });
+            }
+        });
+    </script>
+}

@@ -2,30 +2,34 @@
 
 // Password visibility toggle
 function setupPasswordToggles() {
-    const toggleButtons = document.querySelectorAll('[data-toggle-password]');
+    const toggleButtons = document.querySelectorAll('.toggle-password, [data-toggle-password]');
     
     toggleButtons.forEach(button => {
         button.addEventListener('click', function() {
             const targetId = this.getAttribute('data-toggle-password');
-            const passwordInputs = targetId ? 
-                [document.getElementById(targetId)] : 
-                document.querySelectorAll('input[type="password"], input[data-password-field]');
+            let passwordInput;
             
-            let showPassword = false;
+            if (targetId) {
+                passwordInput = document.getElementById(targetId);
+            } else {
+                passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"].password-field');
+            }
             
-            passwordInputs.forEach(input => {
-                if (input && (input.type === 'password' || input.getAttribute('data-password-field'))) {
-                    showPassword = input.type === 'password';
-                    input.type = showPassword ? 'text' : 'password';
-                    input.setAttribute('data-password-field', 'true');
+            if (passwordInput) {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                
+                // Update icon
+                const icon = this.querySelector('i');
+                if (icon) {
+                    if (isPassword) {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
                 }
-            });
-            
-            // Update icon
-            const icon = this.querySelector('i');
-            if (icon) {
-                icon.classList.toggle('fa-eye');
-                icon.classList.toggle('fa-eye-slash');
             }
         });
     });
@@ -168,4 +172,23 @@ document.addEventListener('DOMContentLoaded', function() {
     setupDateValidation();
     setupAutoHideAlerts();
     setupContactForm();
+    
+    // Legacy password toggle for existing forms
+    const toggleBtn = document.getElementById('toggle-password');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', function() {
+            const passwordInput = document.getElementById('password-input');
+            const toggleIcon = document.getElementById('toggle-icon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleIcon.classList.remove('fa-eye');
+                toggleIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                toggleIcon.classList.remove('fa-eye-slash');
+                toggleIcon.classList.add('fa-eye');
+            }
+        });
+    }
 });

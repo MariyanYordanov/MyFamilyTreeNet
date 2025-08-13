@@ -1,4 +1,4 @@
-@model MyFamilyTreeNet.Data.Models.FamilyMember
+@model MyFamilyTreeNet.Api.DTOs.CreateMemberDto
 @{
     ViewData["Title"] = "Добавяне на нов член";
     var families = ViewBag.Families as SelectList;
@@ -29,18 +29,36 @@
                 </div>
                 <div class="card-body">
                     <form asp-action="Create" method="post">
-                        <div asp-validation-summary="All" class="text-danger mb-3"></div>
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <!-- Family Selection -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <label asp-for="FamilyId" class="form-label">
-                                    Семейство <span class="text-danger">*</span>
-                                </label>
-                                @Html.DropDownListFor(m => m.FamilyId, families, "Изберете семейство", new { @class = "form-select" })
-                                <span asp-validation-for="FamilyId" class="text-danger"></span>
+                        @if (ViewBag.ShowFamilyDropdown == true)
+                        {
+                            <div class="row mb-3">
+                                <div class="col-md-12">
+                                    <label asp-for="FamilyId" class="form-label">
+                                        Семейство <span class="text-danger">*</span>
+                                    </label>
+                                    @Html.DropDownListFor(m => m.FamilyId, families, "Изберете семейство", new { @class = "form-select" })
+                                    <span asp-validation-for="FamilyId" class="text-danger"></span>
+                                </div>
                             </div>
-                        </div>
+                        }
+                        else
+                        {
+                            <input asp-for="FamilyId" type="hidden" />
+                            @if (ViewBag.FamilyName != null)
+                            {
+                                <div class="row mb-3">
+                                    <div class="col-md-12">
+                                        <div class="alert alert-info">
+                                            <i class="fas fa-info-circle me-2"></i>
+                                            Добавяте член към семейство: <strong>@ViewBag.FamilyName</strong>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
 
                         <!-- Name Fields -->
                         <div class="row mb-3">
@@ -112,8 +130,9 @@
                                 <label asp-for="PlaceOfDeath" class="form-label">
                                     <i class="fas fa-map-marker-alt me-1"></i>Място на смърт
                                 </label>
-                                <input asp-for="PlaceOfDeath" class="form-control" placeholder="София, България" />
+                                <input asp-for="PlaceOfDeath" class="form-control" placeholder="София, България" id="PlaceOfDeath" />
                                 <span asp-validation-for="PlaceOfDeath" class="text-danger"></span>
+                                <div class="form-text" id="place-of-death-hint">Попълва се само ако има дата на смърт</div>
                             </div>
                         </div>
 
@@ -169,4 +188,46 @@
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
     <script src="~/js/form-helpers.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Biography character counter
+            const biographyInput = document.getElementById('Biography');
+            const counter = document.getElementById('biography-counter');
+            
+            if (biographyInput && counter) {
+                biographyInput.addEventListener('input', function() {
+                    counter.textContent = this.value.length;
+                });
+            }
+            
+            // Place of death validation
+            const dateOfDeathInput = document.getElementById('DateOfDeath');
+            const placeOfDeathInput = document.getElementById('PlaceOfDeath');
+            const placeOfDeathHint = document.getElementById('place-of-death-hint');
+            
+            function updatePlaceOfDeathState() {
+                if (dateOfDeathInput && placeOfDeathInput) {
+                    if (!dateOfDeathInput.value) {
+                        placeOfDeathInput.disabled = true;
+                        placeOfDeathInput.value = '';
+                        placeOfDeathInput.placeholder = 'Първо въведете дата на смърт';
+                        if (placeOfDeathHint) {
+                            placeOfDeathHint.classList.add('text-danger');
+                        }
+                    } else {
+                        placeOfDeathInput.disabled = false;
+                        placeOfDeathInput.placeholder = 'София, България';
+                        if (placeOfDeathHint) {
+                            placeOfDeathHint.classList.remove('text-danger');
+                        }
+                    }
+                }
+            }
+            
+            if (dateOfDeathInput) {
+                dateOfDeathInput.addEventListener('change', updatePlaceOfDeathState);
+                updatePlaceOfDeathState();
+            }
+        });
+    </script>
 }

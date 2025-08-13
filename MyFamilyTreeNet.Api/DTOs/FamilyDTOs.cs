@@ -13,6 +13,8 @@ namespace MyFamilyTreeNet.Api.DTOs
         [MaxLength(FamilyDescriptionLength)]
         [NoHtml]
         public string? Description { get; set; }
+        
+        public bool IsPublic { get; set; } = true;
     }
 
     public class UpdateFamilyDto

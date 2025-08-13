@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MyFamilyTreeNet.Api.DTOs;
 using MyFamilyTreeNet.Data;
 using MyFamilyTreeNet.Data.Models;
 using System.Security.Claims;
@@ -81,27 +82,58 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
         public IActionResult Create()
         {
-            return View();
+            return View(new CreateFamilyDto { Name = "" });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(Family family)
+        public async Task<IActionResult> Create(CreateFamilyDto dto)
         {
+            _logger.LogInformation($"Create POST called with Name: {dto.Name}, IsPublic: {dto.IsPublic}");
+            
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState is invalid:");
+                foreach (var error in ModelState)
+                {
+                    _logger.LogWarning($"Key: {error.Key}, Errors: {string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage))}");
+                }
+            }
+            
             if (ModelState.IsValid)
             {
-                var currentUserId = GetCurrentUserId();
-                family.CreatedByUserId = currentUserId;
-                family.CreatedAt = DateTime.UtcNow;
+                try
+                {
+                    var currentUserId = GetCurrentUserId();
+                    _logger.LogInformation($"Creating family for user: {currentUserId}");
+                    
+                    var family = new Family
+                    {
+                        Name = dto.Name,
+                        Description = dto.Description,
+                        IsPublic = dto.IsPublic,
+                        CreatedByUserId = currentUserId,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                _context.Families.Add(family);
-                await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Family object created: {family.Name}");
+                    
+                    _context.Families.Add(family);
+                    var result = await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"SaveChanges result: {result} records affected, Family ID: {family.Id}");
 
-                TempData["SuccessMessage"] = "Семейството беше създадено успешно!";
-                return RedirectToAction(nameof(Details), new { id = family.Id });
+                    TempData["SuccessMessage"] = "Семейството беше създадено успешно!";
+                    return RedirectToAction(nameof(Details), new { id = family.Id });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating family");
+                    ModelState.AddModelError("", "Възникна грешка при запазването. Моля опитайте отново.");
+                }
             }
 
-            return View(family);
+            return View(dto);
         }
 
         public async Task<IActionResult> Edit(int id)

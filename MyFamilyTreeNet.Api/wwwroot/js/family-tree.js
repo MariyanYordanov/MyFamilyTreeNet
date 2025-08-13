@@ -6,7 +6,7 @@ function initializeFamilyTree(familyId, members) {
         console.error('D3.js is not loaded');
         return;
     }
-    const container = d3.select('#familyTree');
+    const container = d3.select('#family-tree-container');
     const width = container.node().getBoundingClientRect().width;
     const height = 600;
 
@@ -149,18 +149,6 @@ function initializeFamilyTree(familyId, members) {
                 .translate(translate[0], translate[1])
                 .scale(scale));
     }
-
-    // Export functionality
-    window.exportTree = function() {
-        const svgData = new XMLSerializer().serializeToString(svg.node());
-        const blob = new Blob([svgData], { type: 'image/svg+xml' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `family-tree-${familyId}.svg`;
-        link.click();
-        URL.revokeObjectURL(url);
-    };
 
     // Handle window resize
     window.addEventListener('resize', function() {

@@ -1,8 +1,10 @@
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MyFamilyTreeNet.Api.Contracts;
 using MyFamilyTreeNet.Api.DTOs;
+using MyFamilyTreeNet.Data;
 using MyFamilyTreeNet.Data.Models;
 
 namespace MyFamilyTreeNet.Api.Controllers
@@ -15,11 +17,13 @@ namespace MyFamilyTreeNet.Api.Controllers
     {
         private readonly IFamilyService _familyService;
         private readonly IMapper _mapper;
+        private readonly AppDbContext _context;
 
-        public FamilyController(IFamilyService familyService, IMapper mapper)
+        public FamilyController(IFamilyService familyService, IMapper mapper, AppDbContext context)
         {
             _familyService = familyService;
             _mapper = mapper;
+            _context = context;
         }
 
         [HttpGet]
@@ -141,5 +145,29 @@ namespace MyFamilyTreeNet.Api.Controllers
             return NoContent();
         }
 
+        [HttpGet("{id}/tree-data")]
+        public async Task<IActionResult> GetFamilyTreeData(int id)
+        {
+            var family = await _context.Families
+                .Include(f => f.FamilyMembers)
+                .FirstOrDefaultAsync(f => f.Id == id);
+
+            if (family == null)
+            {
+                return NotFound();
+            }
+
+            var treeData = family.FamilyMembers.Select(m => new
+            {
+                id = m.Id,
+                firstName = m.FirstName,
+                lastName = m.LastName,
+                birthDate = m.DateOfBirth?.ToString("yyyy-MM-dd"),
+                deathDate = m.DateOfDeath?.ToString("yyyy-MM-dd"),
+                gender = m.Gender.ToString()
+            }).ToList();
+
+            return Ok(treeData);
+        }
     }
 }

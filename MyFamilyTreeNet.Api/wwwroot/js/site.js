@@ -7,6 +7,9 @@ document.addEventListener('DOMContentLoaded', function() {
         return new bootstrap.Tooltip(tooltipTriggerEl);
     });
 
+    // Password visibility toggle
+    setupPasswordToggles();
+
     // Auto-dismiss alerts after 5 seconds
     setTimeout(function() {
         var alerts = document.querySelectorAll('.alert');
@@ -101,19 +104,16 @@ document.addEventListener('DOMContentLoaded', function() {
     // Loading states for buttons
     const submitButtons = document.querySelectorAll('button[type="submit"]');
     submitButtons.forEach(function(button) {
-        button.addEventListener('click', function() {
-            const form = this.closest('form');
-            if (form && form.checkValidity()) {
-                this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Обработва се...';
-                this.disabled = true;
-                
-                // Re-enable after 5 seconds as fallback
-                setTimeout(() => {
-                    this.disabled = false;
-                    this.innerHTML = this.dataset.originalText || 'Изпрати';
-                }, 5000);
-            }
-        });
+        const form = button.closest('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                // Only show loading if form is valid
+                if (form.checkValidity()) {
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Обработва се...';
+                    button.disabled = true;
+                }
+            });
+        }
     });
 
     // Store original button text
@@ -181,4 +181,39 @@ function performSearch(query) {
     if (filteredResults.length === 0) {
         searchResults.innerHTML = '<p class="text-muted">Няма намерени резултати за "' + query + '"</p>';
     }
+}
+
+// Password visibility toggle function
+function setupPasswordToggles() {
+    const toggleButtons = document.querySelectorAll('.toggle-password, [data-toggle-password]');
+    
+    toggleButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const targetId = this.getAttribute('data-toggle-password');
+            let passwordInput;
+            
+            if (targetId) {
+                passwordInput = document.getElementById(targetId);
+            } else {
+                passwordInput = this.parentElement.querySelector('input[type="password"], input[type="text"].password-field');
+            }
+            
+            if (passwordInput) {
+                const isPassword = passwordInput.type === 'password';
+                passwordInput.type = isPassword ? 'text' : 'password';
+                
+                // Update icon
+                const icon = this.querySelector('i');
+                if (icon) {
+                    if (isPassword) {
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+            }
+        });
+    });
 }

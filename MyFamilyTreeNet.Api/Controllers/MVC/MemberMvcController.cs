@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using MyFamilyTreeNet.Api.DTOs;
 using MyFamilyTreeNet.Data;
 using MyFamilyTreeNet.Data.Models;
 using System.Security.Claims;
@@ -111,57 +112,106 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 return RedirectToAction("Index", "FamilyMvc");
             }
 
-            ViewBag.Families = new SelectList(families, "Id", "Name", familyId);
-
-            var member = new FamilyMember();
+            var dto = new CreateMemberDto
+            {
+                FirstName = "",
+                MiddleName = "",
+                LastName = "",
+                FamilyId = familyId ?? 0
+            };
+            
             if (familyId.HasValue)
             {
-                member.FamilyId = familyId.Value;
+                // Идваме от конкретно семейство - скрива dropdown
+                var family = await _context.Families
+                    .FirstOrDefaultAsync(f => f.Id == familyId.Value && f.CreatedByUserId == currentUserId);
+                
+                if (family == null)
+                {
+                    TempData["ErrorMessage"] = "Семейството не е намерено или нямате достъп до него.";
+                    return RedirectToAction("Index", "FamilyMvc");
+                }
+                
+                dto.FamilyId = familyId.Value;
+                ViewBag.ShowFamilyDropdown = false;
+                ViewBag.FamilyName = family.Name;
+            }
+            else
+            {
+                // Показва dropdown за избор на семейство
+                ViewBag.ShowFamilyDropdown = true;
+                ViewBag.Families = new SelectList(families, "Id", "Name");
             }
 
-            return View(member);
+            return View(dto);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(FamilyMember member)
+        public async Task<IActionResult> Create(CreateMemberDto dto)
         {
             var currentUserId = GetCurrentUserId();
 
             // Verify family ownership
             var family = await _context.Families
-                .FirstOrDefaultAsync(f => f.Id == member.FamilyId && f.CreatedByUserId == currentUserId);
+                .FirstOrDefaultAsync(f => f.Id == dto.FamilyId && f.CreatedByUserId == currentUserId);
 
             if (family == null)
             {
                 ModelState.AddModelError("FamilyId", "Избраното семейство не е валидно.");
             }
 
-            if (member.DateOfBirth.HasValue && member.DateOfDeath.HasValue && member.DateOfBirth > member.DateOfDeath)
+            if (dto.DateOfBirth.HasValue && dto.DateOfDeath.HasValue && dto.DateOfBirth > dto.DateOfDeath)
             {
                 ModelState.AddModelError("DateOfDeath", "Датата на смърт не може да бъде преди датата на раждане.");
+            }
+            
+            // Валидация за място на смърт
+            if (!dto.DateOfDeath.HasValue && !string.IsNullOrWhiteSpace(dto.PlaceOfDeath))
+            {
+                ModelState.AddModelError("PlaceOfDeath", "Не може да има място на смърт без дата на смърт.");
             }
 
             if (ModelState.IsValid)
             {
-                member.AddedByUserId = currentUserId;
-                member.CreatedAt = DateTime.UtcNow;
+                try
+                {
+                    var member = new FamilyMember
+                    {
+                        FirstName = dto.FirstName,
+                        MiddleName = dto.MiddleName,
+                        LastName = dto.LastName,
+                        DateOfBirth = dto.DateOfBirth,
+                        DateOfDeath = dto.DateOfDeath,
+                        PlaceOfBirth = dto.PlaceOfBirth,
+                        PlaceOfDeath = dto.DateOfDeath.HasValue ? dto.PlaceOfDeath : null,
+                        Gender = dto.Gender != null ? Enum.Parse<Gender>(dto.Gender) : Gender.Unknown,
+                        Biography = dto.Biography,
+                        FamilyId = dto.FamilyId,
+                        AddedByUserId = currentUserId,
+                        CreatedAt = DateTime.UtcNow
+                    };
 
-                _context.FamilyMembers.Add(member);
-                await _context.SaveChangesAsync();
+                    _logger.LogInformation($"Creating member: {member.FirstName} {member.LastName} for family {member.FamilyId}");
+                    
+                    _context.FamilyMembers.Add(member);
+                    var result = await _context.SaveChangesAsync();
+                    
+                    _logger.LogInformation($"SaveChanges result: {result} records affected");
 
-                TempData["SuccessMessage"] = "Членът беше добавен успешно!";
-                return RedirectToAction(nameof(Details), new { id = member.Id });
+                    TempData["SuccessMessage"] = "Членът беше добавен успешно!";
+                    return RedirectToAction("Details", "FamilyMvc", new { id = member.FamilyId });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error creating member");
+                    ModelState.AddModelError("", "Възникна грешка при запазването. Моля опитайте отново.");
+                }
             }
 
-            // Reload families for the view
-            var families = await _context.Families
-                .Where(f => f.CreatedByUserId == currentUserId)
-                .OrderBy(f => f.Name)
-                .ToListAsync();
-            ViewBag.Families = new SelectList(families, "Id", "Name", member.FamilyId);
-
-            return View(member);
+            // Reload data for the view
+            await ReloadCreateViewData(dto.FamilyId, currentUserId);
+            return View(dto);
         }
 
         public async Task<IActionResult> Edit(int id)
@@ -339,6 +389,36 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 age--;
 
             return age > 0 ? age : 0;
+        }
+
+        private async Task ReloadCreateViewData(int? familyId, string currentUserId)
+        {
+            var families = await _context.Families
+                .Where(f => f.CreatedByUserId == currentUserId)
+                .OrderBy(f => f.Name)
+                .ToListAsync();
+
+            if (familyId.HasValue)
+            {
+                var family = await _context.Families
+                    .FirstOrDefaultAsync(f => f.Id == familyId.Value && f.CreatedByUserId == currentUserId);
+                
+                if (family != null)
+                {
+                    ViewBag.ShowFamilyDropdown = false;
+                    ViewBag.FamilyName = family.Name;
+                }
+                else
+                {
+                    ViewBag.ShowFamilyDropdown = true;
+                    ViewBag.Families = new SelectList(families, "Id", "Name");
+                }
+            }
+            else
+            {
+                ViewBag.ShowFamilyDropdown = true;
+                ViewBag.Families = new SelectList(families, "Id", "Name");
+            }
         }
     }
 }

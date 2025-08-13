@@ -190,7 +190,30 @@
     <script>
         const familyId = @Model.Id;
         const modelName = '@Model.Name';
+        
+        // Sample data for testing
+        const sampleData = [
+            { id: 1, firstName: 'Иван', lastName: 'Петров', birthDate: '1980-01-01', deathDate: null },
+            { id: 2, firstName: 'Мария', lastName: 'Петрова', birthDate: '1985-05-15', deathDate: null }
+        ];
+        
+        // Functions for buttons
+        function refreshTree() {
+            location.reload();
+        }
+        
+        function centerTree() {
+            if (typeof initializeFamilyTree === 'function') {
+                initializeFamilyTree(familyId, sampleData);
+            }
+        }
+        
+        // Initialize tree when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof initializeFamilyTree === 'function') {
+                initializeFamilyTree(familyId, sampleData);
+            }
+        });
     </script>
     <script src="~/js/family-tree.js"></script>
-
 }
