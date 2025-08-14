@@ -305,14 +305,20 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    // Don't run migrations in testing environment
-    if (!app.Environment.IsEnvironment("Testing"))
+    // Only run migrations in testing environment or if explicitly needed
+    if (app.Environment.IsEnvironment("Testing"))
     {
+        // For testing, ensure database is created (for InMemory)
+        await context.Database.EnsureCreatedAsync();
+    }
+    else if (args.Contains("--migrate"))
+    {
+        // Run migrations only when explicitly requested with --migrate flag
         await context.Database.MigrateAsync();
     }
     else
     {
-        // For testing, ensure database is created (for InMemory)
+        // In development/production, just ensure database exists without running migrations
         await context.Database.EnsureCreatedAsync();
     }
 

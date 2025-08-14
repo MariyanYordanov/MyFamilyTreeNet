@@ -82,7 +82,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
             var model = new ProfileViewModel
             {
-                Email = user.Email,
+                Email = user.Email ?? "",
                 FirstName = user.FirstName,
                 MiddleName = user.MiddleName,
                 LastName = user.LastName,

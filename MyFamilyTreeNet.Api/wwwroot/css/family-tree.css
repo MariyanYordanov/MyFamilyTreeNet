@@ -22,18 +22,19 @@
 /* Tree nodes and links */
 .node {
     cursor: pointer;
-    transition: all 0.3s ease;
 }
 
-.node:hover {
-    transform: scale(1.1);
-    filter: brightness(1.1);
+/* NO HOVER EFFECTS - only color change */
+.node:hover rect {
+    fill: #e3f2fd;
 }
 
 .node rect {
     fill: #fff;
     stroke: #007bff;
     stroke-width: 2px;
+    rx: 5;
+    ry: 5;
 }
 
 .node text {
@@ -41,32 +42,28 @@
     text-anchor: middle;
 }
 
-.link-group {
-    transition: all 0.3s ease;
-}
-
 .link {
     fill: none;
     stroke: #666;
     stroke-width: 1.5px;
-    transition: stroke 0.3s ease;
-}
-
-.link-group:hover .link {
-    stroke: #007bff;
-    stroke-width: 2px;
 }
 
 .link-label {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    font-size: 10px;
+    font-size: 11px;
     font-weight: 600;
     fill: #495057;
     text-anchor: middle;
     pointer-events: none;
 }
 
-.link-group:hover .link-label {
-    fill: #007bff;
-    font-weight: 700;
+/* Spouse relationships - horizontal lines */
+.link.spouse {
+    stroke: #e91e63;
+    stroke-dasharray: 5,5;
+}
+
+/* Parent-child relationships - vertical lines */
+.link.parent-child {
+    stroke: #4caf50;
 }

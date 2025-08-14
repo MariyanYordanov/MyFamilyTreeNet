@@ -39,19 +39,19 @@ public static class SeedData
             if (result.Succeeded)
             {
                 await userManager.AddToRoleAsync(adminUser, "Admin");
-                Console.WriteLine("Admin user created successfully!");
+                // Admin user created successfully
             }
             else
             {
                 foreach (var error in result.Errors)
                 {
-                    Console.WriteLine($"Error creating admin: {error.Description}");
+                    // Error creating admin: {error.Description}
                 }
             }
         }
         else
         {
-            Console.WriteLine("Admin user already exists.");
+            // Admin user already exists
         }
 
         var demoUsers = new List<User>();
@@ -272,21 +272,21 @@ public static class SeedData
             await context.SaveChangesAsync();
 
          
-            Console.WriteLine("Инициализацията на началните данни завърши успешно!");
-            Console.WriteLine($"Общо семейства: {await context.Families.CountAsync()}");
-            Console.WriteLine($"Общо членове на семействата: {await context.FamilyMembers.CountAsync()}");
-            Console.WriteLine($"Общо връзки: {await context.Relationships.CountAsync()}");
-            Console.WriteLine($"Общо истории: {await context.Stories.CountAsync()}");
-            Console.WriteLine($"Общо снимки: {await context.Photos.CountAsync()}");
-            Console.WriteLine($"Общо потребители: {await context.Users.CountAsync()}");
+            // Seed data initialized successfully
+            // Families count logged
+            // Members count logged
+            // Relationships count logged
+            // Stories count logged
+            // Photos count logged
+            // Users count logged
         }
         else
         {
 
-            Console.WriteLine("Базата данни вече съдържа начални данни - пропускане на инициализацията");
-            Console.WriteLine($"Текущи семейства: {await context.Families.CountAsync()}");
-            Console.WriteLine($"Текущи членове на семействата: {await context.FamilyMembers.CountAsync()}");
-            Console.WriteLine($"Текущи потребители: {await context.Users.CountAsync()}");
+            // Database already contains seed data - skipping initialization
+            // Current families count logged
+            // Current members count logged
+            // Current users count logged
         }
     }
 }

@@ -12,15 +12,15 @@
                     <h2>
                         <i class="fas fa-camera me-2"></i>Снимка за семейството
                     </h2>
-                    <p class="text-muted mb-0">Качете снимка за семейство @family.Name</p>
+                    <p class="text-muted mb-0">Качете снимка за семейство @family?.Name</p>
                 </div>
-                <a class="btn btn-outline-secondary" asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@family.Id">
+                <a class="btn btn-outline-secondary" asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@family?.Id">
                     <i class="fas fa-arrow-left me-1"></i>Назад
                 </a>
             </div>
 
             <!-- Current Photo -->
-            @if (!string.IsNullOrEmpty(family.PhotoUrl))
+            @if (!string.IsNullOrEmpty(family?.PhotoUrl))
             {
                 <div class="card mb-4">
                     <div class="card-header">
@@ -43,7 +43,7 @@
                     </h5>
                 </div>
                 <div class="card-body">
-                    <form method="post" enctype="multipart/form-data" asp-action="FamilyPhoto" asp-route-familyId="@family.Id">
+                    <form method="post" enctype="multipart/form-data" asp-action="FamilyPhoto" asp-route-familyId="@family?.Id">
                         <div class="mb-3">
                             <label for="photo" class="form-label">
                                 Изберете снимка <span class="text-danger">*</span>
@@ -66,7 +66,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-upload me-1"></i>Качи снимката
                             </button>
-                            <a class="btn btn-outline-secondary" asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@family.Id">
+                            <a class="btn btn-outline-secondary" asp-controller="FamilyMvc" asp-action="Details" asp-route-id="@family?.Id">
                                 <i class="fas fa-times me-1"></i>Отказ
                             </a>
                         </div>

@@ -34,9 +34,9 @@
                         <div class="text-center flex-fill">
                             <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white mb-2" 
                                  style="width: 60px; height: 60px; font-size: 1.2rem; font-weight: bold; background-color: #007bff;">
-                                @Model.PrimaryMember.FirstName.Substring(0, 1)@Model.PrimaryMember.LastName.Substring(0, 1)
+                                @Model.PrimaryMember?.FirstName?.Substring(0, 1)@Model.PrimaryMember?.LastName?.Substring(0, 1)
                             </div>
-                            <h6 class="mb-1">@Model.PrimaryMember.FirstName @Model.PrimaryMember.LastName</h6>
+                            <h6 class="mb-1">@Model.PrimaryMember?.FirstName @Model.PrimaryMember?.LastName</h6>
                             <small class="text-muted">Основен член</small>
                         </div>
 
@@ -77,9 +77,9 @@
                         <div class="text-center flex-fill">
                             <div class="rounded-circle d-inline-flex align-items-center justify-content-center text-white mb-2" 
                                  style="width: 60px; height: 60px; font-size: 1.2rem; font-weight: bold; background-color: #28a745;">
-                                @Model.RelatedMember.FirstName.Substring(0, 1)@Model.RelatedMember.LastName.Substring(0, 1)
+                                @Model.RelatedMember?.FirstName?.Substring(0, 1)@Model.RelatedMember?.LastName?.Substring(0, 1)
                             </div>
-                            <h6 class="mb-1">@Model.RelatedMember.FirstName @Model.RelatedMember.LastName</h6>
+                            <h6 class="mb-1">@Model.RelatedMember?.FirstName @Model.RelatedMember?.LastName</h6>
                             <small class="text-muted">Свързан член</small>
                         </div>
                     </div>

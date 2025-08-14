@@ -29,6 +29,9 @@
                 <div class="card-body">
                     <form asp-action="Edit" method="post">
                         <input asp-for="Id" type="hidden" />
+                        <input asp-for="CreatedAt" type="hidden" />
+                        <input asp-for="CreatedByUserId" type="hidden" />
+                        <input asp-for="PhotoUrl" type="hidden" />
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
                         <!-- Family Name -->

@@ -25,11 +25,14 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             return User.FindFirstValue(ClaimTypes.NameIdentifier) ?? string.Empty;
         }
 
+        [AllowAnonymous]
         public async Task<IActionResult> Index()
         {
             var currentUserId = GetCurrentUserId();
+            var isAuthenticated = !string.IsNullOrEmpty(currentUserId);
+            
             var families = await _context.Families
-                .Where(f => f.CreatedByUserId == currentUserId)
+                .Where(f => !isAuthenticated ? f.IsPublic : (f.CreatedByUserId == currentUserId || f.IsPublic))
                 .Include(f => f.FamilyMembers)
                 .Include(f => f.Photos)
                 .Include(f => f.Stories)
@@ -71,11 +74,13 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             var relationships = await _context.Relationships
                 .Include(r => r.PrimaryMember)
                 .Include(r => r.RelatedMember)
-                .Where(r => r.PrimaryMember.FamilyId == id || r.RelatedMember.FamilyId == id)
+                .Where(r => r.PrimaryMember!.FamilyId == id || r.RelatedMember!.FamilyId == id)
                 .ToListAsync();
 
             ViewBag.Relationships = relationships;
-            ViewBag.Statistics = CalculateStatistics(family.FamilyMembers.ToList());
+            var statistics = CalculateStatistics(family.FamilyMembers.ToList());
+            _logger.LogInformation("Statistics calculated: {Statistics}", System.Text.Json.JsonSerializer.Serialize(statistics));
+            ViewBag.Statistics = statistics;
 
             return View(family);
         }
@@ -113,7 +118,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                         Description = dto.Description,
                         IsPublic = dto.IsPublic,
                         CreatedByUserId = currentUserId,
-                        CreatedAt = DateTime.UtcNow
+                        CreatedAt = DateTime.Now
                     };
 
                     _logger.LogInformation($"Family object created: {family.Name}");
@@ -138,16 +143,24 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
 
         public async Task<IActionResult> Edit(int id)
         {
+            _logger.LogInformation("=== EDIT GET ACTION STARTED === ID: {FamilyId}", id);
             var currentUserId = GetCurrentUserId();
+            _logger.LogInformation("Current User ID: {UserId}", currentUserId);
+            
             var family = await _context.Families
+                .Include(f => f.FamilyMembers)
+                .Include(f => f.Photos)
+                .Include(f => f.Stories)
                 .FirstOrDefaultAsync(f => f.Id == id && f.CreatedByUserId == currentUserId);
 
             if (family == null)
             {
+                _logger.LogWarning("Family not found or no access - ID: {FamilyId}, User: {UserId}", id, currentUserId);
                 TempData["ErrorMessage"] = "Семейството не е намерено или нямате достъп до него.";
                 return RedirectToAction(nameof(Index));
             }
 
+            _logger.LogInformation("Edit GET successful - Family: {FamilyName}", family.Name);
             return View(family);
         }
 
@@ -155,30 +168,59 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, Family family)
         {
-            if (id != family.Id)
+            _logger.LogInformation("=== EDIT POST ACTION STARTED === ID: {FamilyId}, Family Name: {FamilyName}", id, family?.Name ?? "null");
+            _logger.LogInformation("Received Family data: ID={Id}, Name={Name}, CreatedByUserId={CreatedByUserId}, CreatedAt={CreatedAt}", 
+                family?.Id, family?.Name, family?.CreatedByUserId, family?.CreatedAt);
+            
+            if (id != family?.Id)
             {
+                _logger.LogWarning("ID mismatch - Route ID: {RouteId}, Model ID: {ModelId}", id, family?.Id);
                 return NotFound();
             }
 
             var currentUserId = GetCurrentUserId();
+            _logger.LogInformation("Current User ID: {UserId}", currentUserId);
+            
             var existingFamily = await _context.Families
                 .FirstOrDefaultAsync(f => f.Id == id && f.CreatedByUserId == currentUserId);
 
             if (existingFamily == null)
             {
+                _logger.LogWarning("Existing family not found for edit - ID: {FamilyId}, User: {UserId}", id, currentUserId);
                 TempData["ErrorMessage"] = "Семейството не е намерено или нямате достъп до него.";
                 return RedirectToAction(nameof(Index));
             }
 
+            // Remove navigation properties from ModelState validation
+            ModelState.Remove("CreatedBy");
+            ModelState.Remove("FamilyMembers");
+            ModelState.Remove("Photos");
+            ModelState.Remove("Stories");
+            
+            _logger.LogInformation("ModelState.IsValid: {IsValid}", ModelState.IsValid);
+            if (!ModelState.IsValid)
+            {
+                _logger.LogWarning("ModelState validation errors:");
+                foreach (var error in ModelState)
+                {
+                    if (error.Value?.Errors.Count > 0)
+                    {
+                        _logger.LogWarning("Field: {Field}, Errors: {Errors}", error.Key, string.Join(", ", error.Value.Errors.Select(e => e.ErrorMessage)));
+                    }
+                }
+            }
+            
             if (ModelState.IsValid)
             {
                 try
                 {
+                    _logger.LogInformation("Updating family - Old Name: {OldName}, New Name: {NewName}", existingFamily.Name, family.Name);
                     existingFamily.Name = family.Name;
                     existingFamily.Description = family.Description;
                     existingFamily.IsPublic = family.IsPublic;
 
-                    await _context.SaveChangesAsync();
+                    var result = await _context.SaveChangesAsync();
+                    _logger.LogInformation("Edit SaveChanges result: {Result} records affected", result);
                     TempData["SuccessMessage"] = "Семейството беше обновено успешно!";
                     return RedirectToAction(nameof(Details), new { id = family.Id });
                 }
@@ -267,7 +309,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
         {
             var currentUserId = GetCurrentUserId();
             var family = await _context.Families
-                .Where(f => f.Id == id && f.CreatedByUserId == currentUserId)
+                .Where(f => f.Id == id && (f.IsPublic || f.CreatedByUserId == currentUserId))
                 .Include(f => f.FamilyMembers)
                 .FirstOrDefaultAsync();
 
@@ -282,7 +324,7 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             var relationships = await _context.Relationships
                 .Include(r => r.PrimaryMember)
                 .Include(r => r.RelatedMember)
-                .Where(r => r.PrimaryMember.FamilyId == id)
+                .Where(r => r.PrimaryMember!.FamilyId == id)
                 .ToListAsync();
 
             _logger.LogInformation("Found {RelationshipCount} relationships", relationships.Count);
@@ -466,15 +508,37 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 memberDict[member.Id] = node;
             }
 
-            // Find root member (oldest by birth or first created)
-            var rootMember = members.OrderBy(m => m.DateOfBirth ?? DateTime.MaxValue)
-                                   .ThenBy(m => m.CreatedAt)
-                                   .First();
+            // Find root member - someone who has no children (is the youngest generation)
+            var parentIds = relationships
+                .Where(r => r.RelationshipType == RelationshipType.Child)
+                .Select(r => r.PrimaryMemberId) // Primary member is the parent in Child relationships
+                .Distinct()
+                .ToHashSet();
+            
+            // Also find who has parents (to identify children)
+            var childIds = relationships
+                .Where(r => r.RelationshipType == RelationshipType.Child)
+                .Select(r => r.RelatedMemberId) // Related member is the child in Child relationships
+                .Distinct()
+                .ToHashSet();
+            
+            // Root should be someone who is a child but not a parent (youngest generation)
+            var rootMember = members
+                .OrderByDescending(m => childIds.Contains(m.Id) && !parentIds.Contains(m.Id)) // Prefer children who are not parents
+                .ThenByDescending(m => !parentIds.Contains(m.Id)) // Then non-parents
+                .ThenByDescending(m => m.DateOfBirth ?? DateTime.MinValue) // Then youngest
+                .ThenBy(m => m.CreatedAt)
+                .First();
+            
+            _logger.LogInformation("Selected root member: {Name} (Id: {Id}, IsParent: {IsParent}, IsChild: {IsChild})", 
+                rootMember.FirstName, rootMember.Id, parentIds.Contains(rootMember.Id), childIds.Contains(rootMember.Id));
+            
             dynamic root = memberDict[rootMember.Id];
 
             // If we have relationships, build hierarchical tree
             if (relationships.Any())
             {
+                _logger.LogInformation("Building tree with {Count} relationships", relationships.Count);
                 BuildChildrenRecursive(root, members, relationships, memberDict, new HashSet<int>());
             }
             else
@@ -496,16 +560,26 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             if (visited.Contains(node.id)) return;
             visited.Add(node.id);
 
-            // Find all relationships where this node is the primary member
+            // Find all relationships where this node is involved - but avoid duplicates
+            // Only take one relationship per pair of members (to avoid processing both A->B and B->A)
             var nodeRelationships = relationships
                 .Where(r => r.PrimaryMemberId == node.id || r.RelatedMemberId == node.id)
+                .GroupBy(r => new { 
+                    Member1 = Math.Min(r.PrimaryMemberId, r.RelatedMemberId),
+                    Member2 = Math.Max(r.PrimaryMemberId, r.RelatedMemberId)
+                })
+                .Select(g => g.First()) // Take only the first relationship from each pair
                 .ToList();
+
+            // Group parents together on the same level
+            var parents = new Dictionary<int, dynamic>(); // Use dictionary to avoid duplicates
+            var otherRelatives = new Dictionary<int, dynamic>();
 
             foreach (var rel in nodeRelationships)
             {
                 int relatedId = rel.PrimaryMemberId == node.id ? rel.RelatedMemberId : rel.PrimaryMemberId;
                 
-                if (memberMap.ContainsKey(relatedId) && !visited.Contains(relatedId))
+                if (memberMap.ContainsKey(relatedId) && !visited.Contains(relatedId) && relatedId != node.id)
                 {
                     var relatedNode = memberMap[relatedId];
                     
@@ -515,42 +589,78 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                     
                     // Set correct relationship type for the label
                     string relationshipTypeForLabel;
+                    RelationshipType displayType;
+                    
+                    // Check if this is a parent relationship
+                    // If current node is child and related node is parent
+                    bool isParent = (rel.RelationshipType == RelationshipType.Child && rel.RelatedMemberId == node.id && rel.PrimaryMemberId == relatedId) ||
+                                   (rel.RelationshipType == RelationshipType.Parent && rel.PrimaryMemberId == relatedId && rel.RelatedMemberId == node.id);
+                    
+                    // Check if this is a spouse relationship
+                    bool isSpouse = rel.RelationshipType == RelationshipType.Spouse;
+                    
                     if (rel.PrimaryMemberId == node.id)
                     {
                         // This node is primary, show what the related node is to this node
-                        relationshipTypeForLabel = GetGenderAwareRelationshipDescription(rel.RelationshipType, relatedMember, currentMember);
+                        displayType = rel.RelationshipType;
+                        // First param is the person being described, second is the reference person
+                        relationshipTypeForLabel = GetGenderAwareRelationshipDescription(displayType, relatedMember, currentMember);
                     }
                     else
                     {
-                        // This node is related, show what this node is to the primary  
+                        // This node is related, show the reverse relationship
                         var reverseType = GetReverseRelationshipTypeForDisplay(rel.RelationshipType);
-                        relationshipTypeForLabel = reverseType != null ? 
-                            GetGenderAwareRelationshipDescription(reverseType.Value, currentMember, relatedMember) : 
-                            GetGenderAwareRelationshipDescription(rel.RelationshipType, currentMember, relatedMember);
+                        displayType = reverseType ?? rel.RelationshipType;
+                        // For reverse, the related member is being described relative to current
+                        relationshipTypeForLabel = GetGenderAwareRelationshipDescription(displayType, relatedMember, currentMember);
                     }
+                    
+                    _logger.LogInformation("Setting relationship: {NodeName} -> {RelatedName} = {Label} (Type: {Type}, IsParent: {IsParent}, IsSpouse: {IsSpouse})", 
+                        currentMember.FirstName, relatedMember.FirstName, relationshipTypeForLabel, displayType, isParent, isSpouse);
+                    
                     relatedNode.relationshipType = relationshipTypeForLabel;
                     
-                    // For tree structure, add as child if it's a child relationship
-                    if (rel.RelationshipType == RelationshipType.Child && rel.PrimaryMemberId == node.id)
+                    // Only add as parent if this is a direct parent-child relationship
+                    if (isParent && !isSpouse)
                     {
-                        ((List<object>)node.children).Add(relatedNode);
-                        BuildChildrenRecursive(relatedNode, members, relationships, memberMap, visited);
+                        parents[relatedId] = relatedNode;
                     }
-                    // For parent relationships where this node is the child
-                    else if (rel.RelationshipType == RelationshipType.Parent && rel.RelatedMemberId == node.id)
+                    else if (!parents.ContainsKey(relatedId))
                     {
-                        // This will be handled when we process the parent node
-                        // The current node should be added as child of the parent
+                        otherRelatives[relatedId] = relatedNode;
                     }
-                    // For siblings, spouses etc., add them at the same level
-                    else if (rel.RelationshipType == RelationshipType.Sibling)
-                    {
-                        ((List<object>)node.children).Add(relatedNode);
-                    }
-                    else if (rel.RelationshipType == RelationshipType.Spouse)
-                    {
-                        ((List<object>)node.children).Add(relatedNode);
-                    }
+                }
+            }
+            
+            // Add parents first (they'll appear below in inverted tree)
+            foreach (var parent in parents.Values)
+            {
+                ((List<object>)node.children).Add(parent);
+                BuildChildrenRecursive(parent, members, relationships, memberMap, visited);
+            }
+            
+            // Then add other relatives
+            foreach (var relative in otherRelatives.Values)
+            {
+                ((List<object>)node.children).Add(relative);
+                BuildChildrenRecursive(relative, members, relationships, memberMap, visited);
+            }
+            
+            // Mark spouses to be shown on same level
+            if (parents.Count == 2)
+            {
+                // Find spouse relationship between parents
+                var parentIds = parents.Keys.ToList();
+                var parent1Id = parentIds[0];
+                var parent2Id = parentIds[1];
+                var spouseRel = relationships.FirstOrDefault(r => 
+                    (r.RelationshipType == RelationshipType.Spouse) &&
+                    ((r.PrimaryMemberId == parent1Id && r.RelatedMemberId == parent2Id) ||
+                     (r.PrimaryMemberId == parent2Id && r.RelatedMemberId == parent1Id)));
+                     
+                if (spouseRel != null)
+                {
+                    _logger.LogInformation("Found spouse relationship between parents");
                 }
             }
         }

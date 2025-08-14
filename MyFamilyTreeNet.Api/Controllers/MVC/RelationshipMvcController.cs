@@ -210,11 +210,18 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                     _context.Relationships.Add(relationship);
 
                     // Create reverse relationship automatically only for asymmetric relationships
-                    var reverseRelationship = CreateReverseRelationship(relationship, currentUserId);
-                    if (reverseRelationship != null && !IsSymmetricRelationship(relationship.RelationshipType))
+                    if (!IsSymmetricRelationship(relationship.RelationshipType))
                     {
-                        _logger.LogInformation("Adding reverse relationship to context...");
-                        _context.Relationships.Add(reverseRelationship);
+                        var reverseRelationship = CreateReverseRelationship(relationship, currentUserId);
+                        if (reverseRelationship != null)
+                        {
+                            _logger.LogInformation("Adding reverse relationship to context...");
+                            _context.Relationships.Add(reverseRelationship);
+                        }
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Symmetric relationship - no reverse relationship needed");
                     }
 
                     _logger.LogInformation("Saving changes to database...");
@@ -274,10 +281,10 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             
             var relationship = await _context.Relationships
                 .Include(r => r.PrimaryMember)
-                    .ThenInclude(m => m.Family)
+                    .ThenInclude(m => m!.Family)
                 .Include(r => r.RelatedMember)
                 .FirstOrDefaultAsync(r => r.Id == id && 
-                                        r.PrimaryMember.Family.CreatedByUserId == currentUserId);
+                                        r.PrimaryMember!.Family!.CreatedByUserId == currentUserId);
 
             if (relationship == null)
             {
@@ -297,9 +304,9 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             
             var relationship = await _context.Relationships
                 .Include(r => r.PrimaryMember)
-                    .ThenInclude(m => m.Family)
+                    .ThenInclude(m => m!.Family)
                 .FirstOrDefaultAsync(r => r.Id == id && 
-                                        r.PrimaryMember.Family.CreatedByUserId == currentUserId);
+                                        r.PrimaryMember!.Family!.CreatedByUserId == currentUserId);
 
             if (relationship != null)
             {

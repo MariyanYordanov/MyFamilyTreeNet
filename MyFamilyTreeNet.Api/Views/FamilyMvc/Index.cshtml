@@ -23,6 +23,10 @@
             {
                 <div class="col-lg-4 col-md-6">
                     <div class="card h-100 shadow-sm">
+                        @if (!string.IsNullOrWhiteSpace(family.PhotoUrl))
+                        {
+                            <img src="@family.PhotoUrl?v=@DateTime.Now.Ticks" class="card-img-top" alt="Семеен герб - @family.Name" style="height: 150px; object-fit: contain; background-color: #f8f9fa; padding: 10px;" />
+                        }
                         <div class="card-body">
                             <h5 class="card-title">
                                 <i class="fas fa-tree me-2"></i>@family.Name
@@ -35,9 +39,6 @@
                                 <div>
                                     <span class="badge bg-primary">
                                         <i class="fas fa-users me-1"></i>@family.FamilyMembers.Count членове
-                                    </span>
-                                    <span class="badge bg-info">
-                                        <i class="fas fa-camera me-1"></i>@family.Photos.Count снимки
                                     </span>
                                     <span class="badge bg-success">
                                         <i class="fas fa-book me-1"></i>@family.Stories.Count истории

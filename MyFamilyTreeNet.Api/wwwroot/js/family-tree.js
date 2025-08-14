@@ -1,6 +1,14 @@
 // Family Tree D3.js Implementation
 
 function getRelationshipText(relationshipType) {
+    // Handle Bulgarian relationship types from server
+    if (relationshipType) {
+        // If already translated from server, return as is
+        if (typeof relationshipType === 'string' && /[а-я]/.test(relationshipType)) {
+            return relationshipType;
+        }
+    }
+    
     switch(relationshipType) {
         case 'Parent': return 'родител';
         case 'Child': return 'дете';
@@ -20,11 +28,19 @@ function getRelationshipText(relationshipType) {
         case 'StepSibling': return 'доведен брат/сестра';
         case 'HalfSibling': return 'полубрат/полусестра';
         case 'Other': return 'друго';
-        default: return 'връзка';
+        default: return relationshipType || 'връзка';
     }
 }
 
+// Store tree state
+let currentTreeData = null;
+let currentFamilyId = null;
+
 function initializeFamilyTree(familyId, treeData) {
+    // Store data for resize
+    currentTreeData = treeData;
+    currentFamilyId = familyId;
+    
     // Check if D3.js is loaded
     if (typeof d3 === 'undefined') {
         console.error('D3.js is not loaded');
@@ -71,11 +87,17 @@ function initializeFamilyTree(familyId, treeData) {
     console.log('Tree data received:', treeData);
     const root = d3.hierarchy(treeData);
     
-    // Create tree layout
+    // Create tree layout - inverted (children on top)
     const treeLayout = d3.tree()
         .size([width - 100, height - 100]);
 
     treeLayout(root);
+    
+    // Invert the y coordinates to flip the tree (children on top)
+    const maxY = Math.max(...root.descendants().map(d => d.y));
+    root.descendants().forEach(d => {
+        d.y = maxY - d.y + 50; // Add some padding from top
+    });
 
     // Draw links
     const links = g.selectAll('.link')
@@ -86,10 +108,29 @@ function initializeFamilyTree(familyId, treeData) {
 
     // Add the link path
     links.append('path')
-        .attr('class', 'link')
-        .attr('d', d3.linkVertical()
-            .x(d => d.x)
-            .y(d => d.y));
+        .attr('class', function(d) {
+            // Check if this is a spouse relationship
+            const isSpouse = d.target.data.relationshipType && 
+                           (d.target.data.relationshipType.includes('Съпруг') || 
+                            d.target.data.relationshipType.includes('Съпруга'));
+            if (isSpouse || Math.abs(d.source.y - d.target.y) < 10) {
+                return 'link spouse';
+            } else {
+                return 'link parent-child';
+            }
+        })
+        .attr('d', function(d) {
+            // Check if this is a spouse relationship (nodes on same level)
+            if (Math.abs(d.source.y - d.target.y) < 10) {
+                // Horizontal line for spouses
+                return `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`;
+            } else {
+                // Vertical link for parent-child
+                return d3.linkVertical()
+                    .x(d => d.x)
+                    .y(d => d.y)(d);
+            }
+        });
 
     // Add relationship labels on links
     links.append('text')
@@ -103,10 +144,10 @@ function initializeFamilyTree(familyId, treeData) {
         .text(d => {
             // Try to determine relationship from data
             console.log('Link data:', d.target.data);
+            console.log('Full target data:', JSON.stringify(d.target.data, null, 2));
             if (d.target.data.relationshipType) {
-                const translatedText = getRelationshipText(d.target.data.relationshipType);
-                console.log('Relationship type:', d.target.data.relationshipType, '-> translated:', translatedText);
-                return translatedText;
+                // The relationshipType should already be in Bulgarian from the server
+                return d.target.data.relationshipType;
             }
             console.log('No relationshipType found, using default');
             return 'връзка';
@@ -191,27 +232,19 @@ function initializeFamilyTree(familyId, treeData) {
                 .scale(scale));
     }
 
-    // Handle window resize
-    window.addEventListener('resize', function() {
-        if (containerNode.offsetParent) {
-            const newRect = containerNode.getBoundingClientRect();
-            const newWidth = newRect.width > 0 ? newRect.width : width;
-            svg.attr('width', newWidth);
-            treeLayout.size([newWidth - 100, height - 100]);
-            treeLayout(root);
-            
-            // Update links and nodes positions
-            links.select('path').attr('d', d3.linkVertical()
-                .x(d => d.x)
-                .y(d => d.y));
-            
-            links.select('.link-label')
-                .attr('x', d => (d.source.x + d.target.x) / 2)
-                .attr('y', d => (d.source.y + d.target.y) / 2 - 5);
-            
-            nodes.attr('transform', d => `translate(${d.x},${d.y})`);
-            
-            centerTree();
-        }
-    });
 }
+
+// Debounced resize handler - prevents rotation during resize
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        if (currentTreeData && currentFamilyId) {
+            const container = document.getElementById('family-tree-container');
+            if (container && container.offsetParent) {
+                // Redraw the tree with same data
+                initializeFamilyTree(currentFamilyId, currentTreeData);
+            }
+        }
+    }, 300); // Wait 300ms after resize stops
+});

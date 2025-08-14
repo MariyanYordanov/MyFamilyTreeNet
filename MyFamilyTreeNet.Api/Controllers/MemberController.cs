@@ -343,7 +343,7 @@ namespace MyFamilyTreeNet.Api.Controllers
                 var relationships = await _context.Relationships
                     .Include(r => r.PrimaryMember)
                     .Include(r => r.RelatedMember)
-                    .Where(r => r.PrimaryMember.FamilyId == familyId)
+                    .Where(r => r.PrimaryMember!.FamilyId == familyId)
                     .ToListAsync();
 
                 var memberDtos = _mapper.Map<List<FamilyMemberDto>>(members);

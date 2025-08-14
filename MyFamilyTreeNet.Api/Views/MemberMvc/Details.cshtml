@@ -199,13 +199,13 @@
                                                         @if (relationship.PrimaryMemberId == Model.Id)
                                                         {
                                                             <a asp-action="Details" asp-route-id="@relationship.RelatedMemberId" class="text-decoration-none">
-                                                                @relationship.RelatedMember.FirstName @relationship.RelatedMember.LastName
+                                                                @relationship.RelatedMember?.FirstName @relationship.RelatedMember?.LastName
                                                             </a>
                                                         }
                                                         else
                                                         {
                                                             <a asp-action="Details" asp-route-id="@relationship.PrimaryMemberId" class="text-decoration-none">
-                                                                @relationship.PrimaryMember.FirstName @relationship.PrimaryMember.LastName
+                                                                @relationship.PrimaryMember?.FirstName @relationship.PrimaryMember?.LastName
                                                             </a>
                                                         }
                                                     </h6>

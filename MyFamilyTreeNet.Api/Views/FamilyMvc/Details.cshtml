@@ -25,7 +25,7 @@
                     <i class="fas fa-edit me-1"></i>Редактирай
                 </a>
                 <a asp-controller="UploadMvc" asp-action="FamilyPhoto" asp-route-familyId="@Model.Id" class="btn btn-outline-success">
-                    <i class="fas fa-camera me-1"></i>Снимка
+                    <i class="fas fa-shield-alt me-1"></i>Семеен герб
                 </a>
                 <a asp-controller="MemberMvc" asp-action="Create" asp-route-familyId="@Model.Id" class="btn btn-primary">
                     <i class="fas fa-user-plus me-1"></i>Добави член
@@ -39,6 +39,20 @@
             </a>
         </div>
     </div>
+
+    <!-- Family Photo -->
+    @if (!string.IsNullOrWhiteSpace(Model.PhotoUrl))
+    {
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <img src="@Model.PhotoUrl?v=@DateTime.Now.Ticks" alt="Семеен герб - @Model.Name" class="img-fluid rounded" style="max-height: 200px; object-fit: contain;" />
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
 
     <!-- Statistics Cards -->
     @if (statistics != null)
@@ -270,8 +284,8 @@
 
 @section Scripts {
     <script src="https://d3js.org/d3.v7.min.js"></script>
-    <link rel="stylesheet" href="~/css/family-tree.css" />
-    <script src="~/js/family-tree.js"></script>
+    <link rel="stylesheet" href="~/css/family-tree.css?v=@DateTime.Now.Ticks" />
+    <script src="~/js/family-tree.js?v=@DateTime.Now.Ticks"></script>
     
     <script>
         document.addEventListener('DOMContentLoaded', function() {
@@ -324,7 +338,7 @@
                     .then(data => {
                         console.log('Family tree data received:', data);
                         if (data && data.id) {
-                            initializeFamilyTree(@Model.Id, [data]);
+                            initializeFamilyTree(@Model.Id, data);
                         } else {
                             console.log('No valid tree data received');
                         }
