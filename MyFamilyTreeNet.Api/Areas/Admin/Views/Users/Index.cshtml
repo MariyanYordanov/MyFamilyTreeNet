@@ -95,9 +95,12 @@
                                 }
                             </td>
                             <td>
-                                @if (userInfo.Roles.Any())
+                                @{
+                                    var roles = userInfo.Roles as IEnumerable<string>;
+                                }
+                                @if (roles?.Any() == true)
                                 {
-                                    @foreach (string role in userInfo.Roles)
+                                    @foreach (string role in roles)
                                     {
                                         <span class="badge bg-@(role == "Admin" ? "danger" : "primary") me-1">@role</span>
                                     }
@@ -129,6 +132,27 @@
                                        class="btn btn-sm btn-outline-primary" title="Детайли">
                                         <i class="fas fa-eye"></i>
                                     </a>
+                                    
+                                    @if (userInfo.IsLocked)
+                                    {
+                                        <form asp-action="ToggleLock" method="post" style="display:inline;">
+                                            <input type="hidden" name="userId" value="@userInfo.User.Id" />
+                                            <button type="submit" class="btn btn-sm btn-success" title="Разблокирай" 
+                                                    onclick="return confirm('Сигурни ли сте че искате да разблокирате този потребител?')">
+                                                <i class="fas fa-unlock"></i>
+                                            </button>
+                                        </form>
+                                    }
+                                    else
+                                    {
+                                        <form asp-action="ToggleLock" method="post" style="display:inline;">
+                                            <input type="hidden" name="userId" value="@userInfo.User.Id" />
+                                            <button type="submit" class="btn btn-sm btn-warning" title="Блокирай"
+                                                    onclick="return confirm('Сигурни ли сте че искате да блокирате този потребител?')">
+                                                <i class="fas fa-ban"></i>
+                                            </button>
+                                        </form>
+                                    }
                                     @if (!userInfo.Roles.Contains("Admin"))
                                     {
                                         <button type="button" class="btn btn-sm btn-outline-danger" 
