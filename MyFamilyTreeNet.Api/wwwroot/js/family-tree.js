@@ -105,6 +105,57 @@ function initializeFamilyTree(familyId, treeData) {
         .enter()
         .append('g')
         .attr('class', 'link-group');
+        
+    // Add spouse links (between nodes with same parent)
+    const spouseLinks = [];
+    root.descendants().forEach(node => {
+        if (node.data.spouseId && node.parent) {
+            // Find spouse node
+            const spouse = node.parent.children.find(child => child.data.id === node.data.spouseId);
+            if (spouse && node.data.id < spouse.data.id) { // Avoid duplicates
+                spouseLinks.push({source: node, target: spouse, isSpouse: true});
+            }
+        }
+    });
+    
+    // Draw spouse links
+    const spouseLinkGroups = g.selectAll('.spouse-link')
+        .data(spouseLinks)
+        .enter()
+        .append('g')
+        .attr('class', 'link-group spouse-link-group');
+        
+    spouseLinkGroups.append('path')
+        .attr('class', 'link spouse')
+        .attr('d', d => `M${d.source.x},${d.source.y} L${d.target.x},${d.target.y}`)
+        .attr('stroke-width', 4);
+        
+    // Add labels to spouse links
+    spouseLinkGroups.append('text')
+        .attr('class', 'link-label')
+        .attr('x', d => (d.source.x + d.target.x) / 2)
+        .attr('y', d => (d.source.y + d.target.y) / 2 - 5)
+        .attr('text-anchor', 'middle')
+        .attr('font-size', '10px')
+        .attr('fill', '#e91e63')
+        .text('Съпруг/а');
+        
+    // Add white background to spouse labels
+    spouseLinkGroups.selectAll('.link-label')
+        .each(function() {
+            const bbox = this.getBBox();
+            d3.select(this.parentNode)
+                .insert('rect', '.link-label')
+                .attr('x', bbox.x - 2)
+                .attr('y', bbox.y - 1)
+                .attr('width', bbox.width + 4)
+                .attr('height', bbox.height + 2)
+                .attr('fill', 'white')
+                .attr('fill-opacity', 0.8)
+                .attr('stroke', '#e91e63')
+                .attr('stroke-width', 0.5)
+                .attr('rx', 2);
+        });
 
     // Add the link path
     links.append('path')
@@ -130,7 +181,8 @@ function initializeFamilyTree(familyId, treeData) {
                     .x(d => d.x)
                     .y(d => d.y)(d);
             }
-        });
+        })
+        .attr('stroke-width', 4);
 
     // Add relationship labels on links
     links.append('text')

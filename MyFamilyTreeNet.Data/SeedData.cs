@@ -142,7 +142,8 @@ public static class SeedData
                 
                
                 new FamilyMember { FamilyId = smithFamily.Id, FirstName = "Robert", MiddleName = "William", LastName = "Smith", DateOfBirth = new DateTime(1950, 2, 28), Gender = Gender.Male, AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new FamilyMember { FamilyId = smithFamily.Id, FirstName = "Mary", MiddleName = "Ann", LastName = "Smith", DateOfBirth = new DateTime(1952, 7, 14), Gender = Gender.Female, AddedByUserId = adminId, CreatedAt = DateTime.UtcNow }
+                new FamilyMember { FamilyId = smithFamily.Id, FirstName = "Mary", MiddleName = "Ann", LastName = "Smith", DateOfBirth = new DateTime(1952, 7, 14), Gender = Gender.Female, AddedByUserId = adminId, CreatedAt = DateTime.UtcNow },
+                new FamilyMember { FamilyId = smithFamily.Id, FirstName = "William", MiddleName = "Robert", LastName = "Smith", DateOfBirth = new DateTime(1975, 9, 10), Gender = Gender.Male, AddedByUserId = adminId, CreatedAt = DateTime.UtcNow }
             };
 
             var royalMembers = new List<FamilyMember>
@@ -173,30 +174,34 @@ public static class SeedData
          
             var relationships = new List<Relationship>
             {
-            
-                new Relationship { PrimaryMemberId = familyMembers[0].Id, RelatedMemberId = familyMembers[1].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[0].Id, RelatedMemberId = familyMembers[2].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[0].Id, RelatedMemberId = familyMembers[3].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[1].Id, RelatedMemberId = familyMembers[2].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = demoUsers.Skip(1).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[1].Id, RelatedMemberId = familyMembers[3].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = demoUsers.Skip(1).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[2].Id, RelatedMemberId = familyMembers[3].Id, RelationshipType = RelationshipType.Sibling, CreatedByUserId = demoUsers.Skip(2).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
+                // Doe Family relationships (familyMembers[0-3]: John, Jane, Michael, Sarah)
+                new Relationship { PrimaryMemberId = familyMembers[0].Id, RelatedMemberId = familyMembers[1].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // John & Jane married
+                new Relationship { PrimaryMemberId = familyMembers[2].Id, RelatedMemberId = familyMembers[0].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Michael is child of John
+                new Relationship { PrimaryMemberId = familyMembers[2].Id, RelatedMemberId = familyMembers[1].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Michael is child of Jane
+                new Relationship { PrimaryMemberId = familyMembers[3].Id, RelatedMemberId = familyMembers[0].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.Skip(1).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Sarah is child of John
+                new Relationship { PrimaryMemberId = familyMembers[3].Id, RelatedMemberId = familyMembers[1].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.Skip(1).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Sarah is child of Jane
+                new Relationship { PrimaryMemberId = familyMembers[2].Id, RelatedMemberId = familyMembers[3].Id, RelationshipType = RelationshipType.Sibling, CreatedByUserId = demoUsers.Skip(2).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Michael & Sarah are siblings
                 
-             
-                new Relationship { PrimaryMemberId = familyMembers[4].Id, RelatedMemberId = familyMembers[5].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow },
+                // Smith Family relationships (familyMembers[4-6]: Robert, Mary, William)
+                new Relationship { PrimaryMemberId = familyMembers[4].Id, RelatedMemberId = familyMembers[5].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // Robert & Mary married
+                new Relationship { PrimaryMemberId = familyMembers[6].Id, RelatedMemberId = familyMembers[4].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // William is child of Robert
+                new Relationship { PrimaryMemberId = familyMembers[6].Id, RelatedMemberId = familyMembers[5].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = demoUsers.Skip(4).FirstOrDefault()?.Id ?? adminId, CreatedAt = DateTime.UtcNow }, // William is child of Mary
         
-                new Relationship { PrimaryMemberId = familyMembers[6].Id, RelatedMemberId = familyMembers[7].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King Edward I & Queen Elizabeth I
-                new Relationship { PrimaryMemberId = familyMembers[8].Id, RelatedMemberId = familyMembers[9].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Prince & Princess
-                new Relationship { PrimaryMemberId = familyMembers[10].Id, RelatedMemberId = familyMembers[11].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King William II & Queen Isabella
-                new Relationship { PrimaryMemberId = familyMembers[12].Id, RelatedMemberId = familyMembers[13].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Crown Prince & Princess
+                // Royal Family relationships (familyMembers[7-15]: King Edward I, Queen Elizabeth I, Prince Charles, Princess Diana, King William II, Queen Isabella, Crown Prince Alexander, Crown Princess Sofia, Prince Edward III)
+                new Relationship { PrimaryMemberId = familyMembers[7].Id, RelatedMemberId = familyMembers[8].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King Edward I & Queen Elizabeth I
+                new Relationship { PrimaryMemberId = familyMembers[9].Id, RelatedMemberId = familyMembers[10].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Prince Charles & Princess Diana
+                new Relationship { PrimaryMemberId = familyMembers[11].Id, RelatedMemberId = familyMembers[12].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King William II & Queen Isabella
+                new Relationship { PrimaryMemberId = familyMembers[13].Id, RelatedMemberId = familyMembers[14].Id, RelationshipType = RelationshipType.Spouse, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Crown Prince Alexander & Princess Sofia
 
-                new Relationship { PrimaryMemberId = familyMembers[6].Id, RelatedMemberId = familyMembers[8].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[7].Id, RelatedMemberId = familyMembers[8].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[8].Id, RelatedMemberId = familyMembers[10].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[9].Id, RelatedMemberId = familyMembers[10].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[10].Id, RelatedMemberId = familyMembers[12].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[11].Id, RelatedMemberId = familyMembers[12].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[12].Id, RelatedMemberId = familyMembers[14].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow },
-                new Relationship { PrimaryMemberId = familyMembers[13].Id, RelatedMemberId = familyMembers[14].Id, RelationshipType = RelationshipType.Parent, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }
+                // Parent-child relationships in Royal family
+                new Relationship { PrimaryMemberId = familyMembers[9].Id, RelatedMemberId = familyMembers[7].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Prince Charles is child of King Edward I
+                new Relationship { PrimaryMemberId = familyMembers[9].Id, RelatedMemberId = familyMembers[8].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Prince Charles is child of Queen Elizabeth I
+                new Relationship { PrimaryMemberId = familyMembers[11].Id, RelatedMemberId = familyMembers[9].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King William II is child of Prince Charles
+                new Relationship { PrimaryMemberId = familyMembers[11].Id, RelatedMemberId = familyMembers[10].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // King William II is child of Princess Diana
+                new Relationship { PrimaryMemberId = familyMembers[13].Id, RelatedMemberId = familyMembers[11].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Crown Prince Alexander is child of King William II
+                new Relationship { PrimaryMemberId = familyMembers[13].Id, RelatedMemberId = familyMembers[12].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Crown Prince Alexander is child of Queen Isabella
+                new Relationship { PrimaryMemberId = familyMembers[15].Id, RelatedMemberId = familyMembers[13].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow }, // Prince Edward III is child of Crown Prince Alexander
+                new Relationship { PrimaryMemberId = familyMembers[15].Id, RelatedMemberId = familyMembers[14].Id, RelationshipType = RelationshipType.Child, CreatedByUserId = adminId, CreatedAt = DateTime.UtcNow } // Prince Edward III is child of Crown Princess Sofia
             };
 
             context.Relationships.AddRange(relationships);
