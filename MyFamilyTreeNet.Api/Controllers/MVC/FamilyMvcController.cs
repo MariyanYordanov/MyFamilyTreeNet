@@ -508,47 +508,120 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
                 memberDict[member.Id] = node;
             }
 
-            // Find root member - someone who has no children (is the youngest generation)
-            var parentIds = relationships
-                .Where(r => r.RelationshipType == RelationshipType.Child)
-                .Select(r => r.PrimaryMemberId) // Primary member is the parent in Child relationships
-                .Distinct()
-                .ToHashSet();
+            // Find root member - someone who has parents but is not a parent themselves
+            var hasParents = new HashSet<int>();
+            var isParent = new HashSet<int>();
             
-            // Also find who has parents (to identify children)
-            var childIds = relationships
-                .Where(r => r.RelationshipType == RelationshipType.Child)
-                .Select(r => r.RelatedMemberId) // Related member is the child in Child relationships
-                .Distinct()
-                .ToHashSet();
+            foreach (var rel in relationships)
+            {
+                if (rel.RelationshipType == RelationshipType.Parent)
+                {
+                    // PrimaryMember says RelatedMember is their parent
+                    hasParents.Add(rel.PrimaryMemberId);
+                }
+                else if (rel.RelationshipType == RelationshipType.Child)
+                {
+                    // PrimaryMember says RelatedMember is their child (so Primary is parent)
+                    isParent.Add(rel.PrimaryMemberId);
+                }
+            }
             
-            // Root should be someone who is a child but not a parent (youngest generation)
+            // Root should be someone who has parents but is not a parent
             var rootMember = members
-                .OrderByDescending(m => childIds.Contains(m.Id) && !parentIds.Contains(m.Id)) // Prefer children who are not parents
-                .ThenByDescending(m => !parentIds.Contains(m.Id)) // Then non-parents
-                .ThenByDescending(m => m.DateOfBirth ?? DateTime.MinValue) // Then youngest
-                .ThenBy(m => m.CreatedAt)
+                .OrderByDescending(m => hasParents.Contains(m.Id) && !isParent.Contains(m.Id))
+                .ThenByDescending(m => m.DateOfBirth ?? DateTime.MinValue)
                 .First();
-            
-            _logger.LogInformation("Selected root member: {Name} (Id: {Id}, IsParent: {IsParent}, IsChild: {IsChild})", 
-                rootMember.FirstName, rootMember.Id, parentIds.Contains(rootMember.Id), childIds.Contains(rootMember.Id));
+                
+            _logger.LogInformation($"Root selection - Has parents: {string.Join(",", hasParents)}, Is parent: {string.Join(",", isParent)}");
             
             dynamic root = memberDict[rootMember.Id];
 
-            // If we have relationships, build hierarchical tree
+            // Build simple two-level tree: Root -> Parents -> Spouses
             if (relationships.Any())
             {
-                _logger.LogInformation("Building tree with {Count} relationships", relationships.Count);
-                BuildChildrenRecursive(root, members, relationships, memberDict, new HashSet<int>());
-            }
-            else
-            {
-                // If no relationships, add all other members as siblings at root level
-                foreach (var member in members.Where(m => m.Id != rootMember.Id))
+                // Find all relationships involving root
+                var rootRelations = relationships
+                    .Where(r => r.PrimaryMemberId == rootMember.Id || r.RelatedMemberId == rootMember.Id)
+                    .ToList();
+                
+                var parentRelations = new List<Relationship>();
+                
+                // Find parent relationships
+                foreach (var rel in rootRelations)
                 {
-                    var memberNode = memberDict[member.Id];
-                    memberNode.relationshipType = GetGenderAwareRelationshipDescription(RelationshipType.Sibling, member, rootMember);
-                    ((List<object>)root.children).Add(memberNode);
+                    if (rel.RelationshipType == RelationshipType.Parent)
+                    {
+                        parentRelations.Add(rel);
+                    }
+                    else if (rel.RelationshipType == RelationshipType.Child)
+                    {
+                        // Child relationship means the other person is the parent
+                        parentRelations.Add(rel);
+                    }
+                }
+                
+                _logger.LogInformation($"Found {parentRelations.Count} parent relations for root {rootMember.FirstName} (ID: {rootMember.Id})");
+                
+                foreach (var parentRel in parentRelations)
+                {
+                    // Determine who is the parent based on relationship type and direction
+                    int parentId;
+                    if (parentRel.RelationshipType == RelationshipType.Parent)
+                    {
+                        if (parentRel.PrimaryMemberId == rootMember.Id)
+                        {
+                            // Root says someone is their parent
+                            parentId = parentRel.RelatedMemberId;
+                        }
+                        else
+                        {
+                            // Someone says they are parent of root
+                            parentId = parentRel.PrimaryMemberId;
+                        }
+                    }
+                    else // RelationshipType.Child
+                    {
+                        if (parentRel.PrimaryMemberId == rootMember.Id)
+                        {
+                            // Root says they are child of someone (that someone is parent)
+                            parentId = parentRel.RelatedMemberId;
+                        }
+                        else
+                        {
+                            // Someone says root is their child (they are parent)
+                            parentId = parentRel.PrimaryMemberId;
+                        }
+                    }
+                    
+                    if (memberDict.ContainsKey(parentId) && !((List<object>)root.children).Any(c => ((dynamic)c).id == parentId))
+                    {
+                        var parentNode = memberDict[parentId];
+                        var parentMember = members.First(m => m.Id == parentId);
+                        parentNode.relationshipType = GetGenderAwareRelationshipDescription(RelationshipType.Parent, parentMember, rootMember);
+                        ((List<object>)root.children).Add(parentNode);
+                        
+                        _logger.LogInformation($"Added parent: {parentMember.FirstName} (ID: {parentId}) to tree");
+                        
+                        // Find spouse of this parent
+                        var spouseRel = relationships
+                            .Where(r => r.RelationshipType == RelationshipType.Spouse && 
+                                       (r.PrimaryMemberId == parentId || r.RelatedMemberId == parentId))
+                            .FirstOrDefault();
+                            
+                        if (spouseRel != null)
+                        {
+                            int spouseId = spouseRel.PrimaryMemberId == parentId ? 
+                                          spouseRel.RelatedMemberId : spouseRel.PrimaryMemberId;
+                                          
+                            if (memberDict.ContainsKey(spouseId) && !((List<object>)root.children).Any(c => ((dynamic)c).id == spouseId))
+                            {
+                                var spouseNode = memberDict[spouseId];
+                                var spouseMember = members.First(m => m.Id == spouseId);
+                                spouseNode.relationshipType = GetGenderAwareRelationshipDescription(RelationshipType.Parent, spouseMember, rootMember);
+                                ((List<object>)root.children).Add(spouseNode);
+                            }
+                        }
+                    }
                 }
             }
 
@@ -560,15 +633,13 @@ namespace MyFamilyTreeNet.Api.Controllers.MVC
             if (visited.Contains(node.id)) return;
             visited.Add(node.id);
 
-            // Find all relationships where this node is involved - but avoid duplicates
-            // Only take one relationship per pair of members (to avoid processing both A->B and B->A)
+            // Find relationships where current node is involved
+            // For tree building, use only Parent relationships (ignore Child relationships as they're duplicates)
             var nodeRelationships = relationships
-                .Where(r => r.PrimaryMemberId == node.id || r.RelatedMemberId == node.id)
-                .GroupBy(r => new { 
-                    Member1 = Math.Min(r.PrimaryMemberId, r.RelatedMemberId),
-                    Member2 = Math.Max(r.PrimaryMemberId, r.RelatedMemberId)
-                })
-                .Select(g => g.First()) // Take only the first relationship from each pair
+                .Where(r => (r.PrimaryMemberId == node.id && r.RelationshipType == RelationshipType.Parent) ||
+                           (r.RelatedMemberId == node.id && r.RelationshipType == RelationshipType.Parent) ||
+                           (r.PrimaryMemberId == node.id && r.RelationshipType == RelationshipType.Spouse) ||
+                           (r.RelatedMemberId == node.id && r.RelationshipType == RelationshipType.Spouse))
                 .ToList();
 
             // Group parents together on the same level

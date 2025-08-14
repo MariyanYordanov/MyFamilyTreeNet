@@ -122,11 +122,6 @@
             </button>
         </li>
         <li class="nav-item" role="presentation">
-            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#photos" type="button">
-                <i class="fas fa-camera me-1"></i>Снимки (@Model.Photos.Count)
-            </button>
-        </li>
-        <li class="nav-item" role="presentation">
             <button class="nav-link" data-bs-toggle="tab" data-bs-target="#stories" type="button">
                 <i class="fas fa-book me-1"></i>Истории (@Model.Stories.Count)
             </button>
@@ -219,38 +214,6 @@
             }
         </div>
 
-        <!-- Photos Tab -->
-        <div class="tab-pane fade" id="photos" role="tabpanel">
-            @if (Model.Photos.Any())
-            {
-                <div class="row">
-                    @foreach (var photo in Model.Photos.OrderByDescending(p => p.DateTaken))
-                    {
-                        <div class="col-md-3 col-sm-6 mb-3">
-                            <div class="card">
-                                <img src="@photo.ImageUrl" class="card-img-top" alt="@photo.Title">
-                                <div class="card-body">
-                                    <h6 class="card-title">@photo.Title</h6>
-                                    @if (photo.DateTaken.HasValue)
-                                    {
-                                        <p class="card-text small text-muted">
-                                            @photo.DateTaken.Value.ToString("dd.MM.yyyy")
-                                        </p>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </div>
-            }
-            else
-            {
-                <div class="text-center py-5">
-                    <i class="fas fa-camera fa-3x text-muted mb-3"></i>
-                    <p class="text-muted">Все още няма качени снимки.</p>
-                </div>
-            }
-        </div>
 
         <!-- Stories Tab -->
         <div class="tab-pane fade" id="stories" role="tabpanel">
