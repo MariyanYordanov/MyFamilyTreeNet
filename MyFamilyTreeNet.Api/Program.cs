@@ -34,7 +34,12 @@ var isDevelopment = builder.Environment.IsDevelopment();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
-    if (isDevelopment && databaseProvider == "SQLite")
+    if (builder.Environment.IsEnvironment("Testing"))
+    {
+        // Testing - InMemory database
+        options.UseInMemoryDatabase("InMemoryDbForTesting");
+    }
+    else if (isDevelopment && databaseProvider == "SQLite")
     {
         // Development - SQLite
         options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection"));
@@ -300,9 +305,20 @@ using (var scope = app.Services.CreateScope())
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
-    await context.Database.MigrateAsync();
+    // Don't run migrations in testing environment
+    if (!app.Environment.IsEnvironment("Testing"))
+    {
+        await context.Database.MigrateAsync();
+    }
+    else
+    {
+        // For testing, ensure database is created (for InMemory)
+        await context.Database.EnsureCreatedAsync();
+    }
 
     await SeedData.Initialize(context, userManager, roleManager);
 }
 
 app.Run();
+
+public partial class Program { }

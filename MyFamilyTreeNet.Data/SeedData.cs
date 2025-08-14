@@ -51,29 +51,7 @@ public static class SeedData
         }
         else
         {
-            Console.WriteLine("Admin user already exists. Checking password...");
-            var passwordCheck = await userManager.CheckPasswordAsync(existingAdmin, "Admin123!");
-            if (!passwordCheck)
-            {
-                var token = await userManager.GeneratePasswordResetTokenAsync(existingAdmin);
-                var resetResult = await userManager.ResetPasswordAsync(existingAdmin, token, "Admin123!");
-                if (resetResult.Succeeded)
-                {
-                    Console.WriteLine("Admin password reset successful!");
-                }
-                else
-                {
-                    Console.WriteLine("Admin password reset failed!");
-                    foreach (var error in resetResult.Errors)
-                    {
-                        Console.WriteLine($"Reset error: {error.Description}");
-                    }
-                }
-            }
-            else
-            {
-                Console.WriteLine("Admin password is correct!");
-            }
+            Console.WriteLine("Admin user already exists.");
         }
 
         var demoUsers = new List<User>();
