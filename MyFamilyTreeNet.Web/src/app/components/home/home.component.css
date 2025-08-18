@@ -1,94 +1,210 @@
+/* Home Component Styles - Matching MVC View */
+
+/* Hero Section */
 .hero-section {
+  background: linear-gradient(135deg, #0d6efd 0%, #0a58ca 100%) !important;
+  border-radius: 0.375rem;
+  margin-bottom: 2rem;
   padding: 3rem 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  background-clip: text;
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  margin-bottom: 2rem !important;
 }
 
+.hero-section h1 {
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.hero-section .lead {
+  font-size: 1.25rem;
+  margin-bottom: 1.5rem;
+  color: white;
+}
+
+/* Feature Cards */
+.feature-icon {
+  width: 80px;
+  height: 80px;
+  margin: 0 auto 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f8f9fa;
+  border-radius: 50%;
+}
+
+.feature-icon i {
+  color: #0d6efd;
+}
+
+.card {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+
+.card-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin-bottom: 0.75rem;
+}
+
+/* Statistics Section */
+.display-5 {
+  font-size: 3rem;
+  font-weight: 700;
+  color: #0d6efd;
+}
+
+.lead {
+  font-size: 1.25rem;
+  color: #6c757d;
+}
+
+/* Family Cards */
 .family-card {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  border: none;
-  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.125);
+  transition: all 0.3s ease;
 }
 
 .family-card:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+  box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
 }
 
-.family-image {
-  height: 200px;
-  object-fit: cover;
-  transition: transform 0.3s ease;
+.family-card .card-title {
+  font-size: 1.1rem;
+  margin-bottom: 0.5rem;
 }
 
-.family-card:hover .family-image {
-  transform: scale(1.05);
+.family-card .card-text {
+  color: #6c757d;
+  font-size: 0.9rem;
 }
 
-.card-img-overlay {
-  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+.family-card .card-footer {
+  border-top: 1px solid rgba(0, 0, 0, 0.125);
+  background-color: transparent;
 }
 
-.features-section {
+/* Buttons */
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.125rem;
+  border-radius: 0.375rem;
+}
+
+.btn-light {
+  background-color: #fff;
+  border-color: #fff;
+  color: #212529;
+}
+
+.btn-light:hover {
   background-color: #f8f9fa;
-  border-radius: 10px;
-  padding: 2rem;
-  margin-top: 3rem;
+  border-color: #f8f9fa;
+  color: #212529;
 }
 
-.features-section i {
-  margin-bottom: 1rem;
+.btn-outline-light {
+  color: #fff;
+  border-color: #fff;
 }
 
-.btn {
-  border-radius: 8px;
-  transition: all 0.3s ease;
+.btn-outline-light:hover {
+  background-color: #fff;
+  color: #0d6efd;
 }
 
-.btn:hover {
-  transform: translateY(-2px);
+.btn-outline-primary {
+  color: #0d6efd;
+  border-color: #0d6efd;
 }
 
+.btn-outline-primary:hover {
+  background-color: #0d6efd;
+  border-color: #0d6efd;
+  color: #fff;
+}
+
+/* Call to Action Section */
+.bg-light {
+  background-color: #f8f9fa !important;
+}
+
+/* Loading State */
 .spinner-border {
   width: 3rem;
   height: 3rem;
 }
 
-/* Responsive adjustments */
+/* Responsive Design */
 @media (max-width: 768px) {
   .hero-section {
-    padding: 2rem 0;
+    padding: 2rem 1rem;
   }
-  
-  .display-4 {
+
+  .hero-section h1 {
     font-size: 2rem;
   }
-  
+
+  .display-5 {
+    font-size: 2rem;
+  }
+
   .btn-lg {
-    font-size: 1rem;
     padding: 0.5rem 1rem;
+    font-size: 1rem;
+  }
+
+  .feature-icon {
+    width: 60px;
+    height: 60px;
+  }
+
+  .feature-icon i {
+    font-size: 1.5rem !important;
   }
 }
 
-/* Animation for cards */
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+/* Icon Colors */
+.text-warning {
+  color: #ffc107 !important;
 }
 
-.family-card {
-  animation: fadeInUp 0.6s ease-out forwards;
+/* Gap Utility for Flexbox */
+.gap-3 {
+  gap: 1rem !important;
 }
 
-.family-card:nth-child(1) { animation-delay: 0.1s; }
-.family-card:nth-child(2) { animation-delay: 0.2s; }
-.family-card:nth-child(3) { animation-delay: 0.3s; }
+/* Shadow Utilities */
+.shadow-sm {
+  box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+}
+
+/* Text Utilities */
+.fw-bold {
+  font-weight: 700 !important;
+}
+
+.text-muted {
+  color: #6c757d !important;
+}
+
+.small {
+  font-size: 0.875rem;
+}
+
+/* Grid Utilities */
+.g-4 {
+  --bs-gutter-x: 1.5rem;
+  --bs-gutter-y: 1.5rem;
+}
+
+/* Remove inline styles from HTML */
+::ng-deep style {
+  display: none !important;
+}

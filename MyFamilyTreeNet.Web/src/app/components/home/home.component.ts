@@ -1,10 +1,11 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { FamilyService } from '../../features/family/services/family.service';
 import { AuthService } from '../../core/services/auth.service';
+import { StatisticsService, PlatformStatistics } from '../../core/services/statistics.service';
 import { Family } from '../../features/family/models/family.model';
 
 @Component({
@@ -17,19 +18,26 @@ import { Family } from '../../features/family/models/family.model';
 export class HomeComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
 
-  families: Family[] = [];
+  featuredFamilies: Family[] = [];
   isLoading = true;
   error: string | null = null;
   isLoggedIn = false;
   currentUser: any = null;
+  statistics: PlatformStatistics = {
+    totalFamilies: 0,
+    totalMembers: 0,
+    totalStories: 0
+  };
 
   constructor(
     private familyService: FamilyService,
-    private authService: AuthService
+    private authService: AuthService,
+    private statisticsService: StatisticsService
   ) {}
 
   ngOnInit(): void {
     this.checkAuthStatus();
+    this.loadData();
   }
 
   ngOnDestroy(): void {
@@ -43,57 +51,51 @@ export class HomeComponent implements OnInit, OnDestroy {
       .subscribe(user => {
         this.isLoggedIn = !!user;
         this.currentUser = user;
-        this.loadFamiliesForHome(); // Load families after auth status is determined
       });
   }
 
-  private loadFamiliesForHome(): void {
+  private loadData(): void {
     this.isLoading = true;
     this.error = null;
 
-    if (this.isLoggedIn && this.currentUser) {
-      // Логнат потребител - покажи неговите семейства
-      this.familyService.getUserFamilies(this.currentUser.id)
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            this.families = response.families || [];
-            this.isLoading = false;
-          },
-          error: (error) => {
-            this.error = 'Възникна грешка при зареждането на вашите семейства.';
-            this.isLoading = false;
-            console.error('Error loading user families:', error);
-          }
-        });
-    } else {
-      // Неавторизиран потребител - покажи последните 3 семейства
-      this.familyService.getFamilies()
-        .pipe(takeUntil(this.destroy$))
-        .subscribe({
-          next: (response) => {
-            // Вземи последните 3 семейства (сортирани по дата на създаване)
-            const allFamilies = response.families || [];
-            this.families = allFamilies
-              .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
-              .slice(0, 3);
-            this.isLoading = false;
-          },
-          error: (error) => {
-            this.error = 'Възникна грешка при зареждането на семействата.';
-            this.isLoading = false;
-            console.error('Error loading latest families:', error);
-          }
-        });
-    }
+    // Load statistics and featured families in parallel
+    forkJoin({
+      statistics: this.statisticsService.getPlatformStatistics(),
+      families: this.familyService.getFamilies()
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data) => {
+        this.statistics = data.statistics;
+        
+        // Get featured families (last 6 public families)
+        const allFamilies = data.families.families || [];
+        this.featuredFamilies = allFamilies
+          .filter(f => f.isPublic !== false) // Only public families
+          .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
+          .slice(0, 6);
+        
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading home page data:', error);
+        this.error = 'Възникна грешка при зареждането на данните.';
+        this.isLoading = false;
+      }
+    });
+  }
+
+  formatDate(date: Date | string | undefined): string {
+    if (!date) return '';
+    const dateObj = typeof date === 'string' ? new Date(date) : date;
+    return dateObj.toLocaleDateString('bg-BG', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
   }
 
   trackByFamilyId(_index: number, family: Family): number {
     return family.id;
-  }
-
-  // Public method to reload families (called from template)
-  reloadFamilies(): void {
-    this.loadFamiliesForHome();
   }
 }

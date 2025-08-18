@@ -3,8 +3,8 @@ export interface Family {
   name: string;
   description: string;
   isPublic?: boolean;
-  createdAt: Date;
-  updatedAt?: Date;
+  createdAt: Date | string;
+  updatedAt?: Date | string;
   createdByUserId: string;
   memberCount: number;
   photoCount?: number;
