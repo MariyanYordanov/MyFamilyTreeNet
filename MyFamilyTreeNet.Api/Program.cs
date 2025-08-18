@@ -311,15 +311,10 @@ using (var scope = app.Services.CreateScope())
         // For testing, ensure database is created (for InMemory)
         await context.Database.EnsureCreatedAsync();
     }
-    else if (args.Contains("--migrate"))
+    else if (isDevelopment || args.Contains("--migrate"))
     {
-        // Run migrations only when explicitly requested with --migrate flag
+        // Run migrations in development or when explicitly requested
         await context.Database.MigrateAsync();
-    }
-    else
-    {
-        // In development/production, just ensure database exists without running migrations
-        await context.Database.EnsureCreatedAsync();
     }
 
     await SeedData.Initialize(context, userManager, roleManager);

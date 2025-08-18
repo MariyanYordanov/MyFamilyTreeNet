@@ -389,8 +389,8 @@ Thumbs.db
 # Angular cache
 .angular/cache/
 
-# SQLite database files
-*.db
+# SQLite database files - keep them in git for development
+# *.db
 *.db-shm
 *.db-wal
 
