@@ -19,6 +19,7 @@ export interface TreeNode {
   height?: number;
   data?: any;
   parent?: TreeNode | null;
+  spouseId?: number;
 }
 
 @Component({
@@ -127,9 +128,10 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
 
     this.g = this.svg.append('g');
 
-    // Add zoom functionality
+    // Add zoom functionality without smooth transitions
     this.zoom = d3.zoom<SVGSVGElement, unknown>()
       .scaleExtent([0.1, 3])
+      .duration(0)
       .on('zoom', (event) => {
         this.g.attr('transform', event.transform);
       });
@@ -142,10 +144,21 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
     
     treeLayout(root);
 
-    // Draw links (connections between nodes)
-    this.g.selectAll('.link')
+    // Collect all nodes with spouse information
+    const allNodes = root.descendants();
+    const nodeDict = new Map();
+    allNodes.forEach(d => {
+      nodeDict.set(d.data.id, d);
+    });
+
+    // Draw parent-child links with labels
+    const links = this.g.selectAll('.link')
       .data(root.links())
-      .enter().append('path')
+      .enter().append('g')
+      .attr('class', 'link-group');
+
+    // Draw the path
+    links.append('path')
       .attr('class', 'link')
       .attr('d', (d: any) => {
         return `M${d.source.x},${d.source.y}
@@ -154,9 +167,48 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
                  ${d.target.x},${d.target.y}`;
       });
 
+    // Add relationship labels on links
+    links.append('text')
+      .attr('class', 'link-label')
+      .attr('text-anchor', 'middle')
+      .attr('x', (d: any) => (d.source.x + d.target.x) / 2)
+      .attr('y', (d: any) => (d.source.y + d.target.y) / 2 - 5)
+      .text((d: any) => d.target.data.relationshipType || '');
+
+    // Draw spouse connections (horizontal lines)
+    const spouseLinks: { source: any, target: any }[] = [];
+    allNodes.forEach(d => {
+      if ((d.data as any).spouseId) {
+        const spouse = nodeDict.get((d.data as any).spouseId);
+        if (spouse && (d.data as any).id < (d.data as any).spouseId) { // Draw each spouse link only once
+          spouseLinks.push({ source: d, target: spouse });
+        }
+      }
+    });
+
+    const spouseConnections = this.g.selectAll('.spouse-link')
+      .data(spouseLinks)
+      .enter().append('g')
+      .attr('class', 'spouse-link-group');
+
+    spouseConnections.append('line')
+      .attr('class', 'spouse-link')
+      .attr('x1', (d: any) => d.source.x)
+      .attr('y1', (d: any) => d.source.y)
+      .attr('x2', (d: any) => d.target.x)
+      .attr('y2', (d: any) => d.target.y);
+
+    // Add spouse labels
+    spouseConnections.append('text')
+      .attr('class', 'spouse-label')
+      .attr('text-anchor', 'middle')
+      .attr('x', (d: any) => (d.source.x + d.target.x) / 2)
+      .attr('y', (d: any) => (d.source.y + d.target.y) / 2 - 5)
+      .text('съпрузи');
+
     // Draw nodes
     const node = this.g.selectAll('.node')
-      .data(root.descendants())
+      .data(allNodes)
       .enter().append('g')
       .attr('class', 'node')
       .attr('transform', (d: any) => `translate(${d.x},${d.y})`)
@@ -193,16 +245,9 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
         return birth + death;
       });
 
-    // Add relationship type
-    node.append('text')
-      .attr('dy', '20')
-      .attr('text-anchor', 'middle')
-      .attr('class', 'node-relationship')
-      .text((d: any) => d.data.relationshipType || '');
-
     // Add age if alive
     node.append('text')
-      .attr('dy', '35')
+      .attr('dy', '20')
       .attr('text-anchor', 'middle')
       .attr('class', 'node-age')
       .text((d: any) => {
@@ -212,8 +257,8 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
         return '';
       });
 
-    // Center the tree
-    this.centerTree();
+    // Center the tree without animation
+    this.centerTreeWithoutAnimation();
   }
 
   centerTree() {
@@ -242,6 +287,32 @@ export class FamilyTreeComponent implements OnInit, AfterViewInit, OnDestroy {
         this.zoom.transform,
         d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
       );
+  }
+
+  centerTreeWithoutAnimation() {
+    if (!this.svg || !this.zoom) return;
+
+    const containerRect = this.treeContainer.nativeElement.getBoundingClientRect();
+    const width = containerRect.width;
+    const height = 600;
+
+    const bounds = this.g.node()?.getBBox();
+    if (!bounds) return;
+
+    const fullWidth = bounds.width;
+    const fullHeight = bounds.height;
+    const midX = bounds.x + fullWidth / 2;
+    const midY = bounds.y + fullHeight / 2;
+
+    if (fullWidth === 0 || fullHeight === 0) return;
+
+    const scale = Math.min(width / fullWidth, height / fullHeight) * 0.8;
+    const translate = [width / 2 - scale * midX, height / 2 - scale * midY];
+
+    this.svg.call(
+      this.zoom.transform,
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+    );
   }
 
   private onNodeClick(nodeData: TreeNode) {

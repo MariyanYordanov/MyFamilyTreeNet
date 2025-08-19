@@ -35,10 +35,16 @@ export class FamilyEditComponent implements OnInit {
 
   ngOnInit() {
     this.familyId = Number(this.route.snapshot.paramMap.get('id'));
-    if (this.familyId) {
+    console.log('FamilyEditComponent - familyId:', this.familyId);
+    
+    if (this.familyId && !isNaN(this.familyId)) {
+      // Edit mode - load existing family
+      console.log('Edit mode - loading family');
       this.loadFamily();
     } else {
-      this.error = 'Invalid family ID';
+      // Create mode - no family ID
+      console.log('Create mode - no family ID');
+      this.familyId = 0;
       this.isLoading = false;
     }
   }
@@ -67,23 +73,45 @@ export class FamilyEditComponent implements OnInit {
       this.isSubmitting = true;
       this.error = null;
 
-      const updateData = this.familyForm.value;
+      const formData = this.familyForm.value;
       
-      this.familyService.updateFamily(this.familyId, updateData).subscribe({
-        next: () => {
-          this.router.navigate(['/families', this.familyId]);
-        },
-        error: (error) => {
-          console.error('Error updating family:', error);
-          this.error = 'Failed to update family. Please try again.';
-          this.isSubmitting = false;
-        }
-      });
+      if (this.familyId > 0) {
+        // Edit existing family
+        this.familyService.updateFamily(this.familyId, formData).subscribe({
+          next: () => {
+            this.router.navigate(['/families', this.familyId]);
+          },
+          error: (error) => {
+            console.error('Error updating family:', error);
+            this.error = 'Failed to update family';
+            this.isSubmitting = false;
+          }
+        });
+      } else {
+        // Create new family
+        console.log('Creating family with data:', formData);
+        this.familyService.createFamily(formData).subscribe({
+          next: (newFamily) => {
+            console.log('Family created successfully:', newFamily);
+            this.router.navigate(['/families', newFamily.id]);
+          },
+          error: (error) => {
+            console.error('Error creating family:', error);
+            console.error('Error details:', error.error);
+            this.error = error.error?.message || 'Failed to create family. Please try again.';
+            this.isSubmitting = false;
+          }
+        });
+      }
     }
   }
 
   onCancel() {
-    this.router.navigate(['/families', this.familyId]);
+    if (this.familyId > 0) {
+      this.router.navigate(['/families', this.familyId]);
+    } else {
+      this.router.navigate(['/families']);
+    }
   }
 
   get name() { return this.familyForm.get('name'); }

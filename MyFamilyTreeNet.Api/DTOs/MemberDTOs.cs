@@ -11,10 +11,9 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidPersonName]
         public required string FirstName { get; set; }
         
-        [Required]
         [MaxLength(NameLength)]
         [ValidPersonName]
-        public required string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
         
         [Required]
         [MaxLength(NameLength)]
@@ -52,10 +51,9 @@ namespace MyFamilyTreeNet.Api.DTOs
         [ValidPersonName]
         public required string FirstName { get; set; }
         
-        [Required]
         [MaxLength(NameLength)]
         [ValidPersonName]
-        public required string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
         
         [Required]
         [MaxLength(NameLength)]
@@ -92,7 +90,7 @@ namespace MyFamilyTreeNet.Api.DTOs
         
         [MaxLength(NameLength)]
         [ValidPersonName]
-        public required string MiddleName { get; set; }
+        public string? MiddleName { get; set; }
         
         [MaxLength(NameLength)]
         [ValidPersonName]

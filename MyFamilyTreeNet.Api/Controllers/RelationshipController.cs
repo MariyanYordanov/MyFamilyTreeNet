@@ -44,7 +44,57 @@ namespace MyFamilyTreeNet.Api.Controllers
             try
             {
                 var relationships = await _relationshipService.GetMemberRelationshipsAsync(memberId);
-                return Ok(relationships);
+                
+                // Return DTOs with proper casing and structure for Angular frontend
+                var result = relationships.Select(r => new
+                {
+                    id = r.Id,
+                    primaryMemberId = r.PrimaryMemberId,
+                    relatedMemberId = r.RelatedMemberId,
+                    relationshipType = (int)r.RelationshipType,
+                    notes = r.Notes,
+                    createdAt = r.CreatedAt,
+                    primaryMember = r.PrimaryMember != null ? new
+                    {
+                        id = r.PrimaryMember.Id,
+                        firstName = r.PrimaryMember.FirstName,
+                        middleName = r.PrimaryMember.MiddleName,
+                        lastName = r.PrimaryMember.LastName,
+                        dateOfBirth = r.PrimaryMember.DateOfBirth?.ToString("yyyy-MM-dd"),
+                        dateOfDeath = r.PrimaryMember.DateOfDeath?.ToString("yyyy-MM-dd"),
+                        gender = r.PrimaryMember.Gender,
+                        familyId = r.PrimaryMember.FamilyId,
+                        familyName = r.PrimaryMember.Family?.Name ?? "",
+                        createdAt = r.PrimaryMember.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        updatedAt = r.PrimaryMember.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        biography = r.PrimaryMember.Biography,
+                        placeOfBirth = r.PrimaryMember.PlaceOfBirth,
+                        placeOfDeath = r.PrimaryMember.PlaceOfDeath,
+                        profileImageUrl = r.PrimaryMember.ProfilePictureUrl,
+                        isAlive = !r.PrimaryMember.DateOfDeath.HasValue
+                    } : null,
+                    relatedMember = r.RelatedMember != null ? new
+                    {
+                        id = r.RelatedMember.Id,
+                        firstName = r.RelatedMember.FirstName,
+                        middleName = r.RelatedMember.MiddleName,
+                        lastName = r.RelatedMember.LastName,
+                        dateOfBirth = r.RelatedMember.DateOfBirth?.ToString("yyyy-MM-dd"),
+                        dateOfDeath = r.RelatedMember.DateOfDeath?.ToString("yyyy-MM-dd"),
+                        gender = r.RelatedMember.Gender,
+                        familyId = r.RelatedMember.FamilyId,
+                        familyName = r.RelatedMember.Family?.Name ?? "",
+                        createdAt = r.RelatedMember.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        updatedAt = r.RelatedMember.CreatedAt.ToString("yyyy-MM-ddTHH:mm:ss"),
+                        biography = r.RelatedMember.Biography,
+                        placeOfBirth = r.RelatedMember.PlaceOfBirth,
+                        placeOfDeath = r.RelatedMember.PlaceOfDeath,
+                        profileImageUrl = r.RelatedMember.ProfilePictureUrl,
+                        isAlive = !r.RelatedMember.DateOfDeath.HasValue
+                    } : null
+                }).ToList();
+                
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -76,7 +126,41 @@ namespace MyFamilyTreeNet.Api.Controllers
                 {
                     return NotFound(new { message = "Relationship not found" });
                 }
-                return Ok(relationship);
+                
+                // Return simple DTO to avoid circular references
+                var result = new
+                {
+                    Id = relationship.Id,
+                    PrimaryMemberId = relationship.PrimaryMemberId,
+                    RelatedMemberId = relationship.RelatedMemberId,
+                    RelationshipType = relationship.RelationshipType,
+                    Notes = relationship.Notes,
+                    CreatedAt = relationship.CreatedAt,
+                    PrimaryMember = relationship.PrimaryMember != null ? new
+                    {
+                        Id = relationship.PrimaryMember.Id,
+                        FirstName = relationship.PrimaryMember.FirstName,
+                        MiddleName = relationship.PrimaryMember.MiddleName,
+                        LastName = relationship.PrimaryMember.LastName,
+                        DateOfBirth = relationship.PrimaryMember.DateOfBirth,
+                        DateOfDeath = relationship.PrimaryMember.DateOfDeath,
+                        Gender = relationship.PrimaryMember.Gender,
+                        FamilyId = relationship.PrimaryMember.FamilyId
+                    } : null,
+                    RelatedMember = relationship.RelatedMember != null ? new
+                    {
+                        Id = relationship.RelatedMember.Id,
+                        FirstName = relationship.RelatedMember.FirstName,
+                        MiddleName = relationship.RelatedMember.MiddleName,
+                        LastName = relationship.RelatedMember.LastName,
+                        DateOfBirth = relationship.RelatedMember.DateOfBirth,
+                        DateOfDeath = relationship.RelatedMember.DateOfDeath,
+                        Gender = relationship.RelatedMember.Gender,
+                        FamilyId = relationship.RelatedMember.FamilyId
+                    } : null
+                };
+                
+                return Ok(result);
             }
             catch (Exception ex)
             {
@@ -90,7 +174,41 @@ namespace MyFamilyTreeNet.Api.Controllers
             try
             {
                 var relationships = await _relationshipService.GetMemberRelationshipsAsync(memberId);
-                return Ok(relationships);
+                
+                // Return simple DTOs to avoid circular references
+                var result = relationships.Select(r => new
+                {
+                    Id = r.Id,
+                    PrimaryMemberId = r.PrimaryMemberId,
+                    RelatedMemberId = r.RelatedMemberId,
+                    RelationshipType = r.RelationshipType,
+                    Notes = r.Notes,
+                    CreatedAt = r.CreatedAt,
+                    PrimaryMember = r.PrimaryMember != null ? new
+                    {
+                        Id = r.PrimaryMember.Id,
+                        FirstName = r.PrimaryMember.FirstName,
+                        MiddleName = r.PrimaryMember.MiddleName,
+                        LastName = r.PrimaryMember.LastName,
+                        DateOfBirth = r.PrimaryMember.DateOfBirth,
+                        DateOfDeath = r.PrimaryMember.DateOfDeath,
+                        Gender = r.PrimaryMember.Gender,
+                        FamilyId = r.PrimaryMember.FamilyId
+                    } : null,
+                    RelatedMember = r.RelatedMember != null ? new
+                    {
+                        Id = r.RelatedMember.Id,
+                        FirstName = r.RelatedMember.FirstName,
+                        MiddleName = r.RelatedMember.MiddleName,
+                        LastName = r.RelatedMember.LastName,
+                        DateOfBirth = r.RelatedMember.DateOfBirth,
+                        DateOfDeath = r.RelatedMember.DateOfDeath,
+                        Gender = r.RelatedMember.Gender,
+                        FamilyId = r.RelatedMember.FamilyId
+                    } : null
+                }).ToList();
+                
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {
@@ -108,6 +226,11 @@ namespace MyFamilyTreeNet.Api.Controllers
         {
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+                
                 var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
                 if (userId == null)
                 {
@@ -141,7 +264,19 @@ namespace MyFamilyTreeNet.Api.Controllers
                 };
                 
                 relationship = await _relationshipService.CreateRelationshipAsync(relationship);
-                return CreatedAtAction(nameof(GetRelationshipById), new { id = relationship.Id }, relationship);
+                
+                // Return simple DTO to avoid circular references
+                var result = new
+                {
+                    Id = relationship.Id,
+                    PrimaryMemberId = relationship.PrimaryMemberId,
+                    RelatedMemberId = relationship.RelatedMemberId,
+                    RelationshipType = relationship.RelationshipType,
+                    Notes = relationship.Notes,
+                    CreatedAt = relationship.CreatedAt
+                };
+                
+                return CreatedAtAction(nameof(GetRelationshipById), new { id = relationship.Id }, result);
             }
             catch (ArgumentException ex)
             {

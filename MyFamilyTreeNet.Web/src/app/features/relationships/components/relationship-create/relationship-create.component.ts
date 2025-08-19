@@ -2,9 +2,9 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
-import { RelationshipService, RelationshipType, CreateRelationshipRequest } from '../../services/relationship.service';
+import { RelationshipService, RelationshipType } from '../../services/relationship.service';
 import { MemberService } from '../../../member/services/member.service';
-import { Member } from '../../../member/models/member.model';
+import { Member, CreateRelationshipRequest } from '../../../member/models/member.model';
 
 @Component({
   selector: 'app-relationship-create',
@@ -91,10 +91,10 @@ export class RelationshipCreateComponent implements OnInit {
 
       const formValue = this.relationshipForm.value;
       const relationshipRequest: CreateRelationshipRequest = {
-        primaryMemberId: this.primaryMemberId,
-        relatedMemberId: Number(formValue.relatedMemberId),
-        relationshipType: Number(formValue.relationshipType) as RelationshipType,
-        notes: formValue.notes || undefined
+        PrimaryMemberId: this.primaryMemberId,
+        RelatedMemberId: Number(formValue.relatedMemberId),
+        RelationshipType: Number(formValue.relationshipType),
+        Notes: formValue.notes || undefined
       };
 
       this.relationshipService.createRelationship(relationshipRequest).subscribe({

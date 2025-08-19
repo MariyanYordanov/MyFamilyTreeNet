@@ -85,12 +85,12 @@ namespace MyFamilyTreeNet.Api.Controllers
 
                 if (!string.IsNullOrWhiteSpace(search))
                 {
-                    var searchLower = search.ToLower();
+                    // Use UPPER() function for proper Cyrillic case-insensitive search - names only
+                    var searchUpper = search.ToUpper();
                     query = query.Where(m => 
-                        m.FirstName.ToLower().Contains(searchLower) ||
-                        m.MiddleName.ToLower().Contains(searchLower) ||
-                        m.LastName.ToLower().Contains(searchLower) ||
-                        (m.Biography != null && m.Biography.ToLower().Contains(searchLower)));
+                        m.FirstName.ToUpper().Contains(searchUpper) ||
+                        (m.MiddleName != null && m.MiddleName.ToUpper().Contains(searchUpper)) ||
+                        (m.LastName != null && m.LastName.ToUpper().Contains(searchUpper)));
                 }
 
                 var totalCount = await query.CountAsync();

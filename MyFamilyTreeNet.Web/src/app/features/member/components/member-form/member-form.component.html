@@ -52,32 +52,6 @@
           </div>
           <div class="card-body">
             <form [formGroup]="memberForm" (ngSubmit)="onSubmit()">
-              <!-- Family Selection -->
-              <div class="row mb-3">
-                <div class="col-md-12">
-                  <label for="familyId" class="form-label">
-                    Семейство <span class="text-danger">*</span>
-                  </label>
-                  <select 
-                    id="familyId" 
-                    class="form-select"
-                    formControlName="familyId"
-                    [class.is-invalid]="isFieldInvalid('familyId')"
-                    [disabled]="isEditMode()">
-                    <option value="">Изберете семейство</option>
-                    @for (family of families(); track family.id) {
-                      <option [value]="family.id">{{ family.name }}</option>
-                    }
-                  </select>
-                  @if (isFieldInvalid('familyId')) {
-                    <div class="invalid-feedback">{{ getFieldError('familyId') }}</div>
-                  }
-                  @if (isEditMode()) {
-                    <div class="form-text">Семейството не може да бъде променено при редактиране</div>
-                  }
-                </div>
-              </div>
-
               <!-- Name Fields -->
               <div class="row mb-3">
                 <div class="col-md-4">
@@ -132,11 +106,15 @@
                   <select 
                     id="gender" 
                     class="form-select"
-                    formControlName="gender">
-                    <option value="">Не е указано</option>
+                    formControlName="gender"
+                    [class.is-invalid]="isFieldInvalid('gender')">
+                    <option value="">Изберете пол</option>
                     <option value="Male">Мъж</option>
                     <option value="Female">Жена</option>
                   </select>
+                  @if (isFieldInvalid('gender')) {
+                    <div class="invalid-feedback">{{ getFieldError('gender') }}</div>
+                  }
                 </div>
               </div>
 
@@ -151,7 +129,11 @@
                     id="dateOfBirth"
                     class="form-control" 
                     formControlName="dateOfBirth"
+                    [class.is-invalid]="isFieldInvalid('dateOfBirth')"
                     (change)="onBirthDateChange()">
+                  @if (isFieldInvalid('dateOfBirth')) {
+                    <div class="invalid-feedback">{{ getFieldError('dateOfBirth') }}</div>
+                  }
                 </div>
                 <div class="col-md-6">
                   <label for="dateOfDeath" class="form-label">
@@ -264,13 +246,19 @@
                   </h6>
                   <ul class="list-unstyled mb-0 text-sm">
                     @if (memberForm.get('firstName')?.invalid && memberForm.get('firstName')?.touched) {
-                      <li class="text-danger">• {{ getFieldError('firstName') }}</li>
+                      <li class="text-danger">• Име: {{ getFieldError('firstName') }}</li>
+                    }
+                    @if (memberForm.get('middleName')?.invalid && memberForm.get('middleName')?.touched) {
+                      <li class="text-danger">• Презиме: {{ getFieldError('middleName') }}</li>
                     }
                     @if (memberForm.get('lastName')?.invalid && memberForm.get('lastName')?.touched) {
-                      <li class="text-danger">• {{ getFieldError('lastName') }}</li>
+                      <li class="text-danger">• Фамилия: {{ getFieldError('lastName') }}</li>
                     }
-                    @if (memberForm.get('familyId')?.invalid && memberForm.get('familyId')?.touched) {
-                      <li class="text-danger">• {{ getFieldError('familyId') }}</li>
+                    @if (memberForm.get('dateOfBirth')?.invalid && memberForm.get('dateOfBirth')?.touched) {
+                      <li class="text-danger">• Дата на раждане: {{ getFieldError('dateOfBirth') }}</li>
+                    }
+                    @if (memberForm.get('gender')?.invalid && memberForm.get('gender')?.touched) {
+                      <li class="text-danger">• Пол: {{ getFieldError('gender') }}</li>
                     }
                     @if (memberForm.get('dateOfDeath')?.hasError('invalidDate')) {
                       <li class="text-danger">• Датата на смърт не може да бъде преди датата на раждане</li>

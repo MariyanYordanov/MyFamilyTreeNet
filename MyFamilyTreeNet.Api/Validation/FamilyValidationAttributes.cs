@@ -10,7 +10,7 @@ namespace MyFamilyTreeNet.Api.Validation
     {
         private readonly string[] _forbiddenWords = 
         {
-            "test", "fake", "dummy", "admin", "root", "system"
+            "fake", "dummy", "admin", "root", "system"
         };
 
         public override bool IsValid(object? value)

@@ -4,9 +4,7 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { Router, ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 import { MemberService } from '../../services/member.service';
-import { FamilyService } from '../../../family/services/family.service';
 import { Member, CreateMemberRequest, UpdateMemberRequest } from '../../models/member.model';
-import { Family } from '../../../family/models/family.model';
 
 @Component({
   selector: 'app-member-form',
@@ -25,14 +23,13 @@ export class MemberFormComponent implements OnInit, OnDestroy {
   success = signal<string | null>(null);
   
   member = signal<Member | null>(null);
-  families = signal<Family[]>([]);
+  familyId: number | null = null;
   
   memberId: number | null = null;
 
   constructor(
     private fb: FormBuilder,
     private memberService: MemberService,
-    private familyService: FamilyService,
     private router: Router,
     private route: ActivatedRoute
   ) {
@@ -40,7 +37,6 @@ export class MemberFormComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.loadFamilies();
     this.checkEditMode();
   }
 
@@ -59,28 +55,10 @@ export class MemberFormComponent implements OnInit, OnDestroy {
       gender: [''],
       placeOfBirth: ['', [Validators.maxLength(100)]],
       placeOfDeath: ['', [Validators.maxLength(100)]],
-      biography: ['', [Validators.maxLength(1000)]],
-      familyId: ['', [Validators.required]]
+      biography: ['', [Validators.maxLength(1000)]]
     });
   }
 
-  private loadFamilies(): void {
-    this.familyService.getFamilies()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (response) => {
-          this.families.set(response.families);
-          
-          if (response.families.length === 1) {
-            this.memberForm.patchValue({ familyId: response.families[0].id });
-          }
-        },
-        error: (error) => {
-          console.error('Error loading families:', error);
-          this.error.set('Грешка при зареждане на семействата');
-        }
-      });
-  }
 
   private checkEditMode(): void {
     const id = this.route.snapshot.paramMap.get('id');
@@ -91,7 +69,7 @@ export class MemberFormComponent implements OnInit, OnDestroy {
     } else {
       const familyId = this.route.snapshot.queryParamMap.get('familyId');
       if (familyId) {
-        this.memberForm.patchValue({ familyId: parseInt(familyId) });
+        this.familyId = parseInt(familyId);
       }
     }
   }
@@ -125,8 +103,7 @@ export class MemberFormComponent implements OnInit, OnDestroy {
       gender: member.gender || '',
       placeOfBirth: member.placeOfBirth || '',
       placeOfDeath: member.placeOfDeath || '',
-      biography: member.biography || '',
-      familyId: member.familyId
+      biography: member.biography || ''
     });
   }
 
@@ -156,13 +133,11 @@ export class MemberFormComponent implements OnInit, OnDestroy {
       gender: formValue.gender || undefined,
       placeOfBirth: formValue.placeOfBirth || undefined,
       placeOfDeath: formValue.placeOfDeath || undefined,
-      biography: formValue.biography || undefined,
-      familyId: parseInt(formValue.familyId)
+      biography: formValue.biography || undefined
     };
 
     if (this.isEditMode() && this.memberId) {
       const updateData: UpdateMemberRequest = { ...memberData };
-      delete (updateData as any).familyId;
 
       this.memberService.updateMember(this.memberId, updateData)
         .pipe(takeUntil(this.destroy$))
@@ -181,8 +156,19 @@ export class MemberFormComponent implements OnInit, OnDestroy {
           }
         });
     } else {
-      const createData: CreateMemberRequest = memberData as CreateMemberRequest;
+      if (!this.familyId) {
+        this.error.set('Липсва ID на семейството');
+        this.isLoading.set(false);
+        return;
+      }
+      
+      const createData: CreateMemberRequest = {
+        ...memberData,
+        familyId: this.familyId
+      };
 
+      console.log('Sending create member request:', createData);
+      
       this.memberService.createMember(createData)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
@@ -190,12 +176,22 @@ export class MemberFormComponent implements OnInit, OnDestroy {
             this.success.set('Членът беше успешно създаден');
             this.isLoading.set(false);
             setTimeout(() => {
-              this.router.navigate(['/members', newMember.id]);
+              this.router.navigate(['/families', this.familyId]);
             }, 1500);
           },
           error: (error) => {
             console.error('Error creating member:', error);
-            this.error.set(error.error?.message || 'Грешка при създаване на члена');
+            console.error('Full error response:', error.error);
+            console.error('Status:', error.status);
+            if (error.error?.errors) {
+              console.error('Validation errors:', error.error.errors);
+              const errorMessages = Object.keys(error.error.errors).map(key => 
+                `${key}: ${error.error.errors[key].join(', ')}`
+              ).join('; ');
+              this.error.set(errorMessages);
+            } else {
+              this.error.set(error.error?.message || error.error || 'Грешка при създаване на члена');
+            }
             this.isLoading.set(false);
           }
         });
@@ -210,10 +206,12 @@ export class MemberFormComponent implements OnInit, OnDestroy {
   }
 
   onCancel(): void {
-    if (this.isEditMode() && this.memberId) {
+    if (this.familyId) {
+      this.router.navigate(['/families', this.familyId]);
+    } else if (this.isEditMode() && this.memberId) {
       this.router.navigate(['/members', this.memberId]);
     } else {
-      this.router.navigate(['/members']);
+      this.router.navigate(['/families']);
     }
   }
 
@@ -222,10 +220,6 @@ export class MemberFormComponent implements OnInit, OnDestroy {
       this.populateForm(this.member()!);
     } else {
       this.memberForm.reset();
-      const familyId = this.route.snapshot.queryParamMap.get('familyId');
-      if (familyId) {
-        this.memberForm.patchValue({ familyId: parseInt(familyId) });
-      }
     }
     this.error.set(null);
     this.success.set(null);
@@ -275,11 +269,4 @@ export class MemberFormComponent implements OnInit, OnDestroy {
     this.onBirthDateChange();
   }
 
-  getSelectedFamilyName(): string {
-    const selectedFamilyId = this.memberForm.get('familyId')?.value;
-    if (!selectedFamilyId) return '';
-    
-    const family = this.families().find(f => f.id === parseInt(selectedFamilyId));
-    return family?.name || '';
-  }
 }

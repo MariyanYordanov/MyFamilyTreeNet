@@ -50,7 +50,6 @@
     fill: none;
     stroke: #6c757d;
     stroke-width: 2px;
-    transition: stroke 0.3s ease;
     
     &:hover {
       stroke: #495057;
@@ -60,11 +59,8 @@
   
   .node {
     cursor: pointer;
-    transition: all 0.3s ease;
     
     &:hover {
-      transform: scale(1.05);
-      
       .node-rect {
         filter: brightness(1.1);
         stroke-width: 3px;
@@ -76,7 +72,6 @@
     fill: #ffffff;
     stroke: #0d6efd;
     stroke-width: 2px;
-    transition: all 0.3s ease;
     filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
     
     &:hover {

@@ -20,7 +20,11 @@ interface UpdateProfileRequest {
 interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
-  confirmPassword: string;
+  confirmNewPassword: string;
+}
+
+interface ChangePasswordResponse {
+  message: string;
 }
 
 @Component({
@@ -53,7 +57,11 @@ export class ProfileComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadUserProfile();
+    // Removed auto tests - use button instead
   }
+  
+  
+  
 
   private initializeForms(): void {
     this.profileForm = this.fb.group({
@@ -97,6 +105,7 @@ export class ProfileComponent implements OnInit {
       )
       .subscribe(user => {
         if (user) {
+          console.log('Current user loaded:', user);
           this.currentUser.set(user);
           this.populateForm(user);
         }
@@ -157,27 +166,60 @@ export class ProfileComponent implements OnInit {
     const changePasswordRequest: ChangePasswordRequest = {
       currentPassword: formValue.currentPassword,
       newPassword: formValue.newPassword,
-      confirmPassword: formValue.confirmPassword
+      confirmNewPassword: formValue.confirmPassword
     };
+    
+    console.log('Sending change password request:', {
+      currentPasswordLength: changePasswordRequest.currentPassword?.length || 0,
+      newPasswordLength: changePasswordRequest.newPassword?.length || 0,
+      confirmNewPasswordLength: changePasswordRequest.confirmNewPassword?.length || 0
+    });
+    
+    // Debug: Check current user
+    console.log('Current user:', this.currentUser());
+    console.log('Auth token exists:', !!localStorage.getItem('token'));
+    console.log('Auth token value:', localStorage.getItem('token')?.substring(0, 20) + '...');
+    
+    // Log the exact request being sent
+    console.log('Sending password change request:', changePasswordRequest);
+    
 
-    this.http.post(`/api/Profile/change-password`, changePasswordRequest)
+    this.http.post<ChangePasswordResponse>(`/api/Profile/change-password`, changePasswordRequest)
       .pipe(
         catchError(error => {
           let errorMsg = 'Грешка при промяната на паролата';
-          if (error.error?.message) {
-            errorMsg = error.error.message;
+          console.error('Password change error:', JSON.stringify(error.error, null, 2));
+          
+          if (error.error && typeof error.error === 'object') {
+            if (error.error.message) {
+              errorMsg = error.error.message;
+            } else if (error.error.errors) {
+              // Handle validation errors
+              const errors = Object.values(error.error.errors).flat();
+              errorMsg = errors.join(', ');
+            } else if (error.error.title || error.error.detail) {
+              // Handle Problem Details format
+              errorMsg = error.error.detail || error.error.title || 'Validation failed';
+            } else {
+              // Handle ModelState errors (like {"": ["Incorrect password."]})
+              const allErrors = Object.values(error.error).flat();
+              if (allErrors.length > 0) {
+                errorMsg = allErrors.join(', ');
+              }
+            }
+          } else if (typeof error.error === 'string') {
+            errorMsg = error.error;
           } else if (error.status === 400) {
-            errorMsg = 'Невалидна текуща парола';
+            errorMsg = 'Невалидна текуща парола или слаба нова парола';
           }
           this.errorMessage.set(errorMsg);
-          console.error('Error changing password:', error);
           return of(null);
         }),
         finalize(() => this.isChangingPassword.set(false))
       )
       .subscribe(response => {
         if (response) {
-          this.successMessage.set('Паролата е променена успешно!');
+          this.successMessage.set(response.message || 'Паролата е променена успешно!');
           this.passwordForm.reset();
         }
       });

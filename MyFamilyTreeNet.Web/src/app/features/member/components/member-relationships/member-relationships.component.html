@@ -16,7 +16,7 @@
     <!-- Add Relationship Form -->
     @if (showAddForm()) {
       <div class="border rounded p-3 mb-3 bg-light">
-        <h6 class="mb-3">Добави нова семейна връзка</h6>
+        <h6 class="mb-3">{{ editingRelationshipId ? 'Редактирай семейна връзка' : 'Добави нова семейна връзка' }}</h6>
         
         <!-- Success/Error Messages -->
         @if (successMessage()) {
@@ -103,7 +103,7 @@
                 <span class="spinner-border spinner-border-sm me-2"></span>
               }
               <i class="fas fa-save me-1"></i>
-              Запази
+              {{ editingRelationshipId ? 'Обнови' : 'Запази' }}
             </button>
           </div>
         </form>

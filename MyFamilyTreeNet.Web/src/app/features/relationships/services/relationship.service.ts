@@ -3,6 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable, BehaviorSubject, throwError } from 'rxjs';
 import { map, catchError, tap } from 'rxjs/operators';
 import { environment } from '../../../../environments/environment';
+import { CreateRelationshipRequest } from '../../member/models/member.model';
 
 export interface Relationship {
   id: number;
@@ -37,12 +38,6 @@ export enum RelationshipType {
   Other = 99
 }
 
-export interface CreateRelationshipRequest {
-  primaryMemberId: number;
-  relatedMemberId: number;
-  relationshipType: RelationshipType;
-  notes?: string;
-}
 
 @Injectable({
   providedIn: 'root'

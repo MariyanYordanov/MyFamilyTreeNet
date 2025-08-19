@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../../environments/environment';
-import { Member, RelationshipType } from '../../models/member.model';
+import { Member, RelationshipType, CreateRelationshipRequest } from '../../models/member.model';
 import { MemberService } from '../../services/member.service';
 import { catchError, finalize, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
@@ -19,12 +19,6 @@ interface Relationship {
   relatedMember: Member;
 }
 
-interface CreateRelationshipRequest {
-  primaryMemberId: number;
-  relatedMemberId: number;
-  relationshipType: RelationshipType;
-  notes?: string;
-}
 
 @Component({
   selector: 'app-member-relationships',
@@ -45,6 +39,7 @@ export class MemberRelationshipsComponent implements OnInit {
   isLoadingRelationships = signal(false);
   successMessage = signal('');
   errorMessage = signal('');
+  editingRelationshipId: number | null = null;
 
   relationshipTypes = [
     { value: RelationshipType.Parent, label: 'Родител' },
@@ -129,14 +124,46 @@ export class MemberRelationshipsComponent implements OnInit {
     this.successMessage.set('');
 
     const formValue = this.relationshipForm.value;
-    const request: CreateRelationshipRequest = {
-      primaryMemberId: member.id,
-      relatedMemberId: parseInt(formValue.relatedMemberId),
-      relationshipType: formValue.relationshipType,
-      notes: formValue.notes || undefined
-    };
+    
+    if (this.editingRelationshipId) {
+      // Update existing relationship
+      const updateRequest = {
+        RelationshipType: parseInt(formValue.relationshipType),
+        Notes: formValue.notes || undefined
+      };
+      
+      this.http.put<Relationship>(`/api/Relationship/${this.editingRelationshipId}`, updateRequest)
+        .pipe(
+          catchError(error => {
+            let errorMsg = 'Грешка при редактирането на връзката';
+            if (error.error?.message) {
+              errorMsg = error.error.message;
+            }
+            this.errorMessage.set(errorMsg);
+            console.error('Error updating relationship:', error);
+            return of(null);
+          }),
+          finalize(() => this.isLoading.set(false))
+        )
+        .subscribe(relationship => {
+          if (relationship) {
+            this.successMessage.set('Семейната връзка е редактирана успешно!');
+            this.relationshipForm.reset();
+            this.showAddForm.set(false);
+            this.editingRelationshipId = null;
+            this.loadRelationships();
+          }
+        });
+    } else {
+      // Create new relationship
+      const request: CreateRelationshipRequest = {
+        PrimaryMemberId: member.id,
+        RelatedMemberId: parseInt(formValue.relatedMemberId),
+        RelationshipType: parseInt(formValue.relationshipType),
+        Notes: formValue.notes || undefined
+      };
 
-    this.http.post<Relationship>(`/api/Relationship`, request)
+      this.http.post<Relationship>(`/api/Relationship`, request)
       .pipe(
         catchError(error => {
           let errorMsg = 'Грешка при създаването на връзката';
@@ -150,18 +177,29 @@ export class MemberRelationshipsComponent implements OnInit {
         finalize(() => this.isLoading.set(false))
       )
       .subscribe(relationship => {
-        if (relationship) {
-          this.successMessage.set('Семейната връзка е създадена успешно!');
-          this.relationshipForm.reset();
-          this.showAddForm.set(false);
-          this.loadRelationships(); // Reload relationships
-        }
-      });
+          if (relationship) {
+            this.successMessage.set('Семейната връзка е създадена успешно!');
+            this.relationshipForm.reset();
+            this.showAddForm.set(false);
+            this.loadRelationships();
+          }
+        });
+    }
   }
 
   editRelationship(relationship: Relationship): void {
-    // TODO: Implement edit functionality
-    console.log('Edit relationship:', relationship);
+    // Pre-fill form with existing relationship data
+    this.relationshipForm.patchValue({
+      relatedMemberId: relationship.relatedMemberId.toString(),
+      relationshipType: relationship.relationshipType.toString(),
+      notes: relationship.notes || ''
+    });
+    
+    // Store the relationship being edited
+    this.editingRelationshipId = relationship.id;
+    this.showAddForm.set(true);
+    this.errorMessage.set('');
+    this.successMessage.set('');
   }
 
   confirmDeleteRelationship(relationship: Relationship): void {
@@ -192,6 +230,7 @@ export class MemberRelationshipsComponent implements OnInit {
     this.showAddForm.set(false);
     this.errorMessage.set('');
     this.successMessage.set('');
+    this.editingRelationshipId = null;
   }
 
   getRelatedMember(relationship: Relationship): Member {

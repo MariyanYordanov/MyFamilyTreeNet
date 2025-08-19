@@ -1,0 +1,166 @@
+<div class="container py-5">
+  <div class="row">
+    <div class="col-lg-8 mx-auto">
+      <div class="text-center mb-5">
+        <h1 class="display-4 mb-3">Свържете се с нас</h1>
+        <p class="lead text-muted">Имате въпроси? Тук сме, за да помогнем!</p>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <!-- Contact Form -->
+          <div class="card shadow-sm">
+            <div class="card-body p-4">
+              <h3 class="mb-4">
+                <i class="fas fa-envelope text-primary me-2"></i>
+                Изпратете ни съобщение
+              </h3>
+
+              <!-- Success Message -->
+              <div *ngIf="success" class="alert alert-success" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                Благодарим ви! Вашето съобщение беше изпратено успешно. Ще се свържем с вас скоро.
+              </div>
+
+              <form [formGroup]="contactForm" (ngSubmit)="onSubmit()">
+                <div class="row">
+                  <div class="col-md-6 mb-3">
+                    <label for="name" class="form-label">Име *</label>
+                    <input 
+                      type="text" 
+                      class="form-control" 
+                      id="name" 
+                      formControlName="name"
+                      [class.is-invalid]="submitted && f['name'].errors"
+                      placeholder="Вашето име">
+                    <div *ngIf="submitted && f['name'].errors" class="invalid-feedback">
+                      <div *ngIf="f['name'].errors?.['required']">Името е задължително</div>
+                      <div *ngIf="f['name'].errors?.['minlength']">Името трябва да е поне 2 символа</div>
+                    </div>
+                  </div>
+
+                  <div class="col-md-6 mb-3">
+                    <label for="email" class="form-label">Email *</label>
+                    <input 
+                      type="email" 
+                      class="form-control" 
+                      id="email" 
+                      formControlName="email"
+                      [class.is-invalid]="submitted && f['email'].errors"
+                      placeholder="вашия@email.com">
+                    <div *ngIf="submitted && f['email'].errors" class="invalid-feedback">
+                      <div *ngIf="f['email'].errors?.['required']">Email-ът е задължителен</div>
+                      <div *ngIf="f['email'].errors?.['email']">Моля въведете валиден email</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="mb-3">
+                  <label for="subject" class="form-label">Тема *</label>
+                  <input 
+                    type="text" 
+                    class="form-control" 
+                    id="subject" 
+                    formControlName="subject"
+                    [class.is-invalid]="submitted && f['subject'].errors"
+                    placeholder="Темата на съобщението">
+                  <div *ngIf="submitted && f['subject'].errors" class="invalid-feedback">
+                    <div *ngIf="f['subject'].errors?.['required']">Темата е задължителна</div>
+                    <div *ngIf="f['subject'].errors?.['minlength']">Темата трябва да е поне 5 символа</div>
+                  </div>
+                </div>
+
+                <div class="mb-4">
+                  <label for="message" class="form-label">Съобщение *</label>
+                  <textarea 
+                    class="form-control" 
+                    id="message" 
+                    formControlName="message"
+                    [class.is-invalid]="submitted && f['message'].errors"
+                    rows="5" 
+                    placeholder="Вашето съобщение..."></textarea>
+                  <div *ngIf="submitted && f['message'].errors" class="invalid-feedback">
+                    <div *ngIf="f['message'].errors?.['required']">Съобщението е задължително</div>
+                    <div *ngIf="f['message'].errors?.['minlength']">Съобщението трябва да е поне 10 символа</div>
+                  </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary btn-lg">
+                  <i class="fas fa-paper-plane me-2"></i>
+                  Изпрати съобщение
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <!-- Contact Information -->
+          <div class="card shadow-sm">
+            <div class="card-body p-4">
+              <h4 class="mb-4">
+                <i class="fas fa-info-circle text-primary me-2"></i>
+                Информация за контакт
+              </h4>
+
+              <div class="mb-4">
+                <h6 class="fw-bold">
+                  <i class="fas fa-envelope text-muted me-2"></i>
+                  Email
+                </h6>
+                <p class="text-muted mb-0">support@myfamilytreenet.com</p>
+              </div>
+
+              <div class="mb-4">
+                <h6 class="fw-bold">
+                  <i class="fas fa-phone text-muted me-2"></i>
+                  Телефон
+                </h6>
+                <p class="text-muted mb-0">+359 2 123 4567</p>
+              </div>
+
+              <div class="mb-4">
+                <h6 class="fw-bold">
+                  <i class="fas fa-clock text-muted me-2"></i>
+                  Работно време
+                </h6>
+                <p class="text-muted mb-0">
+                  Понеделник - Петък<br>
+                  9:00 - 18:00 ч.
+                </p>
+              </div>
+
+              <div class="mb-4">
+                <h6 class="fw-bold">
+                  <i class="fas fa-map-marker-alt text-muted me-2"></i>
+                  Адрес
+                </h6>
+                <p class="text-muted mb-0">
+                  София, България<br>
+                  ул. Примерна 123
+                </p>
+              </div>
+
+              <hr>
+
+              <div>
+                <h6 class="fw-bold mb-3">Последвайте ни</h6>
+                <div class="d-flex gap-2">
+                  <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fab fa-facebook-f"></i>
+                  </a>
+                  <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fab fa-twitter"></i>
+                  </a>
+                  <a href="#" class="btn btn-outline-primary btn-sm">
+                    <i class="fab fa-instagram"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,4 +1,5 @@
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -164,6 +165,41 @@ namespace MyFamilyTreeNet.Api.Controllers
                 signingCredentials: creds);
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+
+        /// <summary>
+        /// Admin emergency password reset - FOR DEBUG ONLY
+        /// </summary>
+        [HttpPost("admin-emergency-reset")]
+        [AllowAnonymous]
+        public async Task<ActionResult> AdminEmergencyReset([FromBody] string newPassword)
+        {
+            try
+            {
+                var adminUser = await _userManager.FindByEmailAsync("admin@myfamilytreenet.com");
+                if (adminUser == null)
+                {
+                    return NotFound("Admin user not found");
+                }
+
+                // Remove current password and set new one
+                var token = await _userManager.GeneratePasswordResetTokenAsync(adminUser);
+                var result = await _userManager.ResetPasswordAsync(adminUser, token, newPassword);
+                
+                if (!result.Succeeded)
+                {
+                    var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+                    return BadRequest($"Password reset failed: {errors}");
+                }
+
+                _logger.LogWarning("EMERGENCY: Admin password was reset!");
+                return Ok(new { message = "Admin password reset successfully" });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during admin emergency reset");
+                return StatusCode(500, "Internal server error");
+            }
         }
     }
 

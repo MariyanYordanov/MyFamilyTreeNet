@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -76,24 +76,26 @@ export class MemberListComponent implements OnInit, OnDestroy {
       });
   }
 
+  private searchSubject = new Subject<string>();
+
   private setupSearch(): void {
-    const searchSubject = new Subject<string>();
-    
-    searchSubject.pipe(
-      debounceTime(300),
+    this.searchSubject.pipe(
+      debounceTime(150),
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(searchTerm => {
-      this.searchTerm.set(searchTerm);
-      this.currentPage.set(1);
-      this.loadMembers();
+      // Update search term and page without triggering immediate re-render
+      queueMicrotask(() => {
+        this.searchTerm.set(searchTerm);
+        this.currentPage.set(1);
+        this.loadMembers();
+      });
     });
-
-    (this as any).onSearchChange = (value: string) => searchSubject.next(value);
   }
 
   private loadMembers(): void {
-    this.loading.set(true);
+    // Don't set loading immediately to prevent focus loss
+    // this.loading.set(true);
     this.error.set(null);
 
     const params: MemberSearchParams = {
@@ -102,6 +104,11 @@ export class MemberListComponent implements OnInit, OnDestroy {
       page: this.currentPage(),
       pageSize: this.pageSize()
     };
+
+    // Debug logging
+    console.log('Loading members with params:', params);
+    console.log('Selected family ID:', this.selectedFamilyId());
+    console.log('Search term:', this.searchTerm());
 
     this.memberService.getMembers(params)
       .pipe(takeUntil(this.destroy$))
@@ -115,9 +122,12 @@ export class MemberListComponent implements OnInit, OnDestroy {
           
           members = this.sortMembers(members);
           
-          this.members.set(members);
-          this.totalCount.set(response.totalCount);
-          this.loading.set(false);
+          // Use queueMicrotask to prevent focus loss during DOM updates
+          queueMicrotask(() => {
+            this.members.set(members);
+            this.totalCount.set(response.totalCount);
+            this.loading.set(false);
+          });
         },
         error: (error) => {
           console.error('Error loading members:', error);
@@ -150,10 +160,14 @@ export class MemberListComponent implements OnInit, OnDestroy {
   }
 
   onSearchChange(value: string): void {
+    this.searchSubject.next(value);
   }
 
   onFamilyFilterChange(familyId: string): void {
-    this.selectedFamilyId.set(familyId ? parseInt(familyId) : null);
+    console.log('Family filter change:', familyId, typeof familyId);
+    const parsedId = familyId ? parseInt(familyId) : null;
+    console.log('Parsed family ID:', parsedId);
+    this.selectedFamilyId.set(parsedId);
     this.currentPage.set(1);
     this.loadMembers();
   }
@@ -234,5 +248,13 @@ export class MemberListComponent implements OnInit, OnDestroy {
   formatDate(dateString?: string): string {
     if (!dateString) return 'Неизвестна';
     return new Date(dateString).toLocaleDateString('bg-BG');
+  }
+
+  trackByMemberId(index: number, member: Member): number {
+    return member.id;
+  }
+
+  trackByFamilyId(index: number, family: Family): number {
+    return family.id;
   }
 }

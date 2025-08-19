@@ -57,10 +57,10 @@ export interface Relationship {
 }
 
 export interface CreateRelationshipRequest {
-  primaryMemberId: number;
-  relatedMemberId: number;
-  relationshipType: RelationshipType;
-  notes?: string;
+  PrimaryMemberId: number;
+  RelatedMemberId: number;
+  RelationshipType: RelationshipType;
+  Notes?: string;
 }
 
 export interface UpdateRelationshipRequest {
@@ -75,18 +75,24 @@ export interface MemberRelationships {
 }
 
 export enum RelationshipType {
-  Parent = 0,
-  Child = 1,
-  Spouse = 2,
-  Sibling = 3,
-  Grandparent = 4,
-  Grandchild = 5,
-  Uncle = 6,
-  Aunt = 7,
-  Cousin = 8,
+  Parent = 1,
+  Child = 2,
+  Spouse = 3,
+  Sibling = 4,
+  Grandparent = 5,
+  Grandchild = 6,
+  Uncle = 7,
+  Aunt = 8,
   Nephew = 9,
   Niece = 10,
-  Other = 11
+  Cousin = 11,
+  GreatGrandparent = 12,
+  GreatGrandchild = 13,
+  StepParent = 14,
+  StepChild = 15,
+  StepSibling = 16,
+  HalfSibling = 17,
+  Other = 99
 }
 
 export interface FamilyTree {

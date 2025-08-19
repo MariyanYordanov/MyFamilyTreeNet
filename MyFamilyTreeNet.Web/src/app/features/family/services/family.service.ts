@@ -36,10 +36,19 @@ export class FamilyService {
       if (params.pageSize) httpParams = httpParams.set('pageSize', params.pageSize.toString());
     }
 
-    return this.http.get<Family[]>(this.apiUrl, { params: httpParams })
+    return this.http.get<any>(this.apiUrl, { params: httpParams })
       .pipe(
-        map(families => {
-          // Convert array response to expected FamilyListResponse format
+        map(data => {
+          // Handle both array and object response formats
+          let families: Family[];
+          if (Array.isArray(data)) {
+            families = data;
+          } else if (data.families && Array.isArray(data.families)) {
+            families = data.families;
+          } else {
+            families = [];
+          }
+          
           const response: FamilyListResponse = {
             families: families,
             totalCount: families.length,
@@ -49,7 +58,7 @@ export class FamilyService {
           };
           return response;
         }),
-        tap(response => this.familiesSubject.next(response.families)),
+        tap(response => this.familiesSubject.next(response.families || [])),
         catchError(this.handleError<FamilyListResponse>('getFamilies'))
       );
   }
@@ -73,7 +82,7 @@ export class FamilyService {
     return this.http.post<Family>(this.apiUrl, familyData)
       .pipe(
         tap(family => {
-          const currentFamilies = this.familiesSubject.value;
+          const currentFamilies = this.familiesSubject.value || [];
           this.familiesSubject.next([...currentFamilies, family]);
         }),
         catchError(this.handleError<Family>('createFamily'))
@@ -86,7 +95,7 @@ export class FamilyService {
     return this.http.put<Family>(`${this.apiUrl}/${id}`, updateRequest)
       .pipe(
         tap(updatedFamily => {
-          const currentFamilies = this.familiesSubject.value;
+          const currentFamilies = this.familiesSubject.value || [];
           const index = currentFamilies.findIndex(f => f.id === updatedFamily.id);
           if (index !== -1) {
             currentFamilies[index] = updatedFamily;
@@ -106,7 +115,7 @@ export class FamilyService {
     return this.http.delete<void>(`${this.apiUrl}/${id}`)
       .pipe(
         tap(() => {
-          const currentFamilies = this.familiesSubject.value;
+          const currentFamilies = this.familiesSubject.value || [];
           this.familiesSubject.next(currentFamilies.filter(f => f.id !== id));
           
           if (this.selectedFamilySubject.value?.id === id) {

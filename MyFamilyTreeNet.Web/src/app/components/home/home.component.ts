@@ -1,11 +1,10 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { Subject, takeUntil } from 'rxjs';
 
 import { FamilyService } from '../../features/family/services/family.service';
 import { AuthService } from '../../core/services/auth.service';
-import { StatisticsService, PlatformStatistics } from '../../core/services/statistics.service';
 import { Family } from '../../features/family/models/family.model';
 
 @Component({
@@ -23,7 +22,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   error: string | null = null;
   isLoggedIn = false;
   currentUser: any = null;
-  statistics: PlatformStatistics = {
+  statistics = {
     totalFamilies: 0,
     totalMembers: 0,
     totalStories: 0
@@ -31,8 +30,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   constructor(
     private familyService: FamilyService,
-    private authService: AuthService,
-    private statisticsService: StatisticsService
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
@@ -58,18 +56,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.error = null;
 
-    // Load statistics and featured families in parallel
-    forkJoin({
-      statistics: this.statisticsService.getPlatformStatistics(),
-      families: this.familyService.getFamilies()
-    })
+    // Load families and use default statistics
+    this.familyService.getFamilies()
     .pipe(takeUntil(this.destroy$))
     .subscribe({
       next: (data) => {
-        this.statistics = data.statistics;
+        // Set default statistics for now
+        this.statistics = {
+          totalFamilies: data.families?.length || 0,
+          totalMembers: 0,
+          totalStories: 0
+        };
         
         // Get featured families (last 6 public families)
-        const allFamilies = data.families.families || [];
+        const allFamilies = data.families || [];
         this.featuredFamilies = allFamilies
           .filter(f => f.isPublic !== false) // Only public families
           .sort((a, b) => new Date(b.createdAt || '').getTime() - new Date(a.createdAt || '').getTime())
@@ -81,6 +81,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         console.error('Error loading home page data:', error);
         this.error = 'Възникна грешка при зареждането на данните.';
         this.isLoading = false;
+        
+        // Set default values on error
+        this.statistics = {
+          totalFamilies: 0,
+          totalMembers: 0,
+          totalStories: 0
+        };
       }
     });
   }

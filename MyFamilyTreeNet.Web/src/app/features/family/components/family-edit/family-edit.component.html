@@ -4,8 +4,9 @@
       <div class="card shadow">
         <div class="card-header bg-primary text-white">
           <h4 class="mb-0">
-            <i class="fas fa-edit me-2"></i>
-            Редактиране на семейство
+            <i class="fas fa-edit me-2" *ngIf="familyId > 0"></i>
+            <i class="fas fa-plus me-2" *ngIf="familyId === 0"></i>
+            {{ familyId > 0 ? 'Редактиране на семейство' : 'Създаване на ново семейство' }}
           </h4>
         </div>
         <div class="card-body">
@@ -14,7 +15,7 @@
             <div class="spinner-border text-primary" role="status">
               <span class="visually-hidden">Зареждане...</span>
             </div>
-            <p class="mt-3 text-muted">Зареждане на данните за семейството...</p>
+            <p class="mt-3 text-muted">{{ familyId > 0 ? 'Зареждане на данните за семейството...' : 'Подготвяне на формата...' }}</p>
           </div>
 
           <!-- Error State -->
@@ -25,7 +26,7 @@
           </div>
 
           <!-- Edit Form -->
-          <form *ngIf="!isLoading && family" [formGroup]="familyForm" (ngSubmit)="onSubmit()" novalidate>
+          <form *ngIf="!isLoading" [formGroup]="familyForm" (ngSubmit)="onSubmit()" novalidate>
             <!-- Family Name -->
             <div class="mb-3">
               <label for="name" class="form-label">
@@ -100,7 +101,7 @@
                 [disabled]="familyForm.invalid || isSubmitting">
                 <span *ngIf="isSubmitting" class="spinner-border spinner-border-sm me-2"></span>
                 <i *ngIf="!isSubmitting" class="fas fa-save me-1"></i>
-                {{ isSubmitting ? 'Запазване...' : 'Запази промените' }}
+                {{ isSubmitting ? (familyId > 0 ? 'Запазване...' : 'Създаване...') : (familyId > 0 ? 'Запази промените' : 'Създай семейство') }}
               </button>
             </div>
           </form>

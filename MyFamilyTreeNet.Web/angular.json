@@ -67,7 +67,8 @@
               "buildTarget": "MyFamilyTreeNet.Web:build:production"
             },
             "development": {
-              "buildTarget": "MyFamilyTreeNet.Web:build:development"
+              "buildTarget": "MyFamilyTreeNet.Web:build:development",
+              "proxyConfig": "proxy.conf.json"
             }
           },
           "defaultConfiguration": "development"

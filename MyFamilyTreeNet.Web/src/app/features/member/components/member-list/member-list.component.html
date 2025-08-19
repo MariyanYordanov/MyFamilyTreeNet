@@ -9,9 +9,6 @@
       <button class="btn btn-outline-secondary" (click)="clearFilters()" [disabled]="loading()">
         <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
       </button>
-      <a routerLink="/members/create" class="btn btn-primary">
-        <i class="fas fa-user-plus me-1"></i>Добави член
-      </a>
     </div>
   </div>
 
@@ -70,9 +67,9 @@
               type="text" 
               class="form-control" 
               placeholder="Търсене по име, фамилия или биография..."
-              [value]="searchTerm()"
               (input)="onSearchChange($any($event.target).value)"
-              [disabled]="loading()">
+              [disabled]="loading()"
+              #searchInput>
           </div>
         </div>
 
@@ -85,7 +82,7 @@
             (change)="onFamilyFilterChange($any($event.target).value)"
             [disabled]="loading()">
             <option value="">Всички семейства</option>
-            @for (family of families(); track family.id) {
+            @for (family of families(); track trackByFamilyId($index, family)) {
               <option [value]="family.id">{{ family.name }}</option>
             }
           </select>
@@ -171,7 +168,7 @@
   <!-- Members List -->
   @if (!loading() && hasMembers()) {
     <div class="row g-4">
-      @for (member of members(); track member.id) {
+      @for (member of members(); track trackByMemberId($index, member)) {
         <div class="col-lg-4 col-md-6">
           <div class="card h-100 border-0 shadow-sm">
             <div class="card-body">
@@ -328,10 +325,7 @@
           <i class="fas fa-filter-circle-xmark me-1"></i>Изчисти филтри
         </button>
       } @else {
-        <p class="text-muted mb-4">Започнете като добавите първия член на семейството.</p>
-        <a routerLink="/members/create" class="btn btn-primary">
-          <i class="fas fa-user-plus me-1"></i>Добави първия член
-        </a>
+        <p class="text-muted mb-4">Няма налични членове. Добавете членове от страницата на съответното семейство.</p>
       }
     </div>
   }
